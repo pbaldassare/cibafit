@@ -132,7 +132,7 @@ serve(async (req) => {
 
     const dailyTarget = activePlan || targets || { kcal_day: 2000, protein_g: 120, carbs_g: 220, fats_g: 70 };
 
-    const systemPrompt = `Sei l'assistente alimentare di Cibarius, app italiana per la gestione del cibo domestico e riduzione dello spreco.
+    const systemPrompt = `Sei l'assistente alimentare di CibaFit, app italiana per la gestione del cibo domestico e riduzione dello spreco.
 
 Il tuo compito è suggerire 3 ricette basate sulla dispensa reale dell'utente.
 

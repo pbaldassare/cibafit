@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useTour, TourRole } from "@/components/AppTourContext";
-import cibariusLogo from "@/assets/cibarius-logo.png";
 import MobileHeader from "@/components/MobileHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -545,15 +544,15 @@ const ProfiloPage = () => {
           ))}
         </div>
 
-        {/* ═══ Condividi Cibarius ═══ */}
+        {/* ═══ Condividi CibaFit ═══ */}
         <div className="rounded-[18px] overflow-hidden border border-border bg-gradient-to-br from-primary/10 via-card to-primary/5">
           <div className="px-4 pt-4 pb-4">
             <div className="flex items-center gap-2 mb-1">
               <Share2 size={18} className="text-primary" />
-              <h3 className="text-[15px] font-semibold text-foreground">Condividi Cibarius</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">Condividi CibaFit</h3>
             </div>
             <p className="text-[13px] text-muted-foreground mb-3">
-              Invita amici e colleghi a provare Cibarius! Condividi il link dell'app. 🍽️
+              Invita amici e colleghi a provare CibaFit! Condividi il link dell'app. 🍽️
             </p>
             <Button
               size="sm"
@@ -561,8 +560,8 @@ const ProfiloPage = () => {
               onClick={() => {
                 if (typeof navigator.share === "function") {
                   navigator.share({
-                    title: "Cibarius",
-                    text: "Prova Cibarius! Gestisci dispensa, pasti e ricette in modo intelligente 🍽️",
+                    title: "CibaFit",
+                    text: "Prova CibaFit! Gestisci dispensa, pasti e ricette in modo intelligente 🍽️",
                     url: "https://simple-blue-frame.lovable.app",
                   }).catch(() => {});
                 } else {
@@ -579,7 +578,7 @@ const ProfiloPage = () => {
         {/* ═══ Rivedi tour ═══ */}
         <button
           onClick={() => {
-            localStorage.removeItem("cibarius_tour_done");
+            localStorage.removeItem("cibafit_tour_done");
             startTour((role as TourRole) ?? "user");
           }}
           className="flex w-full items-center gap-3 rounded-[18px] border border-border bg-card px-4 py-3.5 text-left transition-colors active:bg-secondary"

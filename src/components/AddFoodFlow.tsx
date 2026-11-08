@@ -1480,7 +1480,7 @@ const AddFoodFlow = ({
                   <div className="flex items-center gap-2 px-1 py-1.5">
                     <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                     <p className="text-xs text-muted-foreground flex-1">
-                      {searchPhase === "local" && "Ricerca nel catalogo Cibarius..."}
+                      {searchPhase === "local" && "Ricerca nel catalogo CibaFit..."}
                       {searchPhase === "off" && "Ricerca prodotti italiani ed europei..."}
                       {searchPhase === "usda" && "Ricerca database internazionale..."}
                     </p>

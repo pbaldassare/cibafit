@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 
 const sidebarItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
@@ -16,7 +16,7 @@ const sidebarItems = [
   { to: "/admin/support", icon: MessageSquareWarning, label: "Segnalazioni" },
   { to: "/admin/payments", icon: CreditCard, label: "Pagamenti & Coupon" },
   { to: "/admin/products-db", icon: Database, label: "Database Prodotti" },
-  { to: "/admin/api", icon: Key, label: "API Cibarius" },
+  { to: "/admin/api", icon: Key, label: "API CibaFit" },
   { to: "/admin/stats", icon: TrendingUp, label: "Statistiche" },
   { to: "/admin/settings", icon: Settings, label: "Impostazioni" },
   { to: "/admin/seed", icon: Sprout, label: "Dati Demo" },
@@ -37,7 +37,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       {/* Sidebar */}
       <aside className="hidden w-64 flex-col md:flex" style={{ backgroundColor: "hsl(var(--primary))" }}>
         <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-          <img src={cibariusLogo} alt="Cibarius" className="h-6 brightness-0 invert" />
+          <BrandLogo className="h-6 brightness-0 invert" />
           <span className="text-xs font-medium uppercase tracking-wider ml-auto" style={{ color: "rgba(255,255,255,0.6)" }}>Admin</span>
         </div>
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
@@ -77,7 +77,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           <button onClick={() => navigate(-1)} className="text-white/90 -ml-1 p-1 active:opacity-70 transition-opacity">
             <ChevronLeft size={22} strokeWidth={2} />
           </button>
-          <img src={cibariusLogo} alt="Cibarius" className="h-6 brightness-0 invert" />
+          <BrandLogo className="h-6 brightness-0 invert" />
           <span className="text-xs font-medium text-white/60 uppercase tracking-wider ml-auto">Admin</span>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>

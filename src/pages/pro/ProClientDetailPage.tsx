@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Flame, ChevronLeft, ChevronRight, MessageSquare, ClipboardList, Activity, Lightbulb, ChefHat, Pencil, History, MessageCircle, FileDown, Ruler, CalendarDays } from "lucide-react";
+import { HeartPulse, Loader2, Send, Flame, ChevronLeft, ChevronRight, MessageSquare, ClipboardList, Activity, Lightbulb, ChefHat, Pencil, History, MessageCircle, FileDown, Ruler, CalendarDays } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
   colazione: "🌅 Colazione",
@@ -164,6 +164,9 @@ const ProClientDetailPage = () => {
 
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-2">
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/clinical`)}>
+            <HeartPulse className="h-4 w-4" /> Scheda clinica
+          </Button>
           <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/plan`)}>
             <ClipboardList className="h-4 w-4" /> Piano obiettivi
           </Button>

@@ -13,7 +13,7 @@ const AppTourPrompt = () => {
   const [dontShow, setDontShow] = useState(false);
 
   useEffect(() => {
-    const done = localStorage.getItem("cibarius_tour_done");
+    const done = localStorage.getItem("cibafit_tour_done");
     if (!done) {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
@@ -22,13 +22,13 @@ const AppTourPrompt = () => {
 
   const handleStart = () => {
     setOpen(false);
-    if (dontShow) localStorage.setItem("cibarius_tour_done", "1");
+    if (dontShow) localStorage.setItem("cibafit_tour_done", "1");
     startTour((role as TourRole) ?? "user");
   };
 
   const handleSkip = () => {
     setOpen(false);
-    if (dontShow) localStorage.setItem("cibarius_tour_done", "1");
+    if (dontShow) localStorage.setItem("cibafit_tour_done", "1");
   };
 
   return (
@@ -40,7 +40,7 @@ const AppTourPrompt = () => {
               <Map className="h-7 w-7 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-center text-lg">Benvenuto su Cibarius! 🎉</DialogTitle>
+          <DialogTitle className="text-center text-lg">Benvenuto su CibaFit! 🎉</DialogTitle>
           <DialogDescription className="text-center text-[13px] leading-relaxed">
             Vuoi fare un tour guidato dell'app? Ti mostreremo tutte le funzionalità in pochi minuti.
           </DialogDescription>

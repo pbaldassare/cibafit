@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, X, ScanLine, Clock, UtensilsCrossed, ShoppingCart, Users, ClipboardList, BarChart3, Sparkles, Refrigerator, BookOpen, MessageSquare, Package } from "lucide-react";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 import type { AppRole } from "@/hooks/useRole";
 
 interface Slide {
@@ -14,8 +14,8 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
   user: [
     {
       icon: <Sparkles className="h-10 w-10" />,
-      title: "Benvenuto in Cibarius!",
-      text: "La tua app per gestire alimentazione, dispensa e scadenze in modo intelligente.",
+      title: "Benvenuto in CibaFit!",
+      text: "La tua app per seguire dieta, pasti e progressi, insieme al tuo nutrizionista.",
     },
     {
       icon: <ScanLine className="h-10 w-10" />,
@@ -24,8 +24,8 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
     },
     {
       icon: <Clock className="h-10 w-10" />,
-      title: "Scadenze sotto controllo",
-      text: "Ricevi notifiche prima che i tuoi prodotti scadano. Niente più sprechi!",
+      title: "Il tuo piano sempre con te",
+      text: "Vedi il piano del nutrizionista e confrontalo con quello che mangi ogni giorno.",
     },
     {
       icon: <UtensilsCrossed className="h-10 w-10" />,
@@ -41,7 +41,7 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
   professional: [
     {
       icon: <Sparkles className="h-10 w-10" />,
-      title: "Benvenuto in Cibarius!",
+      title: "Benvenuto in CibaFit!",
       text: "La piattaforma per nutrizionisti: segui i tuoi clienti, crea piani alimentari e monitora i progressi.",
     },
     {
@@ -67,7 +67,7 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
   ],
 };
 
-const STORAGE_KEY = "cibarius_onboarding_done";
+const STORAGE_KEY = "cibafit_onboarding_done";
 
 export const shouldShowOnboarding = (): boolean => {
   return !localStorage.getItem(STORAGE_KEY);
@@ -107,7 +107,7 @@ const OnboardingWalkthrough = ({ role, onComplete }: Props) => {
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Top bar with skip */}
       <div className="flex items-center justify-between px-4 pt-4">
-        <img src={cibariusLogo} alt="Cibarius" className="h-7" />
+        <BrandLogo className="h-7" />
         <Button
           variant="ghost"
           size="sm"
@@ -147,7 +147,7 @@ const OnboardingWalkthrough = ({ role, onComplete }: Props) => {
       {/* Bottom navigation */}
       <div className="px-6 pb-8 space-y-3">
         <Button className="w-full h-12 text-base" onClick={handleNext}>
-          {isLast ? "Inizia ad usare Cibarius" : "Avanti"}
+          {isLast ? "Inizia ad usare CibaFit" : "Avanti"}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         {!isLast && (

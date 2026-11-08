@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn, Eye, EyeOff, ArrowRight } from "lucide-react";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 import AuthFeatureCarousel from "@/components/AuthFeatureCarousel";
 
 const LoginPage = () => {
@@ -60,11 +60,7 @@ const LoginPage = () => {
 
         <div className="relative z-10 flex flex-col items-center px-4 pt-14 pb-10">
           {/* Logo */}
-          <img
-            src={cibariusLogo}
-            alt="Cibarius"
-            className="h-9 brightness-0 invert mb-6"
-          />
+          <BrandLogo className="h-9 brightness-0 invert mb-6" />
 
           {/* Carousel inside hero */}
           <div className="w-full max-w-sm">

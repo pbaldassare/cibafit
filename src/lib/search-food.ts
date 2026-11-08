@@ -19,7 +19,7 @@ export interface FoodSearchResult {
 export type SearchPhase = "local" | "off" | "usda" | "done";
 
 // ─── Query cache (localStorage, 7-day TTL) ───────────
-const SEARCH_CACHE_KEY = "cibarius_search_cache_v2";
+const SEARCH_CACHE_KEY = "cibafit_search_cache_v2";
 const SEARCH_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 interface SearchCacheEntry {

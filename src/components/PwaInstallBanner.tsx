@@ -37,7 +37,7 @@ const PwaInstallBanner = () => {
           <Download className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">Installa Cibarius</p>
+          <p className="text-sm font-semibold text-foreground">Installa CibaFit</p>
           {isIos ? (
             <p className="text-xs text-muted-foreground mt-0.5">
               Tocca <span className="font-medium">Condividi ↑</span> poi <span className="font-medium">"Aggiungi alla schermata Home"</span>

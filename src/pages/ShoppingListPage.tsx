@@ -15,7 +15,7 @@ interface ShoppingItem {
   category: string;
 }
 
-const STORAGE_KEY = "cibarius_shopping_checked";
+const STORAGE_KEY = "cibafit_shopping_checked";
 
 const ShoppingListPage = () => {
   const { user } = useAuth();
@@ -121,7 +121,7 @@ const ShoppingListPage = () => {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Lista della spesa - Cibarius", text });
+        await navigator.share({ title: "Lista della spesa - CibaFit", text });
       } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(text);

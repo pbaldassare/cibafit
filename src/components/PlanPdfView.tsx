@@ -1,4 +1,4 @@
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 
 interface MealTarget {
   meal_type: string;
@@ -43,10 +43,10 @@ const PlanPdfView = ({ plan, mealTargets, proName, clientName }: PlanPdfViewProp
       {/* Header */}
       <div className="flex items-center justify-between border-b-2 border-blue-500 pb-4 mb-6">
         <div className="flex items-center gap-3">
-          <img src={cibariusLogo} alt="Cibarius" className="h-10 w-10 object-contain" />
+          <BrandLogo className="text-2xl" />
           <div>
             <h1 className="text-xl font-bold text-blue-600" style={{ fontFamily: "Fredoka, sans-serif" }}>
-              Cibarius
+              CibaFit
             </h1>
             <p className="text-xs text-gray-500">Piano Nutrizionale</p>
           </div>
@@ -127,7 +127,7 @@ const PlanPdfView = ({ plan, mealTargets, proName, clientName }: PlanPdfViewProp
 
       {/* Footer */}
       <div className="border-t border-gray-200 pt-4 mt-8 text-center text-xs text-gray-400">
-        <p>Generato da Cibarius · {today}</p>
+        <p>Generato da CibaFit · {today}</p>
       </div>
     </div>
   );

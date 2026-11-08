@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import BrandLogo from "@/components/BrandLogo";
 import UserNotificationsBell from "@/components/UserNotificationsBell";
 
 interface MobileHeaderProps {
@@ -12,6 +13,28 @@ interface MobileHeaderProps {
 
 const MobileHeader = ({ title, showBack = true, right, hideNotifications = false }: MobileHeaderProps) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isMobile = useIsMobile();
+
+  // Su computer l'area nutrizionista ha la barra laterale: qui serve solo il titolo della pagina.
+  if (pathname.startsWith("/pro") && !isMobile) {
+    return (
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur">
+        {showBack && (
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Indietro"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ChevronLeft size={20} strokeWidth={2} />
+          </button>
+        )}
+        <h1 className="flex-1 truncate text-base font-semibold text-foreground">{title}</h1>
+        {right}
+        {!hideNotifications && <UserNotificationsBell />}
+      </header>
+    );
+  }
 
   return (
     <div className="relative">
@@ -31,7 +54,7 @@ const MobileHeader = ({ title, showBack = true, right, hideNotifications = false
             )}
           </div>
           <div className="flex flex-1 items-center justify-center gap-2">
-            <img src={cibariusLogo} alt="Cibarius" className="h-5 brightness-0 invert" />
+            <BrandLogo className="h-5 brightness-0 invert" />
           </div>
           <div className="flex items-center gap-1 text-white">
             {right}

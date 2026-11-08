@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UserPlus, Eye, EyeOff, User, UtensilsCrossed, Stethoscope, ArrowLeft, ArrowRight, Check } from "lucide-react";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 import AuthFeatureCarousel from "@/components/AuthFeatureCarousel";
 import ReferralBadge from "@/components/ReferralBadge";
 
@@ -150,7 +150,7 @@ const SignupPage = () => {
 
     toast({
       title: "Registrazione completata! 🎉",
-      description: "Benvenuto in Cibarius! Puoi iniziare subito ad usare l'app.",
+      description: "Benvenuto in CibaFit! Puoi iniziare subito ad usare l'app.",
     });
     navigate("/", { replace: true });
   };
@@ -159,7 +159,7 @@ const SignupPage = () => {
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header gradient */}
       <div className="relative bg-gradient-to-r from-primary to-primary-dark px-4 pb-16 pt-16 text-center">
-        <img src={cibariusLogo} alt="Cibarius" className="mx-auto h-10 brightness-0 invert" />
+        <BrandLogo className="mx-auto h-10 brightness-0 invert" />
         <div className="absolute bottom-0 left-0 right-0 translate-y-[1px]">
           <svg viewBox="0 0 1440 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="block w-full">
             <path d="M0 0C0 0 360 50 720 50C1080 50 1440 0 1440 0V50H0V0Z" className="fill-background" />

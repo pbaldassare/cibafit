@@ -1,6 +1,6 @@
 {
-  "name": "Cibarius",
-  "short_name": "Cibarius",
+  "name": "CibaFit",
+  "short_name": "CibaFit",
   "description": "Gestione intelligente di dispensa, pasti e ricette",
   "start_url": "/",
   "display": "standalone",

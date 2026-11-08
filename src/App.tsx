@@ -7,7 +7,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
 import UserLayout from "./components/UserLayout";
-import MobileLayout from "./components/MobileLayout";
+import ProLayout from "./components/ProLayout";
 import AdminPwaGuard from "./components/AdminPwaGuard";
 import PlusGuard from "./components/PlusGuard";
 import PlanProgressGuard from "./components/PlanProgressGuard";
@@ -30,6 +30,8 @@ import MealPhotoPage from "./pages/MealPhotoPage";
 import MealsTargetsPage from "./pages/MealsTargetsPage";
 import ProfiloPage from "./pages/ProfiloPage";
 import InvitePage from "./pages/InvitePage";
+import UserClinicalPage from "./pages/UserClinicalPage";
+import ProClientClinicalPage from "./pages/pro/ProClientClinicalPage";
 import SuggestMealPage from "./pages/SuggestMealPage";
 import PublicRecipesPage from "./pages/PublicRecipesPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
@@ -138,6 +140,7 @@ const App = () => (
                 <Route path="/diet" element={<UserDietPage />} />
                 <Route path="/plan" element={<PlanProgressGuard><UserActivePlanPage /></PlanProgressGuard>} />
                 <Route path="/weekly-plan" element={<UserWeeklyPlanPage />} />
+                <Route path="/clinical" element={<UserClinicalPage />} />
                 <Route path="/suggest-meal" element={<SuggestMealPage />} />
                 <Route path="/my-recipes" element={<UserPantryRecipesPage />} />
                 <Route path="/reminders" element={<RemindersPage />} />
@@ -156,10 +159,11 @@ const App = () => (
               </Route>
 
               {/* ═══ PROFESSIONAL ═══ */}
-              <Route element={<MobileLayout />}>
+              <Route element={<ProLayout />}>
                 <Route path="/pro" element={<RG roles={["professional", "admin"]}><ProPage /></RG>} />
                 <Route path="/pro/clients" element={<RG roles={["professional", "admin"]}><ProClientsPage /></RG>} />
                 <Route path="/pro/client/:clientId" element={<RG roles={["professional", "admin"]}><ProClientDetailPage /></RG>} />
+                <Route path="/pro/client/:clientId/clinical" element={<RG roles={["professional", "admin"]}><ProClientClinicalPage /></RG>} />
                 <Route path="/pro/client/:clientId/plan" element={<RG roles={["professional", "admin"]}><ProClientPlanPage /></RG>} />
                 <Route path="/pro/client/:clientId/plan-history" element={<RG roles={["professional", "admin"]}><ProClientPlanHistoryPage /></RG>} />
                 <Route path="/pro/client/:clientId/monitor" element={<RG roles={["professional", "admin"]}><ProClientMonitorPage /></RG>} />

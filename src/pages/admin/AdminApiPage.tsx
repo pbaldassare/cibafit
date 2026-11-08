@@ -122,7 +122,7 @@ const AdminApiPage = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Key className="h-6 w-6" /> API Cibarius
+            <Key className="h-6 w-6" /> API CibaFit
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Gestisci le chiavi API per integrazioni interne</p>
         </div>

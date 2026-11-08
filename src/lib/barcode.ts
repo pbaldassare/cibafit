@@ -53,7 +53,7 @@ export function calcNutrition(
 }
 
 // ─── Barcode cache (localStorage) with TTL ───────────
-const CACHE_KEY = "cibarius_barcode_cache";
+const CACHE_KEY = "cibafit_barcode_cache";
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 interface CacheEntry { data: ProductData; ts: number }

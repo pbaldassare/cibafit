@@ -5,7 +5,7 @@ import { Loader2, CheckCircle, XCircle, Ticket } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 
 const REFERRAL_STORAGE_KEY = "ref_coupon_code";
 const REFERRAL_EXPIRY_KEY = "ref_coupon_expires";
@@ -78,7 +78,7 @@ const JoinReferralPage = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <div className="relative bg-gradient-to-r from-primary to-primary-dark px-4 pb-16 pt-16 text-center">
-        <img src={cibariusLogo} alt="Cibarius" className="mx-auto h-10 brightness-0 invert" />
+        <BrandLogo className="mx-auto h-10 brightness-0 invert" />
         <div className="absolute bottom-0 left-0 right-0 translate-y-[1px]">
           <svg viewBox="0 0 1440 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="block w-full">
             <path d="M0 0C0 0 360 50 720 50C1080 50 1440 0 1440 0V50H0V0Z" className="fill-background" />
@@ -104,7 +104,7 @@ const JoinReferralPage = () => {
                     Sei stato invitato dal tuo nutrizionista
                   </h1>
                   <p className="text-muted-foreground">
-                    <span className="font-semibold text-foreground">{nutritionistName}</span> ti ha invitato su Cibarius
+                    <span className="font-semibold text-foreground">{nutritionistName}</span> ti ha invitato su CibaFit
                   </p>
                 </div>
 

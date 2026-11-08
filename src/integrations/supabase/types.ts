@@ -260,6 +260,63 @@ export type Database = {
         }
         Relationships: []
       }
+      client_clinical_profiles: {
+        Row: {
+          activity_level: string | null
+          allergies: string[]
+          birth_date: string | null
+          client_user_id: string
+          conditions: string | null
+          created_at: string
+          dietary_preferences: string | null
+          goal: string | null
+          health_data_consent_at: string | null
+          height_cm: number | null
+          intolerances: string[]
+          medications: string | null
+          notes: string | null
+          sex: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activity_level?: string | null
+          allergies?: string[]
+          birth_date?: string | null
+          client_user_id: string
+          conditions?: string | null
+          created_at?: string
+          dietary_preferences?: string | null
+          goal?: string | null
+          health_data_consent_at?: string | null
+          height_cm?: number | null
+          intolerances?: string[]
+          medications?: string | null
+          notes?: string | null
+          sex?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activity_level?: string | null
+          allergies?: string[]
+          birth_date?: string | null
+          client_user_id?: string
+          conditions?: string | null
+          created_at?: string
+          dietary_preferences?: string | null
+          goal?: string | null
+          health_data_consent_at?: string | null
+          height_cm?: number | null
+          intolerances?: string[]
+          medications?: string | null
+          notes?: string | null
+          sex?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       client_links: {
         Row: {
           activated_at: string | null

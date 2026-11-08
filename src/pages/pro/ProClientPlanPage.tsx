@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,9 +60,11 @@ const ProClientPlanPage = () => {
   const [saving, setSaving] = useState(false);
   const [existingPlanId, setExistingPlanId] = useState<string | null>(null);
   const [clientName, setClientName] = useState("");
+  const [searchParams] = useSearchParams();
+  const [exclusions, setExclusions] = useState<string[]>([]);
 
   // Step 1
-  const [kcalDay, setKcalDay] = useState("2000");
+  const [kcalDay, setKcalDay] = useState(() => new URLSearchParams(window.location.search).get("kcal") ?? "2000");
   const [proteinDay, setProteinDay] = useState("120");
   const [carbsDay, setCarbsDay] = useState("220");
   const [fatsDay, setFatsDay] = useState("70");
@@ -118,11 +120,17 @@ const ProClientPlanPage = () => {
           .maybeSingle(),
       ]);
       setClientName(profileRes.data?.full_name || "Cliente");
+      const { data: clinical } = await supabase
+        .from("client_clinical_profiles")
+        .select("allergies, intolerances")
+        .eq("client_user_id", clientId!)
+        .maybeSingle();
+      setExclusions([...(clinical?.allergies ?? []), ...(clinical?.intolerances ?? [])]);
 
       if (planRes.data) {
         const p = planRes.data as any;
         setExistingPlanId(p.id);
-        setKcalDay(String(p.kcal_day));
+        setKcalDay(searchParams.get("kcal") ?? String(p.kcal_day));
         setProteinDay(String(p.protein_g_day));
         setCarbsDay(String(p.carbs_g_day));
         setFatsDay(String(p.fats_g_day));
@@ -487,6 +495,11 @@ const ProClientPlanPage = () => {
     <div>
       <MobileHeader title={isEditMode ? `Modifica piano — ${clientName}` : `Piano — ${clientName}`} />
       <main className="px-4 py-5 pb-28 space-y-4">
+        {exclusions.length > 0 && (
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-foreground">
+            <span className="font-semibold">Da escludere:</span> {exclusions.join(", ")}
+          </p>
+        )}
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2">
           {[1, 2, 3, 4].map((s) => (

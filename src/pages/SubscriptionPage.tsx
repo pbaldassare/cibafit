@@ -120,7 +120,7 @@ const SubscriptionPage = () => {
         {/* Header */}
         <div className="text-center space-y-1">
           <Crown className="h-8 w-8 text-primary mx-auto" />
-          <h1 className="text-xl font-bold text-foreground">Piani Cibarius</h1>
+          <h1 className="text-xl font-bold text-foreground">Piani CibaFit</h1>
           <p className="text-sm text-muted-foreground">Scegli il piano perfetto per te</p>
         </div>
 

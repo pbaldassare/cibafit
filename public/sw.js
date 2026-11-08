@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cibarius-v1';
+const CACHE_NAME = 'cibafit-v1';
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
@@ -63,7 +63,7 @@ self.addEventListener('fetch', (event) => {
 
 // Push notification handler
 self.addEventListener('push', (event) => {
-  let data = { title: 'Cibarius', body: 'Hai un promemoria', url: '/meals' };
+  let data = { title: 'CibaFit', body: 'Hai un promemoria', url: '/meals' };
   try {
     if (event.data) {
       data = { ...data, ...event.data.json() };

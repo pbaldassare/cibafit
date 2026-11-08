@@ -1,6 +1,6 @@
 # CibaFit
 
-App React + Vite derivata da Cibarius. Condivide il progetto Supabase `dqhzopbjhxyhgcpedskl`
+App per nutrizionisti e i loro clienti, derivata da Cibarius (senza la parte ristorazione). Condivide il progetto Supabase `dqhzopbjhxyhgcpedskl`
 con Cibarius **in produzione**, ma usa solo lo schema `cibafit`.
 
 ## Regole per non rompere Cibarius
@@ -30,3 +30,5 @@ Il database richiede che `cibafit` sia tra gli "Exposed schemas" (Supabase > Dat
 - `cibafit-delete-user`, `cibafit-create-user`: agiscono sull'account condiviso con Cibarius.
 - `cibafit-send-email`, `cibafit-send-expiry-alerts`, `cibafit-auth-email-hook`: email ancora a nome Cibarius.
 - `cibafit-seed-template-recipes`, `cibafit-seed-off-products`, `cibafit-extract-product`.
+
+`CURSOR.md` descrive ancora Cibarius: va riscritto.

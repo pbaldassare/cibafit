@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import cibariusLogo from "@/assets/cibarius-logo.png";
+import BrandLogo from "@/components/BrandLogo";
 
 interface NutritionistProfile {
   display_name: string;
@@ -76,9 +76,9 @@ const NutritionistPublicPage = () => {
   // SEO meta tags
   useEffect(() => {
     if (profile) {
-      document.title = `Nutrizionista ${profile.display_name} su Cibarius`;
+      document.title = `Nutrizionista ${profile.display_name} su CibaFit`;
       const metaDesc = document.querySelector('meta[name="description"]');
-      const content = `Scopri i piani alimentari e segui il nutrizionista ${profile.display_name} su Cibarius.`;
+      const content = `Scopri i piani alimentari e segui il nutrizionista ${profile.display_name} su CibaFit.`;
       if (metaDesc) {
         metaDesc.setAttribute("content", content);
       } else {
@@ -88,7 +88,7 @@ const NutritionistPublicPage = () => {
         document.head.appendChild(meta);
       }
     }
-    return () => { document.title = "Cibarius"; };
+    return () => { document.title = "CibaFit"; };
   }, [profile]);
 
   const handleCTA = () => {
@@ -126,7 +126,7 @@ const NutritionistPublicPage = () => {
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <div className="relative bg-gradient-to-br from-primary to-primary/80 px-4 pb-24 pt-10 text-center">
-        <img src={cibariusLogo} alt="Cibarius" className="mx-auto h-8 brightness-0 invert mb-8" />
+        <BrandLogo className="mx-auto h-8 brightness-0 invert mb-8" />
         <Avatar className="mx-auto h-24 w-24 border-4 border-background shadow-xl">
           {profile.photo_url ? (
             <AvatarImage src={profile.photo_url} alt={profile.display_name} />
@@ -216,7 +216,7 @@ const NutritionistPublicPage = () => {
 
         {/* CTA */}
         <Button className="w-full gap-2" size="lg" onClick={handleCTA}>
-          Usa Cibarius con questo nutrizionista <ArrowRight className="h-4 w-4" />
+          Usa CibaFit con questo nutrizionista <ArrowRight className="h-4 w-4" />
         </Button>
 
         <Button variant="outline" className="w-full" onClick={() => navigate("/auth/login")}>

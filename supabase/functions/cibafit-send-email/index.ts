@@ -11,7 +11,7 @@ const corsHeaders = {
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 
-// Cibarius brand colors
+// CibaFit brand colors
 const PRIMARY = "#22B6F2";
 const PRIMARY_DARK = "#0B7DBE";
 const BG = "#F3F5F8";
@@ -29,22 +29,22 @@ function baseHtml(title: string, body: string): string {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
 <tr><td style="background:linear-gradient(135deg,${PRIMARY},${PRIMARY_DARK});padding:28px 32px;text-align:center;">
-<span style="font-size:24px;font-weight:700;color:#ffffff;font-family:'Fredoka',Arial,sans-serif;">Cibarius</span>
+<span style="font-size:24px;font-weight:700;color:#ffffff;font-family:'Fredoka',Arial,sans-serif;">CibaFit</span>
 </td></tr>
 <tr><td style="padding:32px;">${body}</td></tr>
 <tr><td style="padding:0 32px 24px;text-align:center;">
-<p style="font-size:12px;color:${TEXT_MUTED};margin:0;">© ${new Date().getFullYear()} Cibarius. Tutti i diritti riservati.</p>
+<p style="font-size:12px;color:${TEXT_MUTED};margin:0;">© ${new Date().getFullYear()} CibaFit. Tutti i diritti riservati.</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 function verificationEmail(name: string, link: string): { subject: string; html: string; text: string } {
   return {
-    subject: "Conferma il tuo account Cibarius",
+    subject: "Conferma il tuo account CibaFit",
     html: baseHtml("Conferma account", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Benvenuto, ${name}! 🎉</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Grazie per esserti registrato su Cibarius. Per iniziare a gestire la tua alimentazione in modo intelligente, conferma il tuo indirizzo email.
+        Grazie per esserti registrato su CibaFit. Per iniziare a gestire la tua alimentazione in modo intelligente, conferma il tuo indirizzo email.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${link}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
@@ -52,20 +52,20 @@ function verificationEmail(name: string, link: string): { subject: string; html:
         </a>
       </td></tr></table>
       <p style="font-size:13px;color:${TEXT_MUTED};margin:24px 0 0;line-height:1.5;">
-        Se non hai creato un account su Cibarius, puoi ignorare questa email.
+        Se non hai creato un account su CibaFit, puoi ignorare questa email.
       </p>
     `),
-    text: `Benvenuto ${name}! Conferma il tuo account Cibarius: ${link}`,
+    text: `Benvenuto ${name}! Conferma il tuo account CibaFit: ${link}`,
   };
 }
 
 function passwordResetEmail(name: string, link: string): { subject: string; html: string; text: string } {
   return {
-    subject: "Recupera la password del tuo account Cibarius",
+    subject: "Recupera la password del tuo account CibaFit",
     html: baseHtml("Reset password", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Ciao, ${name}</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Hai richiesto di reimpostare la password del tuo account Cibarius. Clicca il pulsante qui sotto per procedere.
+        Hai richiesto di reimpostare la password del tuo account CibaFit. Clicca il pulsante qui sotto per procedere.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${link}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
@@ -76,7 +76,7 @@ function passwordResetEmail(name: string, link: string): { subject: string; html
         ⏳ Il link scade tra 1 ora. Se non hai richiesto il reset, ignora questa email.
       </p>
     `),
-    text: `Ciao ${name}, reimposta la tua password Cibarius: ${link} (scade tra 1 ora)`,
+    text: `Ciao ${name}, reimposta la tua password CibaFit: ${link} (scade tra 1 ora)`,
   };
 }
 
@@ -106,7 +106,7 @@ function expiryAlertEmail(name: string, products: ExpiryProduct[], appUrl: strin
     .join("");
 
   return {
-    subject: "Hai prodotti da consumare presto su Cibarius",
+    subject: "Hai prodotti da consumare presto su CibaFit",
     html: baseHtml("Avviso scadenze", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 8px;font-family:'Fredoka',Arial,sans-serif;">Ciao, ${name} 👋</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 20px;">
@@ -121,11 +121,11 @@ function expiryAlertEmail(name: string, products: ExpiryProduct[], appUrl: strin
       </table>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${appUrl}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;margin-right:8px;">
-          Apri Cibarius
+          Apri CibaFit
         </a>
       </td></tr></table>
     `),
-    text: `Ciao ${name}, hai ${products.length} prodotti in scadenza su Cibarius. Apri l'app: ${appUrl}`,
+    text: `Ciao ${name}, hai ${products.length} prodotti in scadenza su CibaFit. Apri l'app: ${appUrl}`,
   };
 }
 

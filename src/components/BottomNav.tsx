@@ -1,9 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useRole } from "@/hooks/useRole";
-import { TrendingUp,
-  Home, User, UtensilsCrossed,
-  BookOpen, LayoutDashboard, Users, FileText,
-  MessageSquare, Building2, Package, Archive, Clock, ChefHat, ClipboardList,
+import {
+  Archive, ClipboardList, FileText, Home, LayoutDashboard, MessageSquare, TrendingUp, User, Users, UtensilsCrossed,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 

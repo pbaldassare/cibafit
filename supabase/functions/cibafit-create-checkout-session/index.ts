@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
             ? { percent_off: Number(coupon.discount_value) }
             : { amount_off: Math.round(Number(coupon.discount_value) * 100), currency: "eur" }),
           duration: "once",
-          metadata: { cibarius_coupon_id: coupon.id },
+          metadata: { cibafit_coupon_id: coupon.id },
         });
 
         stripeDiscounts = [{ coupon: stripeCoupon.id }];

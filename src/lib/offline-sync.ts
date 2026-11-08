@@ -7,7 +7,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const DB_NAME = "cibarius_offline";
+const DB_NAME = "cibafit_offline";
 const DB_VERSION = 1;
 const STORE_NAME = "pending_ops";
 

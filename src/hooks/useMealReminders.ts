@@ -8,7 +8,7 @@ const MEAL_MESSAGES: Record<string, { first: string; second: string }> = {
     second: "Non hai ancora registrato la colazione ☀️",
   },
   pranzo: {
-    first: "Ricordati di registrare il pranzo su Cibarius 🍝",
+    first: "Ricordati di registrare il pranzo su CibaFit 🍝",
     second: "Non hai ancora registrato il pranzo 🍝",
   },
   cena: {
@@ -59,7 +59,7 @@ function scheduleLocalNotification(
         ]
       : [];
 
-    const notification = new Notification("Cibarius", {
+    const notification = new Notification("CibaFit", {
       body,
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",

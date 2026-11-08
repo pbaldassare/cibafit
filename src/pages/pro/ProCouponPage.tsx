@@ -94,8 +94,8 @@ const ProCouponPage = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Unisciti a Cibarius",
-          text: `Il tuo nutrizionista ti invita su Cibarius! Usa il link per uno sconto:`,
+          title: "Unisciti a CibaFit",
+          text: `Il tuo nutrizionista ti invita su CibaFit! Usa il link per uno sconto:`,
           url,
         });
       } catch {}

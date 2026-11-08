@@ -140,7 +140,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
   const stopTour = useCallback(() => {
     setIsActive(false);
     setCurrentStep(0);
-    localStorage.setItem("cibarius_tour_done", "1");
+    localStorage.setItem("cibafit_tour_done", "1");
     addFoodCloseRef.current?.();
   }, []);
 
@@ -148,7 +148,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
     setCurrentStep(prev => {
       if (prev >= stepsRef.current.length - 1) {
         setIsActive(false);
-        localStorage.setItem("cibarius_tour_done", "1");
+        localStorage.setItem("cibafit_tour_done", "1");
         addFoodCloseRef.current?.();
         return 0;
       }

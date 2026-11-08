@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 
-// Cibarius brand
+// CibaFit brand
 const PRIMARY = "#22B6F2";
 const PRIMARY_DARK = "#0B7DBE";
 const BG = "#F3F5F8";
@@ -31,11 +31,11 @@ function baseHtml(title: string, body: string): string {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
 <tr><td style="background:linear-gradient(135deg,${PRIMARY},${PRIMARY_DARK});padding:28px 32px;text-align:center;">
-<span style="font-size:24px;font-weight:700;color:#ffffff;font-family:'Fredoka',Arial,sans-serif;">Cibarius</span>
+<span style="font-size:24px;font-weight:700;color:#ffffff;font-family:'Fredoka',Arial,sans-serif;">CibaFit</span>
 </td></tr>
 <tr><td style="padding:32px;">${body}</td></tr>
 <tr><td style="padding:0 32px 24px;text-align:center;">
-<p style="font-size:12px;color:${TEXT_MUTED};margin:0;">© ${new Date().getFullYear()} Cibarius. Tutti i diritti riservati.</p>
+<p style="font-size:12px;color:${TEXT_MUTED};margin:0;">© ${new Date().getFullYear()} CibaFit. Tutti i diritti riservati.</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
@@ -54,11 +54,11 @@ interface EmailResult {
 
 function signupEmail(name: string, confirmUrl: string): EmailResult {
   return {
-    subject: "Conferma il tuo account Cibarius",
+    subject: "Conferma il tuo account CibaFit",
     html: baseHtml("Conferma account", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Benvenuto, ${name}! 🎉</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Grazie per esserti registrato su Cibarius. Per iniziare, conferma il tuo indirizzo email.
+        Grazie per esserti registrato su CibaFit. Per iniziare, conferma il tuo indirizzo email.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${confirmUrl}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
@@ -66,20 +66,20 @@ function signupEmail(name: string, confirmUrl: string): EmailResult {
         </a>
       </td></tr></table>
       <p style="font-size:13px;color:${TEXT_MUTED};margin:24px 0 0;line-height:1.5;">
-        Se non hai creato un account su Cibarius, puoi ignorare questa email.
+        Se non hai creato un account su CibaFit, puoi ignorare questa email.
       </p>
     `),
-    text: `Benvenuto ${name}! Conferma il tuo account Cibarius: ${confirmUrl}`,
+    text: `Benvenuto ${name}! Conferma il tuo account CibaFit: ${confirmUrl}`,
   };
 }
 
 function recoveryEmail(name: string, confirmUrl: string): EmailResult {
   return {
-    subject: "Recupera la password del tuo account Cibarius",
+    subject: "Recupera la password del tuo account CibaFit",
     html: baseHtml("Reset password", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Ciao, ${name}</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Hai richiesto di reimpostare la password del tuo account Cibarius.
+        Hai richiesto di reimpostare la password del tuo account CibaFit.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${confirmUrl}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
@@ -90,17 +90,17 @@ function recoveryEmail(name: string, confirmUrl: string): EmailResult {
         ⏳ Il link scade tra 1 ora. Se non hai richiesto il reset, ignora questa email.
       </p>
     `),
-    text: `Ciao ${name}, reimposta la tua password Cibarius: ${confirmUrl}`,
+    text: `Ciao ${name}, reimposta la tua password CibaFit: ${confirmUrl}`,
   };
 }
 
 function emailChangeEmail(name: string, confirmUrl: string): EmailResult {
   return {
-    subject: "Conferma il cambio email su Cibarius",
+    subject: "Conferma il cambio email su CibaFit",
     html: baseHtml("Cambio email", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Ciao, ${name}</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Hai richiesto di cambiare l'indirizzo email del tuo account Cibarius. Conferma cliccando il pulsante.
+        Hai richiesto di cambiare l'indirizzo email del tuo account CibaFit. Conferma cliccando il pulsante.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${confirmUrl}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
@@ -111,28 +111,28 @@ function emailChangeEmail(name: string, confirmUrl: string): EmailResult {
         Se non hai richiesto questa modifica, ignora questa email.
       </p>
     `),
-    text: `Ciao ${name}, conferma il cambio email Cibarius: ${confirmUrl}`,
+    text: `Ciao ${name}, conferma il cambio email CibaFit: ${confirmUrl}`,
   };
 }
 
 function magicLinkEmail(name: string, confirmUrl: string): EmailResult {
   return {
-    subject: "Il tuo link di accesso a Cibarius",
+    subject: "Il tuo link di accesso a CibaFit",
     html: baseHtml("Magic Link", `
       <h1 style="font-size:22px;color:${TEXT_DARK};margin:0 0 16px;font-family:'Fredoka',Arial,sans-serif;">Ciao, ${name}</h1>
       <p style="font-size:15px;color:${TEXT_DARK};line-height:1.6;margin:0 0 24px;">
-        Clicca il pulsante per accedere al tuo account Cibarius.
+        Clicca il pulsante per accedere al tuo account CibaFit.
       </p>
       <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
         <a href="${confirmUrl}" style="display:inline-block;background:${PRIMARY};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none;">
-          Accedi a Cibarius
+          Accedi a CibaFit
         </a>
       </td></tr></table>
       <p style="font-size:13px;color:${TEXT_MUTED};margin:24px 0 0;line-height:1.5;">
         ⏳ Il link scade tra 1 ora.
       </p>
     `),
-    text: `Accedi a Cibarius: ${confirmUrl}`,
+    text: `Accedi a CibaFit: ${confirmUrl}`,
   };
 }
 

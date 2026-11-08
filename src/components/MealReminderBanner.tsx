@@ -20,7 +20,7 @@ const MEAL_CONFIG: Record<string, { label: string; emoji: string; message: strin
   pranzo: {
     label: "Pranzo",
     emoji: "🍝",
-    message: "Ricordati di registrare il pranzo su Cibarius",
+    message: "Ricordati di registrare il pranzo su CibaFit",
     followUpMessage: "Non hai ancora registrato il pranzo",
     enabledKey: "pranzo_enabled",
     timeKey: "pranzo_time",

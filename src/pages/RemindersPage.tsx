@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Save } from "lucide-react";
 
-const STORAGE_KEY = "cibarius_reminder_prefs";
+const STORAGE_KEY = "cibafit_reminder_prefs";
 
 export interface ReminderPrefs {
   daysBeforeExpiry: number;

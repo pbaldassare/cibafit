@@ -9,6 +9,7 @@ import {
   Package,
   Plus,
   ScanLine,
+  HeartPulse,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -315,6 +316,13 @@ const Index = () => {
                 </li>
               </>
             )}
+            <li>
+              <button onClick={() => navigate("/clinical")} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50">
+                <HeartPulse className="h-5 w-5 shrink-0 text-primary-dark" strokeWidth={1.75} aria-hidden="true" />
+                <span className="flex-1 text-sm font-medium text-foreground">Scheda salute</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              </button>
+            </li>
             <li>
               <button onClick={() => navigate("/pantry")} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50">
                 <Package className="h-5 w-5 shrink-0 text-primary-dark" strokeWidth={1.75} aria-hidden="true" />
