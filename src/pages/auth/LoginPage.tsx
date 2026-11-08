@@ -55,12 +55,9 @@ const LoginPage = () => {
     <div className="flex min-h-screen flex-col bg-background">
       {/* ── Hero zone: gradient + logo + carousel ── */}
       <div className="relative bg-brand-gradient overflow-hidden">
-        {/* Glass overlay */}
-        <div className="absolute inset-0 bg-white/[0.08]" />
-
         <div className="relative z-10 flex flex-col items-center px-4 pt-14 pb-10">
           {/* Logo */}
-          <BrandLogo className="h-9 brightness-0 invert mb-6" />
+          <BrandLogo className="text-3xl mb-6 text-white" />
 
           {/* Carousel inside hero */}
           <div className="w-full max-w-sm">

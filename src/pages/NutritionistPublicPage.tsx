@@ -126,7 +126,7 @@ const NutritionistPublicPage = () => {
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <div className="relative bg-gradient-to-br from-primary to-primary/80 px-4 pb-24 pt-10 text-center">
-        <BrandLogo className="mx-auto h-8 brightness-0 invert mb-8" />
+        <BrandLogo className="mx-auto text-2xl mb-8 text-white" />
         <Avatar className="mx-auto h-24 w-24 border-4 border-background shadow-xl">
           {profile.photo_url ? (
             <AvatarImage src={profile.photo_url} alt={profile.display_name} />

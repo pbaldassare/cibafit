@@ -37,45 +37,22 @@ const MobileHeader = ({ title, showBack = true, right, hideNotifications = false
   }
 
   return (
-    <div className="relative">
-      {/* Gradient header – subtle, elegant */}
-      <header
-        className="sticky top-0 z-40 px-4 pt-2 pb-5"
-        style={{
-          background: "linear-gradient(135deg, hsl(196, 88%, 54%) 0%, hsl(201, 89%, 39%) 100%)",
-        }}
-      >
-        <div className="flex h-8 items-center">
-          <div className="flex w-10 items-center">
-            {showBack && (
-              <button onClick={() => navigate(-1)} className="text-white/90 -ml-1 p-1 active:opacity-70 transition-opacity">
-                <ChevronLeft size={22} strokeWidth={2} />
-              </button>
-            )}
-          </div>
-          <div className="flex flex-1 items-center justify-center gap-2">
-            <BrandLogo className="h-5 brightness-0 invert" />
-          </div>
-          <div className="flex items-center gap-1 text-white">
-            {right}
-            {!hideNotifications && <UserNotificationsBell />}
-          </div>
-        </div>
-      </header>
-      {/* Smooth wave */}
-      <div className="relative -mt-1">
-        <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="block w-full">
-          <path
-            d="M0 0H1440V16C1440 16 1280 48 720 48C160 48 0 16 0 16V0Z"
-            fill="hsl(201, 89%, 39%)"
-          />
-          <path
-            d="M0 16C0 16 160 48 720 48C1280 48 1440 16 1440 16V48H0V16Z"
-            className="fill-background"
-          />
-        </svg>
+    <header className="sticky top-0 z-40 flex h-12 items-center bg-[hsl(var(--shell))] px-4 text-white">
+      <div className="flex w-10 items-center">
+        {showBack && (
+          <button onClick={() => navigate(-1)} aria-label="Indietro" className="-ml-1 p-1 text-white/90 transition-opacity active:opacity-70">
+            <ChevronLeft size={22} strokeWidth={2} />
+          </button>
+        )}
       </div>
-    </div>
+      <div className="flex flex-1 items-center justify-center">
+        <BrandLogo className="text-lg text-white" />
+      </div>
+      <div className="flex min-w-10 items-center justify-end gap-1">
+        {right}
+        {!hideNotifications && <UserNotificationsBell />}
+      </div>
+    </header>
   );
 };
 

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import expiryIllustration from "@/assets/illustrations/expiry.svg";
 import scanIllustration from "@/assets/illustrations/scan.svg";
 import nutritionIllustration from "@/assets/illustrations/nutrition.svg";
 
@@ -11,19 +10,14 @@ interface Slide {
 
 const DEFAULT_SLIDES: Slide[] = [
   {
-    image: expiryIllustration,
-    title: "Scadenze sotto controllo",
-    text: "Tieni sotto controllo prodotti e preparazioni.",
+    image: nutritionIllustration,
+    title: "Il tuo piano, ogni giorno",
+    text: "Segui il piano del nutrizionista e confrontalo con ciò che mangi.",
   },
   {
     image: scanIllustration,
     title: "Foto o barcode",
-    text: "L'AI legge etichetta, calorie, macro e scadenza.",
-  },
-  {
-    image: nutritionIllustration,
-    title: "Piano e ricette",
-    text: "Segui il piano del professionista e ricevi ricette su misura.",
+    text: "Registra un pasto in pochi secondi, con calorie e macro.",
   },
 ];
 

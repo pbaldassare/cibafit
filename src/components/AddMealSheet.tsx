@@ -367,7 +367,7 @@ const AddMealSheet = ({ open, onOpenChange, onSaved }: AddMealSheetProps) => {
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { label: "Proteine", value: calcMacros()!.protein, color: "text-destructive" },
-                      { label: "Carbo", value: calcMacros()!.carbs, color: "text-accent" },
+                      { label: "Carbo", value: calcMacros()!.carbs, color: "text-warning" },
                       { label: "Grassi", value: calcMacros()!.fats, color: "text-primary" },
                     ].map(({ label, value, color }) => (
                       <div key={label} className="flex flex-col items-center rounded-xl bg-card p-2">

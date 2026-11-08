@@ -36,7 +36,7 @@ const QuickDayBadge = () => {
   const q = quickDay as any;
   return (
     <div className="rounded-xl border-2 border-accent/40 bg-accent/10 p-3 flex items-center gap-3">
-      <Zap className="h-5 w-5 text-accent shrink-0" />
+      <Zap className="h-5 w-5 text-warning shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">
           {LABEL[q.day_type] || "Giorno stimato"}

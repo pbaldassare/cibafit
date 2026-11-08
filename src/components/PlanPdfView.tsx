@@ -41,11 +41,11 @@ const PlanPdfView = ({ plan, mealTargets, proName, clientName }: PlanPdfViewProp
   return (
     <div className="plan-pdf-view max-w-2xl mx-auto p-8 bg-white text-gray-900" id="plan-pdf">
       {/* Header */}
-      <div className="flex items-center justify-between border-b-2 border-blue-500 pb-4 mb-6">
+      <div className="flex items-center justify-between border-b-2 border-[#0B3B3C] pb-4 mb-6">
         <div className="flex items-center gap-3">
           <BrandLogo className="text-2xl" />
           <div>
-            <h1 className="text-xl font-bold text-blue-600" style={{ fontFamily: "Fredoka, sans-serif" }}>
+            <h1 className="text-xl font-bold text-[#0B3B3C]" style={{ fontFamily: "Bricolage Grotesque, sans-serif" }}>
               CibaFit
             </h1>
             <p className="text-xs text-gray-500">Piano Nutrizionale</p>

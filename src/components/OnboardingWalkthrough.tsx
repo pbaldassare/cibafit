@@ -107,7 +107,7 @@ const OnboardingWalkthrough = ({ role, onComplete }: Props) => {
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Top bar with skip */}
       <div className="flex items-center justify-between px-4 pt-4">
-        <BrandLogo className="h-7" />
+        <BrandLogo className="text-2xl" />
         <Button
           variant="ghost"
           size="sm"

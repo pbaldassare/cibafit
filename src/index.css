@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,117 +6,118 @@
 
 @layer base {
   :root {
-    /* CibaFit Premium palette */
-    --background: 216 20% 96%;      /* #F3F5F8 */
-    --foreground: 220 20% 14%;      /* #1E2530 */
+    /* Cedro: verde profondo per la struttura, cedro per il punto attivo */
+    --shell: 181 69% 14%;           /* #0B3B3C */
+    --citron: 63 75% 50%;           /* #D9E021 */
+
+    --background: 80 27% 95%;       /* #F4F6EF */
+    --foreground: 181 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 14%;
+    --card-foreground: 181 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 14%;
+    --popover-foreground: 181 30% 12%;
 
-    --primary: 196 88% 54%;         /* #22B6F2 */
+    --primary: 181 69% 14%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 201 89% 39%;    /* #0B7DBE */
-    --primary-glow: 196 88% 64%;
+    --primary-dark: 181 69% 14%;
+    --primary-glow: 181 45% 30%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 201 89% 39%;
+    --secondary: 80 20% 91%;
+    --secondary-foreground: 181 69% 14%;
 
-    --muted: 216 14% 93%;
-    --muted-foreground: 215 10% 52%;
+    --muted: 80 18% 90%;
+    --muted-foreground: 181 10% 34%;
 
-    --accent: 37 90% 51%;           /* #F39C12 – solo per alert */
-    --accent-foreground: 0 0% 100%;
+    --accent: 63 70% 88%;
+    --accent-foreground: 181 69% 14%;
 
-    --destructive: 1 76% 55%;
+    --destructive: 1 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 56% 46%;
+    --success: 152 60% 30%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 37 90% 51%;
+    --warning: 32 90% 38%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 216 14% 91%;
-    --input: 216 14% 91%;
-    --ring: 196 88% 54%;
+    --border: 80 14% 85%;
+    --input: 80 14% 80%;
+    --ring: 181 55% 28%;
 
-    --radius: 1.125rem;             /* 18px */
+    --radius: 0.875rem;
 
-    --sidebar-background: 201 89% 39%;
+    --sidebar-background: 181 69% 14%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 196 88% 64%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 201 89% 34%;
+    --sidebar-primary: 63 75% 50%;
+    --sidebar-primary-foreground: 181 69% 14%;
+    --sidebar-accent: 181 55% 21%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 201 89% 34%;
-    --sidebar-ring: 196 88% 54%;
+    --sidebar-border: 181 45% 22%;
+    --sidebar-ring: 63 75% 50%;
 
     --nav-height: 72px;
     --header-height: 3.5rem;
 
-    /* Brand gradient */
-    --brand-gradient: linear-gradient(135deg, hsl(196, 88%, 54%) 0%, hsl(201, 89%, 39%) 100%);
+    --brand-gradient: linear-gradient(hsl(var(--shell)), hsl(var(--shell)));
 
-    /* Premium shadows */
-    --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.03);
-    --shadow-card-hover: 0 4px 12px -2px rgba(0,0,0,0.08);
-    --shadow-elevated: 0 8px 24px -4px rgba(0,0,0,0.08);
-    --shadow-brand: 0 4px 14px -2px hsla(201, 89%, 39%, 0.35);
+    --shadow-card: 0 1px 2px 0 hsla(181, 40%, 14%, 0.06);
+    --shadow-card-hover: 0 4px 12px -2px hsla(181, 40%, 14%, 0.10);
+    --shadow-elevated: 0 8px 20px -6px hsla(181, 40%, 14%, 0.22);
+    --shadow-brand: 0 6px 14px -4px hsla(181, 69%, 14%, 0.35);
   }
 
   .dark {
-    --background: 220 18% 7%;
-    --foreground: 210 14% 93%;
+    --background: 181 30% 7%;
+    --foreground: 80 20% 93%;
 
-    --card: 220 18% 11%;
-    --card-foreground: 210 14% 93%;
+    --card: 181 25% 11%;
+    --card-foreground: 80 20% 93%;
 
-    --popover: 220 18% 11%;
-    --popover-foreground: 210 14% 93%;
+    --popover: 181 25% 11%;
+    --popover-foreground: 80 20% 93%;
 
-    --primary: 196 88% 54%;
-    --primary-foreground: 0 0% 100%;
-    --primary-dark: 201 89% 39%;
-    --primary-glow: 196 88% 64%;
+    --primary: 63 75% 50%;
+    --primary-foreground: 181 69% 12%;
+    --primary-dark: 63 75% 58%;
+    --primary-glow: 63 75% 60%;
 
-    --secondary: 220 18% 15%;
-    --secondary-foreground: 210 14% 93%;
+    --secondary: 181 20% 16%;
+    --secondary-foreground: 80 20% 93%;
 
-    --muted: 220 14% 15%;
-    --muted-foreground: 215 10% 55%;
+    --muted: 181 18% 15%;
+    --muted-foreground: 80 8% 65%;
 
-    --accent: 37 90% 51%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 181 25% 20%;
+    --accent-foreground: 80 20% 93%;
 
-    --destructive: 1 62% 45%;
+    --destructive: 1 62% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 56% 46%;
-    --success-foreground: 0 0% 100%;
+    --success: 152 50% 45%;
+    --success-foreground: 181 69% 8%;
 
-    --warning: 37 90% 51%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 37 90% 55%;
+    --warning-foreground: 181 69% 8%;
 
-    --border: 220 14% 18%;
-    --input: 220 14% 18%;
-    --ring: 196 88% 54%;
+    --border: 181 15% 20%;
+    --input: 181 15% 24%;
+    --ring: 63 75% 50%;
 
     --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.2);
     --shadow-card-hover: 0 4px 12px -2px rgba(0,0,0,0.3);
     --shadow-elevated: 0 8px 24px -4px rgba(0,0,0,0.35);
-    --shadow-brand: 0 4px 14px -2px hsla(201, 89%, 39%, 0.4);
+    --shadow-brand: 0 6px 14px -4px rgba(0,0,0,0.4);
 
-    --sidebar-background: 220 18% 7%;
-    --sidebar-foreground: 210 14% 93%;
-    --sidebar-primary: 196 88% 54%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 18% 15%;
-    --sidebar-accent-foreground: 196 88% 64%;
-    --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 196 88% 54%;
+    --sidebar-background: 181 69% 9%;
+    --sidebar-foreground: 80 20% 93%;
+    --sidebar-primary: 63 75% 50%;
+    --sidebar-primary-foreground: 181 69% 12%;
+    --sidebar-accent: 181 40% 16%;
+    --sidebar-accent-foreground: 80 20% 93%;
+    --sidebar-border: 181 30% 18%;
+    --sidebar-ring: 63 75% 50%;
   }
 }
 
@@ -140,14 +141,25 @@
   h3 { font-size: 16px; font-weight: 600; }
 }
 
-/* Force Inter on EVERYTHING */
 *, *::before, *::after {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Fredoka on headings only */
 h1, h2, h3, h4, h5, h6, .font-display {
-  font-family: 'Fredoka', 'Baloo 2', 'Nunito', sans-serif !important;
+  font-family: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif !important;
+}
+
+::selection {
+  background: hsl(var(--citron));
+  color: hsl(var(--shell));
+}
+
+:focus-visible {
+  outline-color: hsl(var(--ring));
+}
+
+html {
+  scrollbar-color: hsl(var(--primary-glow)) transparent;
 }
 
 @layer utilities {
@@ -176,10 +188,9 @@ h1, h2, h3, h4, h5, h6, .font-display {
   }
 
   .btn-brand {
-    background: var(--brand-gradient);
+    background: hsl(var(--citron));
     box-shadow: var(--shadow-brand);
-    border: 1px solid rgba(255,255,255,0.10);
-    color: white;
+    color: hsl(var(--shell));
   }
   .btn-brand:active {
     opacity: 0.9;
@@ -196,18 +207,6 @@ h1, h2, h3, h4, h5, h6, .font-display {
   padding-right: 1rem;
 }
 
-/* ═══ RESTAURANT APP: operational, dense, high-contrast ═══ */
-.restaurant-app {
-  letter-spacing: 0;
-}
-.restaurant-app main {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-.restaurant-app h1 { font-size: 20px; font-weight: 700; font-family: 'Inter', system-ui, sans-serif !important; letter-spacing: -0.02em; }
-.restaurant-app h2 { font-size: 16px; font-weight: 700; font-family: 'Inter', system-ui, sans-serif !important; }
-.restaurant-app h3 { font-size: 14px; font-weight: 700; font-family: 'Inter', system-ui, sans-serif !important; }
-
 /* ═══ PRINT STYLES ═══ */
 @media print {
   body { background: white !important; }
@@ -218,20 +217,4 @@ h1, h2, h3, h4, h5, h6, .font-display {
   .plan-pdf-view { max-width: 100% !important; padding: 0 !important; }
   @page { margin: 1.2cm; }
 
-  /* HACCP public label: smart pagination */
-  .haccp-public-page { display: block !important; }
-  .haccp-public-page .haccp-section {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    margin-bottom: 0.5rem;
-  }
-  .haccp-public-page .haccp-section-header {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-  .haccp-public-page .haccp-row {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  .haccp-public-page a { color: inherit !important; text-decoration: none !important; }
 }

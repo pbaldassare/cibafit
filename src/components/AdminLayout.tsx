@@ -37,7 +37,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       {/* Sidebar */}
       <aside className="hidden w-64 flex-col md:flex" style={{ backgroundColor: "hsl(var(--primary))" }}>
         <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-          <BrandLogo className="h-6 brightness-0 invert" />
+          <BrandLogo className="text-xl text-white" />
           <span className="text-xs font-medium uppercase tracking-wider ml-auto" style={{ color: "rgba(255,255,255,0.6)" }}>Admin</span>
         </div>
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
@@ -77,7 +77,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           <button onClick={() => navigate(-1)} className="text-white/90 -ml-1 p-1 active:opacity-70 transition-opacity">
             <ChevronLeft size={22} strokeWidth={2} />
           </button>
-          <BrandLogo className="h-6 brightness-0 invert" />
+          <BrandLogo className="text-xl text-white" />
           <span className="text-xs font-medium text-white/60 uppercase tracking-wider ml-auto">Admin</span>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>

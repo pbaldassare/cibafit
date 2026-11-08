@@ -36,13 +36,13 @@ interface WeightGoal {
 }
 
 const METRICS = [
-  { key: "weight_kg", label: "Peso (kg)", color: "hsl(196,88%,54%)" },
+  { key: "weight_kg", label: "Peso (kg)", color: "hsl(181,69%,24%)" },
   { key: "waist_cm", label: "Vita (cm)", color: "hsl(37,90%,51%)" },
   { key: "hips_cm", label: "Fianchi (cm)", color: "hsl(152,56%,46%)" },
   { key: "chest_cm", label: "Petto (cm)", color: "hsl(1,76%,55%)" },
   { key: "arm_cm", label: "Braccio (cm)", color: "hsl(270,60%,55%)" },
   { key: "thigh_cm", label: "Coscia (cm)", color: "hsl(330,60%,55%)" },
-  { key: "body_fat_pct", label: "Body fat (%)", color: "hsl(201,89%,39%)" },
+  { key: "body_fat_pct", label: "Body fat (%)", color: "hsl(63,70%,36%)" },
 ] as const;
 
 const ProClientMeasurementsPage = () => {

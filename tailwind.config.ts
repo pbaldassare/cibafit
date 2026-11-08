@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "Nunito Sans", "Roboto", "sans-serif"],
-        display: ["Fredoka", "Baloo 2", "Nunito", "sans-serif"],
+        sans: ["Hanken Grotesk", "system-ui", "sans-serif"],
+        display: ["Bricolage Grotesque", "Hanken Grotesk", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

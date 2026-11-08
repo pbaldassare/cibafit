@@ -53,9 +53,7 @@ const UserBottomNav = () => {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
-      style={{
-        background: "linear-gradient(135deg, hsl(196, 88%, 54%) 0%, hsl(201, 89%, 39%) 100%)",
-      }}
+      style={{ background: "hsl(var(--shell))" }}
     >
       <div className="mx-auto flex h-[64px] max-w-lg items-center justify-around px-1">
       {tabs.map(({ to, icon: Icon, label }) => {
@@ -89,7 +87,7 @@ const UserBottomNav = () => {
                 {label}
               </span>
               {isActive && (
-                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[2px] w-4 rounded-full bg-white" />
+                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[2px] w-4 rounded-full bg-[hsl(var(--citron))]" />
               )}
             </NavLink>
           );

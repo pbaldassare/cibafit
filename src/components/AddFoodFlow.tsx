@@ -1833,7 +1833,7 @@ const AddFoodFlow = ({
                 {notFound && (
                   <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-accent shrink-0" />
+                      <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
                       <p className="text-xs text-muted-foreground">
                         Barcode non trovato su OpenFoodFacts.
                       </p>
@@ -2409,7 +2409,7 @@ const AddFoodFlow = ({
             )}
             {!expiryAnalyzing && expiryCandidates.length === 0 && expiryImage && (
               <div className="flex flex-col items-center gap-2 py-4 text-center">
-                <AlertTriangle className="h-8 w-8 text-accent" />
+                <AlertTriangle className="h-8 w-8 text-warning" />
                 <p className="text-sm text-muted-foreground">Nessuna data trovata. Inserisci manualmente.</p>
                 <Button variant="outline" onClick={() => setExpiryModalOpen(false)}>Chiudi</Button>
               </div>

@@ -1,11 +1,11 @@
 {
   "name": "CibaFit",
   "short_name": "CibaFit",
-  "description": "Gestione intelligente di dispensa, pasti e ricette",
+  "description": "Il piano del nutrizionista e i tuoi pasti di ogni giorno",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0B7DBE",
-  "theme_color": "#0B7DBE",
+  "background_color": "#0B3B3C",
+  "theme_color": "#0B3B3C",
   "orientation": "portrait-primary",
   "icons": [
     {
