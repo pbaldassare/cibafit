@@ -51,13 +51,13 @@ const RestaurantHaccpDocumentsPage = () => {
     if (file) {
       const ext = file.name.split(".").pop() || "bin";
       const path = `${restaurant.id}/${Date.now()}.${ext}`;
-      const { data: up, error: upErr } = await supabase.storage.from("haccp-documents").upload(path, file);
+      const { data: up, error: upErr } = await supabase.storage.from("cibafit-haccp-documents").upload(path, file);
       if (upErr) {
         setSaving(false);
         toast({ variant: "destructive", title: "Errore upload", description: upErr.message });
         return;
       }
-      const { data: urlD } = supabase.storage.from("haccp-documents").getPublicUrl(up!.path);
+      const { data: urlD } = supabase.storage.from("cibafit-haccp-documents").getPublicUrl(up!.path);
       if (file.type.startsWith("image/")) photoUrl = urlD.publicUrl;
       else fileUrl = urlD.publicUrl;
     }

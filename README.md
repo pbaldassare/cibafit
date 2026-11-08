@@ -10,7 +10,7 @@ con Cibarius **in produzione**, ma usa solo lo schema `cibafit`.
   Le modifiche a CibaFit si applicano una per una e solo su `cibafit`.
 - Le Edge Functions hanno il prefisso `cibafit-`. Deploy solo per nome:
   `supabase functions deploy cibafit-<nome> --project-ref dqhzopbjhxyhgcpedskl --use-api`.
-- `auth.users` e i bucket Storage sono condivisi con Cibarius.
+- I file usano solo i bucket `cibafit-*`. Resta condiviso con Cibarius `auth.users`: gli account sono gli stessi.
 
 ## Avvio locale
 

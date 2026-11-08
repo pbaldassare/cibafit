@@ -888,14 +888,14 @@ const AddFoodFlow = ({
         for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
 
         const { error: uploadErr } = await supabase.storage
-          .from("media")
+          .from("cibafit-media")
           .upload(filePath, bytes, { contentType: photo.mime_type, upsert: false });
         if (uploadErr) {
           console.error("Upload attachment error:", uploadErr);
           continue;
         }
 
-        const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
+        const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(filePath);
 
         await supabase.from("attachments").insert({
           entity_id: entityId,

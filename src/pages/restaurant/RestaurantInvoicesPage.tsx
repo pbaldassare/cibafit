@@ -91,7 +91,7 @@ const RestaurantInvoicesPage = () => {
         body.mime_type = "image/jpeg";
       } else if (isImage) {
         // Download and convert to base64
-        const { data: fileData } = await supabase.storage.from("media").download(doc.file_path);
+        const { data: fileData } = await supabase.storage.from("cibafit-media").download(doc.file_path);
         if (!fileData) throw new Error("Impossibile scaricare il file");
         const buffer = await fileData.arrayBuffer();
         const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -132,14 +132,14 @@ const RestaurantInvoicesPage = () => {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const filePath = `restaurants/${restaurant.id}/bolle/${ts}-${safeName}`;
 
-    const { error: storageError } = await supabase.storage.from("media").upload(filePath, file);
+    const { error: storageError } = await supabase.storage.from("cibafit-media").upload(filePath, file);
     if (storageError) {
       toast({ variant: "destructive", title: "Errore upload", description: storageError.message });
       setUploading(false);
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(filePath);
 
     const { data: newDoc, error: dbError } = await supabase.from("restaurant_documents").insert({
       restaurant_id: restaurant.id,
@@ -172,7 +172,7 @@ const RestaurantInvoicesPage = () => {
   };
 
   const handleDelete = async (doc: RestaurantDocument) => {
-    await supabase.storage.from("media").remove([doc.file_path]);
+    await supabase.storage.from("cibafit-media").remove([doc.file_path]);
     await supabase.from("restaurant_documents").delete().eq("id", doc.id);
     toast({ title: "Documento eliminato" });
     fetchDocs();

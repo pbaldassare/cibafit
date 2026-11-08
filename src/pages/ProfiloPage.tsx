@@ -181,9 +181,9 @@ const ProfiloPage = () => {
     try {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${user.id}/avatar.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: uploadErr } = await supabase.storage.from("cibafit-avatars").upload(path, file, { upsert: true });
       if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data: urlData } = supabase.storage.from("cibafit-avatars").getPublicUrl(path);
       const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
       const { error: updateErr } = await supabase.from("profiles").update({ avatar_url: avatarUrl } as any).eq("id", user.id);
       if (updateErr) throw updateErr;
@@ -259,9 +259,9 @@ const ProfiloPage = () => {
     try {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${user.id}/pro-photo.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const { error: uploadErr } = await supabase.storage.from("cibafit-avatars").upload(path, file, { upsert: true });
       if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data: urlData } = supabase.storage.from("cibafit-avatars").getPublicUrl(path);
       const photoUrl = urlData.publicUrl + "?t=" + Date.now();
       await supabase.from("professional_profiles").update({ photo_url: photoUrl } as any).eq("id", myProProfile.id);
       setMyProProfile(p => p ? { ...p, photo_url: photoUrl } : p);

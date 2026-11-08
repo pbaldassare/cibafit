@@ -231,9 +231,9 @@ const UserItemDetailPage = () => {
     try {
       const ext = file.name.split(".").pop() ?? "jpg";
       const filePath = `users/${user.id}/${item.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("item-photos").upload(filePath, file, { cacheControl: "3600" });
+      const { error: upErr } = await supabase.storage.from("cibafit-item-photos").upload(filePath, file, { cacheControl: "3600" });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("item-photos").getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from("cibafit-item-photos").getPublicUrl(filePath);
       const { data: row, error: dbErr } = await supabase
         .from("inventory_item_photos")
         .insert({

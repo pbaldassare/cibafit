@@ -77,14 +77,14 @@ const RestaurantSettingsPage = () => {
     const ext = file.name.split(".").pop();
     const path = `restaurants/${restaurant.id}/cover.${ext}`;
     const { error: uploadErr } = await supabase.storage
-      .from("media")
+      .from("cibafit-media")
       .upload(path, file, { upsert: true });
     if (uploadErr) {
       toast({ variant: "destructive", title: "Errore upload", description: uploadErr.message });
       setUploading(false);
       return;
     }
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+    const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(path);
     const url = urlData.publicUrl + "?t=" + Date.now();
     setImageUrl(url);
     await supabase.from("restaurants").update({ image_url: url }).eq("id", restaurant.id);

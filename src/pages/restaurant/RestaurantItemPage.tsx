@@ -184,9 +184,9 @@ const RestaurantItemPage = () => {
     try {
       const ext = file.name.split(".").pop() ?? "jpg";
       const filePath = `${restaurant.id}/ddt/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("haccp-documents").upload(filePath, file, { cacheControl: "3600" });
+      const { error: upErr } = await supabase.storage.from("cibafit-haccp-documents").upload(filePath, file, { cacheControl: "3600" });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("haccp-documents").getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from("cibafit-haccp-documents").getPublicUrl(filePath);
       const { data: doc, error: docErr } = await supabase
         .from("haccp_documents")
         .insert({
@@ -218,9 +218,9 @@ const RestaurantItemPage = () => {
       const realId = id!.replace(/^(inv|prep)-/, "");
       const ext = file.name.split(".").pop() ?? "jpg";
       const filePath = `${restaurant!.id}/${realId}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("item-photos").upload(filePath, file, { cacheControl: "3600" });
+      const { error: upErr } = await supabase.storage.from("cibafit-item-photos").upload(filePath, file, { cacheControl: "3600" });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("item-photos").getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage.from("cibafit-item-photos").getPublicUrl(filePath);
       const photoUrl = urlData.publicUrl;
       const { data: row, error: dbErr } = await supabase
         .from("inventory_item_photos")

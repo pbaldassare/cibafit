@@ -192,10 +192,10 @@ const MealPhotoPage = () => {
         const ts = Date.now();
         const path = `meals/${user.id}/${ts}.jpg`;
         const { error: upErr } = await supabase.storage
-          .from("media")
+          .from("cibafit-media")
           .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
         if (!upErr) {
-          const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+          const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(path);
           photoUrl = urlData.publicUrl;
         }
       }

@@ -40,7 +40,7 @@ const ImageUpload = ({ imageUrl, onUploaded, storagePath, className = "" }: Imag
     const ext = file.name.split(".").pop() ?? "jpg";
     const filePath = `${storagePath}/${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage.from("media").upload(filePath, file, {
+    const { error } = await supabase.storage.from("cibafit-media").upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -51,7 +51,7 @@ const ImageUpload = ({ imageUrl, onUploaded, storagePath, className = "" }: Imag
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(filePath);
     const publicUrl = urlData.publicUrl;
 
     setUploading(false);

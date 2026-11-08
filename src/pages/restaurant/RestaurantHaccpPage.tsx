@@ -182,9 +182,9 @@ const RestaurantHaccpPage = () => {
       for (const photo of photos) {
         const ext = photo.name.split(".").pop() || "jpg";
         const path = `haccp/${restaurant.id}/${logId}/${Date.now()}.${ext}`;
-        const { data: uploadData } = await supabase.storage.from("media").upload(path, photo);
+        const { data: uploadData } = await supabase.storage.from("cibafit-media").upload(path, photo);
         if (uploadData) {
-          const { data: urlData } = supabase.storage.from("media").getPublicUrl(uploadData.path);
+          const { data: urlData } = supabase.storage.from("cibafit-media").getPublicUrl(uploadData.path);
           await supabase.from("haccp_task_photos" as any).insert({
             restaurant_id: restaurant.id,
             task_log_id: logId,
