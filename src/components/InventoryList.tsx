@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuth } from "@/hooks/useAuth";
-import { useRestaurant } from "@/hooks/useRestaurant";
 import { supabase } from "@/integrations/supabase/client";
 import MobileHeader from "@/components/MobileHeader";
 import ImageUpload from "@/components/ImageUpload";
@@ -97,13 +96,12 @@ function calcNutrition(
 }
 
 interface InventoryListProps {
-  mode: "user" | "restaurant";
+  mode: "user";
   storageFilter?: string;
 }
 
 const InventoryList = ({ mode, storageFilter: externalStorageFilter }: InventoryListProps) => {
   const { user } = useAuth();
-  const { restaurant } = useRestaurant();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -159,11 +157,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
       .select("id, quantity, unit, storage_type, expiry_date, notes, calories_total, macros_total, product:products(id, name, brand, image_url, category, calories_100g, serving_size_g, macros_100g, data_source, nutrition_available)")
       .order("expiry_date", { ascending: true, nullsFirst: false });
 
-    if (mode === "user") {
-      query = query.eq("owner_user_id", user.id);
-    } else if (restaurant) {
-      query = query.eq("restaurant_id", restaurant.id);
-    }
+    query = query.eq("owner_user_id", user.id);
 
     const { data, error } = await query;
     if (!error && data) {
@@ -174,7 +168,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
 
   useEffect(() => {
     fetchItems();
-  }, [user, restaurant]);
+  }, [user]);
 
   // Auto-retry save after dedup decision
   const formRef = useRef<HTMLFormElement>(null);
@@ -185,9 +179,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
   }, [skipDedup, dedupOpen]);
 
   const getUploadPath = () => {
-    if (mode === "user" && user) return `users/${user.id}/products`;
-    if (mode === "restaurant" && restaurant) return `restaurants/${restaurant.id}/products`;
-    return "";
+    return user ? `users/${user.id}/products` : "";
   };
 
   const handleImageUploaded = (publicUrl: string, filePath: string) => {
@@ -244,8 +236,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
           file_path: newImagePath,
           public_url: newImageUrl,
         };
-        if (mode === "user") attachData.owner_user_id = user.id;
-        else if (restaurant) attachData.restaurant_id = restaurant.id;
+        attachData.owner_user_id = user.id;
 
         await supabase.from("attachments").insert(attachData);
       }
@@ -260,11 +251,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
       notes: newNotes || null,
     };
 
-    if (mode === "user") {
-      insertData.owner_user_id = user.id;
-    } else if (restaurant) {
-      insertData.restaurant_id = restaurant.id;
-    }
+    insertData.owner_user_id = user.id;
 
     const { error } = await supabase.from("inventory_items").insert(insertData);
     setAdding(false);
@@ -277,7 +264,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
       setTimeout(() => {
         toast({
           title: "ℹ️ Prodotto senza dati nutrizionali",
-          description: "Questo prodotto verrà usato per scadenze e anti-spreco. Non sarà incluso nei calcoli nutrizionali finché non avrà valori nutrizionali compilati.",
+          description: "Questo prodotto resterà in dispensa. Non sarà incluso nei calcoli nutrizionali finché non avrà valori nutrizionali compilati.",
         });
       }, 500);
       setAddOpen(false);

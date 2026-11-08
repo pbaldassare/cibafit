@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useRole } from "@/hooks/useRole";
-import {
+import { TrendingUp,
   Home, User, UtensilsCrossed,
   BookOpen, LayoutDashboard, Users, FileText,
   MessageSquare, Building2, Package, Archive, Clock, ChefHat, ClipboardList,
@@ -17,17 +17,10 @@ interface TabItem {
 const tabsByRole: Record<string, TabItem[]> = {
   user: [
     { to: "/", icon: Home, label: "Home", tourId: "nav-home" },
-    { to: "/expiry", icon: Clock, label: "Scadenze", tourId: "nav-expiry" },
+    { to: "/progress", icon: TrendingUp, label: "Progressi", tourId: "nav-progress" },
     { to: "/diet", icon: ClipboardList, label: "Piano", tourId: "nav-plan" },
     { to: "/meals", icon: UtensilsCrossed, label: "Pasti", tourId: "nav-meals" },
     { to: "/profile", icon: User, label: "Profilo", tourId: "nav-profile" },
-  ],
-  restaurant_owner: [
-    { to: "/restaurant", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/restaurant/products", icon: Clock, label: "Scadenze" },
-    { to: "/restaurant/preparations", icon: ChefHat, label: "Preparaz." },
-    { to: "/restaurant/recipes", icon: BookOpen, label: "Ricette" },
-    { to: "/restaurant/invoices", icon: FileText, label: "Bolle" },
   ],
   professional: [
     { to: "/pro", icon: LayoutDashboard, label: "Dashboard", tourId: "pro-nav-dashboard" },
@@ -35,13 +28,6 @@ const tabsByRole: Record<string, TabItem[]> = {
     { to: "/pro/reports", icon: FileText, label: "Report", tourId: "pro-nav-reports" },
     { to: "/pro/notes", icon: MessageSquare, label: "Note", tourId: "pro-nav-notes" },
     { to: "/pro/profile", icon: User, label: "Profilo", tourId: "pro-nav-profile" },
-  ],
-  supplier: [
-    { to: "/supplier", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/supplier/restaurants", icon: Building2, label: "Ristoranti" },
-    { to: "/supplier/catalog", icon: Package, label: "Catalogo" },
-    { to: "/supplier/reports", icon: FileText, label: "Report" },
-    { to: "/profile", icon: User, label: "Profilo" },
   ],
   admin: [
     { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },

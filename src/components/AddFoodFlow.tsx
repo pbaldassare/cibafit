@@ -33,7 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Checkbox } from "@/components/ui/checkbox";
 
 /* ─── Types ─── */
-export type AddFoodContext = "inventory" | "meal" | "recipe" | "preparation";
+export type AddFoodContext = "inventory" | "meal";
 type MealType = "colazione" | "pranzo" | "cena" | "spuntino";
 type Method = "photo_ai" | "search" | "scan" | "manual";
 type Step = "method" | "photo_ai" | "scan" | "search" | "summary" | "recipes" | "receipt" | "receipt_photo" | "receipt_qr";
@@ -54,7 +54,6 @@ interface AddFoodFlowProps {
   context: AddFoodContext;
   contextId?: string;
   mealType?: MealType;
-  defaultRestaurantId?: string;
   onComplete: () => void;
 }
 
@@ -74,15 +73,13 @@ const storageOptions = [
 const ctaLabels: Record<AddFoodContext, string> = {
   inventory: "Salva nei prodotti",
   meal: "Aggiungi al pasto",
-  recipe: "Aggiungi ingrediente",
-  preparation: "Aggiungi alla preparazione",
 };
 
 const CONFIDENCE_LOW = 0.6;
 
 const AddFoodFlow = ({
   open, onOpenChange, context, contextId, mealType: preselectedMealType,
-  defaultRestaurantId, onComplete,
+  onComplete,
 }: AddFoodFlowProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -903,7 +900,6 @@ const AddFoodFlow = ({
           file_path: filePath,
           public_url: urlData.publicUrl,
           owner_user_id: user?.id ?? null,
-          restaurant_id: defaultRestaurantId ?? null,
         });
       }
     } catch (err) {
@@ -1016,17 +1012,13 @@ const AddFoodFlow = ({
           calories_total: computed.calories,
           macros_total: computed.macros as any,
         };
-        if (defaultRestaurantId) {
-          insertData.restaurant_id = defaultRestaurantId;
-        } else {
-          insertData.owner_user_id = user.id;
-        }
+        insertData.owner_user_id = user.id;
         const { data: invItem, error } = await supabase.from("inventory_items").insert(insertData).select("id").single();
         if (error) throw error;
         await saveAttachments(invItem.id, "inventory_item");
         {
           const stLabel = storageOptions.find(s => s.key === storageType)?.label ?? "Prodotti";
-          const path = storageType === "freezer" ? "/freezer" : storageType === "ambiente" ? "/pantry" : "/products?storage=frigo";
+          const path = storageType === "ambiente" ? "/pantry" : "/products?storage=frigo";
           toast({
             title: `Aggiunto in ${stLabel}! ✓`,
             action: (
@@ -1108,20 +1100,6 @@ const AddFoodFlow = ({
 
         toast({ title: `Aggiunto a ${selectedMealType || preselectedMealType}! ✓` });
 
-      } else if (context === "recipe") {
-        if (!contextId) throw new Error("recipe_id mancante");
-        const { error } = await supabase.from("recipe_ingredients").insert({
-          recipe_id: contextId,
-          product_id: pid!,
-          quantity,
-          unit,
-        });
-        if (error) throw error;
-        toast({ title: "Ingrediente aggiunto! ✓" });
-
-      } else if (context === "preparation") {
-        // For preparation context, just return via onComplete - the parent handles saving
-        toast({ title: "Ingrediente aggiunto! ✓" });
       }
 
       // Save product attachments
@@ -1351,25 +1329,6 @@ const AddFoodFlow = ({
                       <div>
                         <p className="text-sm font-bold text-foreground">🍽️ Ricette dal piano</p>
                         <p className="text-xs text-muted-foreground">Scegli tra le ricette suggerite</p>
-                      </div>
-                    </button>
-                  )}
-
-                  {/* Crea Preparazione link – only for restaurants */}
-                  {(context === "inventory" || context === "preparation") && defaultRestaurantId && (
-                    <button
-                      onClick={() => {
-                        onOpenChange(false);
-                        navigate(defaultRestaurantId ? "/restaurant/preparations" : "/preparations");
-                      }}
-                      className="flex items-center gap-3 rounded-2xl border border-dashed border-[#7C3AED]/30 bg-[#EDE9FE]/30 p-4 text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: "#EDE9FE" }}>
-                        <ChefHat className="h-5 w-5" style={{ color: "#7C3AED" }} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold" style={{ color: "#111827" }}>🍳 Crea Preparazione</p>
-                        <p className="text-xs" style={{ color: "#4B5563" }}>Piatto preparato con scadenza</p>
                       </div>
                     </button>
                   )}
@@ -1791,8 +1750,7 @@ const AddFoodFlow = ({
                                 storage_type: item.storage_type || "frigo",
                                 expiry_date: item.expiry_date || format(addDays(new Date(), 3), "yyyy-MM-dd"),
                               };
-                              if (defaultRestaurantId) insertData.restaurant_id = defaultRestaurantId;
-                              else insertData.owner_user_id = user.id;
+                              insertData.owner_user_id = user.id;
                               const { error: invErr } = await supabase.from("inventory_items").insert(insertData);
                               if (invErr) { console.error("Receipt inventory insert:", invErr); continue; }
                             }
@@ -1967,11 +1925,11 @@ const AddFoodFlow = ({
                 </div>
 
                 {/* ── Info: no nutrition data ── */}
-                {calories100g == null && !defaultRestaurantId && (
+                {calories100g == null && (
                   <div className="flex items-start gap-2 rounded-xl border border-muted bg-muted/30 p-3">
                     <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                     <p className="text-[11px] text-muted-foreground">
-                      Prodotto salvato per scadenze e anti-spreco. Non sarà usato nei calcoli nutrizionali finché non avrà valori nutrizionali compilati.
+                      Prodotto salvato in dispensa. Non sarà usato nei calcoli nutrizionali finché non avrà valori nutrizionali compilati.
                     </p>
                   </div>
                 )}
@@ -2091,7 +2049,7 @@ const AddFoodFlow = ({
                   </button>
 
                   {/* Storage chip (inventory/prep only) */}
-                  {(context === "inventory" || context === "preparation" || (context === "meal" && saveToInventory)) && (
+                  {(context === "inventory" || (context === "meal" && saveToInventory)) && (
                     <button
                       onClick={() => setEditingChip(editingChip === "storage" ? null : "storage")}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all ${
@@ -2104,7 +2062,7 @@ const AddFoodFlow = ({
                   )}
 
                   {/* Expiry chip (inventory/prep only) */}
-                  {(context === "inventory" || context === "preparation" || (context === "meal" && saveToInventory)) && (
+                  {(context === "inventory" || (context === "meal" && saveToInventory)) && (
                     <button
                       onClick={() => setEditingChip(editingChip === "expiry" ? null : "expiry")}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all ${

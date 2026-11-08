@@ -120,18 +120,13 @@ const AdminPaymentsPage = () => {
     setCommissions((comRes.data as any[]) || []);
 
     // Stats
-    const restTrial = enriched.filter((s: any) => s.plan_type === "restaurant" && s.status === "trial").length;
-    const restActive = enriched.filter((s: any) => s.plan_type === "restaurant" && s.status === "active").length;
-    const restExpired = enriched.filter((s: any) => s.plan_type === "restaurant" && ["expired", "cancelled"].includes(s.status)).length;
     const uPlus = enriched.filter((s: any) => s.plan_type === "user_plus" && ["trial", "active"].includes(s.status)).length;
     const { count: totalUsers } = await supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "user");
     const freeOverrides = enriched.filter((s: any) => s.is_free_override).length;
-    const activeRestMonthly = enriched.filter((s: any) => s.plan_type === "restaurant" && s.status === "active" && !s.is_free_override).length;
     const activePlusMonthly = enriched.filter((s: any) => s.plan_type === "user_plus" && s.status === "active" && !s.is_free_override).length;
-    const mrr = activeRestMonthly * 19.9 + activePlusMonthly * 2.49;
+    const mrr = activePlusMonthly * 2.99;
 
     setStats({
-      restaurantTrial: restTrial, restaurantActive: restActive, restaurantExpired: restExpired,
       userPlus: uPlus, freeUsers: (totalUsers ?? 0) - uPlus, mrr: mrr.toFixed(2),
       freeOverrides, activeCoupons: enrichedCoupons.filter((c: any) => c.is_active).length,
     });
@@ -302,7 +297,6 @@ const AdminPaymentsPage = () => {
 
   const filteredSubs = subs.filter((s: any) => {
     if (filter === "all") return true;
-    if (filter === "restaurant") return s.plan_type === "restaurant";
     if (filter === "user_plus") return s.plan_type === "user_plus";
     if (filter === "trial") return s.status === "trial";
     if (filter === "active") return s.status === "active";
@@ -371,14 +365,11 @@ const AdminPaymentsPage = () => {
       {/* Stats */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 mb-6">
         {[
-          { label: "Ristoranti trial", value: stats.restaurantTrial, icon: Clock, color: "text-amber-600" },
-          { label: "Ristoranti attivi", value: stats.restaurantActive, icon: Store, color: "text-emerald-600" },
           { label: "User Plus", value: stats.userPlus, icon: Sparkles, color: "text-primary" },
           { label: "MRR stimato", value: `€${stats.mrr}`, icon: TrendingUp, color: "text-emerald-600" },
           { label: "Utenti gratuiti", value: stats.freeUsers, icon: Users, color: "text-muted-foreground" },
           { label: "Override gratis", value: stats.freeOverrides, icon: Gift, color: "text-primary" },
           { label: "Coupon attivi", value: stats.activeCoupons, icon: Ticket, color: "text-amber-600" },
-          { label: "Ristoranti scaduti", value: stats.restaurantExpired, icon: XCircle, color: "text-destructive" },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label}>
             <CardContent className="pt-3 pb-2 text-center">
@@ -410,7 +401,6 @@ const AdminPaymentsPage = () => {
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tutti</SelectItem>
-                  <SelectItem value="restaurant">Ristoranti</SelectItem>
                   <SelectItem value="user_plus">User Plus</SelectItem>
                   <SelectItem value="trial">Trial</SelectItem>
                   <SelectItem value="active">Attivi</SelectItem>
@@ -441,7 +431,7 @@ const AdminPaymentsPage = () => {
                         </td>
                         <td className="py-2">
                           <Badge variant="outline" className="text-[10px]">
-                            {s.plan_type === "restaurant" ? "Ristorante" : "Plus"}
+                            Plus
                           </Badge>
                           {s.is_free_override && <Badge className="ml-1 text-[9px] bg-primary/20 text-primary">Gratis</Badge>}
                         </td>
@@ -691,7 +681,6 @@ const AdminPaymentsPage = () => {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="user_plus">User Plus</SelectItem>
-                        <SelectItem value="restaurant">Ristorante</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -859,7 +848,6 @@ const AdminPaymentsPage = () => {
                   <SelectItem value="all">Tutti i ruoli</SelectItem>
                   <SelectItem value="user">Utente</SelectItem>
                   <SelectItem value="professional">Professionista</SelectItem>
-                  <SelectItem value="restaurant_owner">Ristorante</SelectItem>
                 </SelectContent>
               </Select>
             </div>

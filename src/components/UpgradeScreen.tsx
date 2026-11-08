@@ -4,26 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Crown, Lock, Sparkles, Store } from "lucide-react";
 
 interface UpgradeScreenProps {
-  planType: "restaurant" | "user_plus";
+  planType: "user_plus";
 }
 
 const configs = {
-  restaurant: {
-    icon: Store,
-    title: "Abbonamento Ristorante richiesto",
-    message: "Il tuo periodo di prova è terminato. Attiva l'abbonamento per continuare a usare Cibarius.",
-    features: [
-      "Modulo HACCP completo",
-      "Gestione scadenze",
-      "Controlli attività",
-      "Report HACCP",
-      "Gestione staff",
-      "Registro controlli",
-    ],
-    price: "Da €19,90/mese",
-    trial: "30 giorni gratis",
-    cta: "Attiva abbonamento",
-  },
   user_plus: {
     icon: Sparkles,
     title: "Sblocca Piano e Progressi",

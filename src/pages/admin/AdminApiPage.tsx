@@ -29,7 +29,6 @@ const ENDPOINTS = [
   { method: "POST", path: "/products", description: "Crea un nuovo prodotto", scopes: ["write"] },
   { method: "GET", path: "/ingredients", description: "Lista ingredienti con valori nutrizionali", scopes: ["read"] },
   { method: "GET", path: "/food-templates", description: "Database alimenti base", scopes: ["read"] },
-  { method: "GET", path: "/inventory", description: "Inventario per restaurant_id", scopes: ["read"] },
   { method: "POST", path: "/search-food", description: "Ricerca unificata alimenti", scopes: ["read"] },
 ];
 

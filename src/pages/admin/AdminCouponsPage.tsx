@@ -366,7 +366,6 @@ const AdminCouponsPage = () => {
                   <SelectItem value="all">Tutti i ruoli</SelectItem>
                   <SelectItem value="user">Utente</SelectItem>
                   <SelectItem value="professional">Professionista</SelectItem>
-                  <SelectItem value="restaurant_owner">Ristorante</SelectItem>
                 </SelectContent>
               </Select>
             </div>

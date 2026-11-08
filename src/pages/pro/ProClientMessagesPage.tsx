@@ -57,7 +57,7 @@ const ProClientMessagesPage = () => {
       .channel("messages-pro")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
+        { event: "INSERT", schema: "cibafit", table: "messages" },
         (payload) => {
           const msg = payload.new as Message;
           if (

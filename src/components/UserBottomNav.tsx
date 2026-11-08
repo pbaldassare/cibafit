@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, AlertTriangle, ClipboardList, UtensilsCrossed, TrendingUp, User, LucideIcon } from "lucide-react";
+import { Home, ClipboardList, UtensilsCrossed, TrendingUp, User, LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,7 +8,6 @@ interface TabItem { to: string; icon: LucideIcon; label: string }
 
 const tabs: TabItem[] = [
   { to: "/", icon: Home, label: "Home" },
-  { to: "/expiry", icon: AlertTriangle, label: "Scadenze" },
   { to: "/meals", icon: UtensilsCrossed, label: "Pasti" },
   { to: "/plan", icon: ClipboardList, label: "Piano" },
   { to: "/progress", icon: TrendingUp, label: "Progressi" },
@@ -17,7 +16,6 @@ const tabs: TabItem[] = [
 
 const tourIds: Record<string, string> = {
   "/": "nav-home",
-  "/expiry": "nav-expiry",
   "/plan": "nav-plan",
   "/meals": "nav-meals",
   "/progress": "nav-progress",
@@ -44,7 +42,7 @@ const UserBottomNav = () => {
 
     const channel = supabase
       .channel("unread-badge")
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}` }, () => {
+      .on("postgres_changes", { event: "*", schema: "cibafit", table: "messages", filter: `receiver_id=eq.${user.id}` }, () => {
         fetchUnread();
       })
       .subscribe();

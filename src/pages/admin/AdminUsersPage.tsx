@@ -18,13 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-const ROLES: AppRole[] = ["user", "restaurant_owner", "admin", "professional", "supplier"];
+const ROLES: AppRole[] = ["user", "professional", "admin"];
 const ROLE_LABELS: Record<AppRole, string> = {
   user: "Utente",
-  restaurant_owner: "Ristoratore",
   admin: "Amministratore",
   professional: "Professionista",
-  supplier: "Fornitore",
 };
 const AdminUsersPage = () => {
   const { toast } = useToast();

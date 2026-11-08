@@ -14,12 +14,11 @@ import AuthFeatureCarousel from "@/components/AuthFeatureCarousel";
 import ReferralBadge from "@/components/ReferralBadge";
 
 
-type AccountType = "user" | "restaurant_owner" | "professional";
+type AccountType = "user" | "professional";
 
 const ACCOUNT_TYPES: { value: AccountType; label: string; desc: string; icon: typeof User }[] = [
-  { value: "user", label: "Utente", desc: "Gestisci la tua alimentazione e dispensa", icon: User },
-  { value: "restaurant_owner", label: "Ristorante", desc: "Gestisci il tuo ristorante e il magazzino", icon: UtensilsCrossed },
-  { value: "professional", label: "Professionista", desc: "Segui i tuoi clienti come nutrizionista", icon: Stethoscope },
+  { value: "user", label: "Utente", desc: "Segui la tua dieta, i pasti e i progressi", icon: User },
+  { value: "professional", label: "Nutrizionista", desc: "Segui i tuoi clienti e crea i loro piani", icon: Stethoscope },
 ];
 
 const SignupPage = () => {
@@ -54,10 +53,6 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Step 3 - restaurant
-  const [restaurantName, setRestaurantName] = useState("");
-  const [restaurantAddress, setRestaurantAddress] = useState("");
-  const [restaurantPhone, setRestaurantPhone] = useState("");
 
   // Step 3 - professional
   const [displayName, setDisplayName] = useState("");
@@ -87,7 +82,6 @@ const SignupPage = () => {
       return baseOk;
     }
     if (step === 3) {
-      if (accountType === "restaurant_owner") return restaurantName && restaurantPhone;
       if (accountType === "professional") return displayName && specialization;
     }
     return true;
@@ -115,12 +109,6 @@ const SignupPage = () => {
       metadata.ref_coupon_code = refCode;
     }
 
-    if (accountType === "restaurant_owner") {
-      metadata.restaurant_name = restaurantName;
-      metadata.restaurant_address = restaurantAddress;
-      metadata.restaurant_phone = restaurantPhone;
-    }
-
     if (accountType === "professional") {
       metadata.display_name = displayName;
       metadata.specialization = specialization;
@@ -134,7 +122,7 @@ const SignupPage = () => {
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
         // I dati CibaFit stanno sotto "cibafit": il trigger di Cibarius legge solo i campi di primo livello,
-        // cosi' non crea ristoranti o profili professionali in public.
+        // cosi' non crea profili in public (Cibarius).
         data: { full_name: metadata.full_name, email: metadata.email, cibafit: metadata },
       },
     });
@@ -206,7 +194,6 @@ const SignupPage = () => {
             <CardTitle className="text-2xl text-foreground">
               {step === 1 && "Chi sei?"}
               {step === 2 && "I tuoi dati"}
-              {step === 3 && accountType === "restaurant_owner" && "Il tuo ristorante"}
               {step === 3 && accountType === "professional" && "Il tuo profilo professionale"}
             </CardTitle>
             <CardDescription>
@@ -308,32 +295,6 @@ const SignupPage = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required={accountType !== "user"}
-                />
-              </div>
-            )}
-
-            {/* ─── STEP 3: Restaurant ─── */}
-            {step === 3 && accountType === "restaurant_owner" && (
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  placeholder="Nome del ristorante"
-                  value={restaurantName}
-                  onChange={(e) => setRestaurantName(e.target.value)}
-                  required
-                />
-                <Input
-                  type="text"
-                  placeholder="Indirizzo (consigliato)"
-                  value={restaurantAddress}
-                  onChange={(e) => setRestaurantAddress(e.target.value)}
-                />
-                <Input
-                  type="tel"
-                  placeholder="Telefono ristorante"
-                  value={restaurantPhone}
-                  onChange={(e) => setRestaurantPhone(e.target.value)}
-                  required
                 />
               </div>
             )}

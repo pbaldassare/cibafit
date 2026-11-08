@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Subscription {
   id: string;
   user_id: string;
-  plan_type: "restaurant" | "user_plus";
+  plan_type: "user_plus";
   status: "trial" | "active" | "past_due" | "cancelled" | "expired";
   start_date: string;
   trial_end_date: string | null;
@@ -20,7 +20,7 @@ export interface Subscription {
   created_at: string;
 }
 
-export const useSubscription = (planType?: "restaurant" | "user_plus") => {
+export const useSubscription = (planType?: "user_plus") => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);

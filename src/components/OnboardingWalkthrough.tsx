@@ -38,33 +38,6 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
       text: "Ricevi suggerimenti di ricette basate su cosa hai in dispensa e sul tuo piano alimentare.",
     },
   ],
-  restaurant_owner: [
-    {
-      icon: <Sparkles className="h-10 w-10" />,
-      title: "Benvenuto in Cibarius!",
-      text: "Gestisci il tuo ristorante: magazzino, scadenze, HACCP e molto altro in un'unica app.",
-    },
-    {
-      icon: <Package className="h-10 w-10" />,
-      title: "Magazzino intelligente",
-      text: "Scansiona prodotti in entrata con foto o barcode. Traccia lotti, quantità e scadenze.",
-    },
-    {
-      icon: <Clock className="h-10 w-10" />,
-      title: "Scadenze e HACCP",
-      text: "Alert automatici per scadenze, checklist HACCP digitali e registro temperature integrato.",
-    },
-    {
-      icon: <ClipboardList className="h-10 w-10" />,
-      title: "Preparazioni e etichette",
-      text: "Crea preparazioni con tracciabilità completa, stampa etichette con allergeni e lotto.",
-    },
-    {
-      icon: <Users className="h-10 w-10" />,
-      title: "Gestisci il team",
-      text: "Aggiungi collaboratori con ruoli diversi. Tutto tracciato e sotto controllo.",
-    },
-  ],
   professional: [
     {
       icon: <Sparkles className="h-10 w-10" />,

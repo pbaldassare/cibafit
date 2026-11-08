@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import UpgradeScreen from "./UpgradeScreen";
 
 interface SubscriptionGuardProps {
-  planType: "restaurant" | "user_plus";
+  planType: "user_plus";
   children: React.ReactNode;
 }
 

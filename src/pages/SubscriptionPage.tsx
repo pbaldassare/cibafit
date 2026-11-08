@@ -36,17 +36,9 @@ const SubscriptionPage = () => {
   const [couponCode, setCouponCode] = useState((location.state as any)?.couponCode || "");
 
   // Determine which tab to show based on role
-  const isRestaurant = role === "restaurant_owner";
-  const defaultTab = isRestaurant ? "restaurant" : "user_plus";
-  const [activeTab, setActiveTab] = useState<"user_plus" | "restaurant">(defaultTab);
-
-  // Sync tab when role loads
-  useEffect(() => {
-    if (role) setActiveTab(isRestaurant ? "restaurant" : "user_plus");
-  }, [role, isRestaurant]);
+  const activeTab = "user_plus";
 
   const { subscription: userPlusSub } = useSubscription("user_plus");
-  const { subscription: restaurantSub } = useSubscription("restaurant");
 
   const success = searchParams.get("success") === "true";
 
@@ -108,7 +100,7 @@ const SubscriptionPage = () => {
   }
 
   const filteredPlans = plans.filter((p) => p.role_type === activeTab);
-  const activeSub = activeTab === "user_plus" ? userPlusSub : restaurantSub;
+  const activeSub = userPlusSub;
 
   const userPlusFeatures = [
     "Piano alimentare personalizzato",
@@ -118,17 +110,8 @@ const SubscriptionPage = () => {
     "Monitoraggio nutrizione avanzato",
   ];
 
-  const restaurantFeatures = [
-    "Modulo HACCP completo",
-    "Gestione scadenze avanzata",
-    "Controlli e report HACCP",
-    "Gestione staff",
-    "Registro controlli e temperature",
-    "Export PDF/CSV",
-  ];
-
-  const features = activeTab === "user_plus" ? userPlusFeatures : restaurantFeatures;
-  const Icon = activeTab === "user_plus" ? Sparkles : Store;
+  const features = userPlusFeatures;
+  const Icon = Sparkles;
 
   return (
     <div>
@@ -140,34 +123,6 @@ const SubscriptionPage = () => {
           <h1 className="text-xl font-bold text-foreground">Piani Cibarius</h1>
           <p className="text-sm text-muted-foreground">Scegli il piano perfetto per te</p>
         </div>
-
-        {/* Tab selector — only show if admin (can see both) */}
-        {role === "admin" && (
-          <div className="flex bg-muted rounded-xl p-1 gap-1">
-            <button
-              onClick={() => setActiveTab("user_plus")}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === "user_plus"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground"
-              }`}
-            >
-              <Sparkles className="h-4 w-4 inline mr-1.5" />
-              Utente Plus
-            </button>
-            <button
-              onClick={() => setActiveTab("restaurant")}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === "restaurant"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground"
-              }`}
-            >
-              <Store className="h-4 w-4 inline mr-1.5" />
-              Ristorante
-            </button>
-          </div>
-        )}
 
         {/* Active sub banner */}
         {activeSub && ["active", "trial"].includes(activeSub.status) && (
@@ -208,7 +163,7 @@ const SubscriptionPage = () => {
             <CardContent className="pt-4">
               <p className="text-xs font-semibold text-muted-foreground mb-2">GRATIS PER TUTTI</p>
               <div className="space-y-1.5">
-                {["Gestione dispensa", "Scadenze e anti-spreco", "Scanner scontrini", "Piani standard (digiuno, low carb, mediterranea, vegetariana)", "Scelta calorie giornaliere"].map((f, i) => (
+                {["Gestione dispensa", "Scadenze della dispensa", "Scanner scontrini", "Piani standard (digiuno, low carb, mediterranea, vegetariana)", "Scelta calorie giornaliere"].map((f, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Check className="h-3 w-3 shrink-0" />
                     <span>{f}</span>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "user" | "restaurant_owner" | "admin" | "professional" | "supplier";
+export type AppRole = "user" | "admin" | "professional";
 
 export interface Profile {
   id: string;
@@ -52,9 +52,7 @@ export const useRole = () => {
 export const getRoleHomePath = (role: AppRole | null): string => {
   switch (role) {
     case "admin": return "/admin";
-    case "restaurant_owner": return "/restaurant";
     case "professional": return "/pro";
-    case "supplier": return "/supplier";
     default: return "/";
   }
 };

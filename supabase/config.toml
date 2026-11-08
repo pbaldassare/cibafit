@@ -21,9 +21,6 @@ verify_jwt = false
 [functions.cibafit-analyze-meal-photo]
 verify_jwt = false
 
-[functions.cibafit-analyze-restaurant-photos]
-verify_jwt = false
-
 [functions.cibafit-parse-receipt-qr]
 verify_jwt = false
 
@@ -57,5 +54,3 @@ verify_jwt = false
 [functions.cibafit-seed-off-products]
 verify_jwt = false
 
-[functions.cibafit-get-haccp-label]
-verify_jwt = false

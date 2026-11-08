@@ -37,9 +37,6 @@ const AdminSubscriptionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [subs, setSubs] = useState<SubRow[]>([]);
   const [stats, setStats] = useState({
-    restaurantTrial: 0,
-    restaurantActive: 0,
-    restaurantExpired: 0,
     userPlus: 0,
     freeUsers: 0,
   });
@@ -74,9 +71,6 @@ const AdminSubscriptionsPage = () => {
       setSubs(enriched);
 
       // Calculate stats
-      const restTrial = enriched.filter(s => s.plan_type === "restaurant" && s.status === "trial").length;
-      const restActive = enriched.filter(s => s.plan_type === "restaurant" && s.status === "active").length;
-      const restExpired = enriched.filter(s => s.plan_type === "restaurant" && ["expired", "cancelled"].includes(s.status)).length;
       const uPlus = enriched.filter(s => s.plan_type === "user_plus" && ["trial", "active"].includes(s.status)).length;
 
       // Free users = total users - plus users
@@ -86,9 +80,6 @@ const AdminSubscriptionsPage = () => {
         .eq("role", "user");
 
       setStats({
-        restaurantTrial: restTrial,
-        restaurantActive: restActive,
-        restaurantExpired: restExpired,
         userPlus: uPlus,
         freeUsers: (totalUsers ?? 0) - uPlus,
       });
@@ -110,9 +101,6 @@ const AdminSubscriptionsPage = () => {
   }
 
   const statCards = [
-    { label: "Ristoranti in trial", value: stats.restaurantTrial, icon: Clock, color: "text-amber-600" },
-    { label: "Ristoranti paganti", value: stats.restaurantActive, icon: Store, color: "text-emerald-600" },
-    { label: "Ristoranti scaduti", value: stats.restaurantExpired, icon: XCircle, color: "text-destructive" },
     { label: "Utenti Plus", value: stats.userPlus, icon: Sparkles, color: "text-primary" },
     { label: "Utenti gratuiti", value: stats.freeUsers, icon: Users, color: "text-muted-foreground" },
   ];
@@ -163,7 +151,7 @@ const AdminSubscriptionsPage = () => {
                       </td>
                       <td className="py-2.5">
                         <Badge variant="outline" className="text-xs">
-                          {s.plan_type === "restaurant" ? "Ristorante" : "Plus"}
+                          Plus
                         </Badge>
                       </td>
                       <td className="py-2.5">

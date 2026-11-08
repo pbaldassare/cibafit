@@ -46,7 +46,7 @@ export default function UserNotificationsBell() {
       .channel("notifications-" + user.id)
       .on("postgres_changes", {
         event: "INSERT",
-        schema: "public",
+        schema: "cibafit",
         table: "in_app_notifications",
         filter: `user_id=eq.${user.id}`,
       }, () => { load(); })

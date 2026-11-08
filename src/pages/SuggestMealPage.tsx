@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -251,15 +251,13 @@ const MEAL_TYPES = [
 ] as const;
 
 /* ═══ COMPONENT ═══ */
-const AntiWastePage = () => {
+const SuggestMealPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
 
   const [pantry, setPantry] = useState<PantryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"all" | "expiring">(searchParams.get("mode") === "expiring" ? "expiring" : "all");
 
   // AI state
   const [aiSuggestions, setAiSuggestions] = useState<SuggestedRecipe[]>([]);
@@ -327,9 +325,8 @@ const AntiWastePage = () => {
       };
     }).filter(Boolean) as (SuggestedRecipe & { score: number })[];
 
-    const filtered = mode === "expiring" ? scored.filter(s => s.usesExpiringCount > 0) : scored;
-    return filtered.sort((a, b) => b.score - a.score).slice(0, 6);
-  }, [pantryNames, expiringNames, mode, pantry]);
+    return scored.sort((a, b) => b.score - a.score).slice(0, 6);
+  }, [pantryNames, expiringNames, pantry]);
 
   // AI suggest
   const handleAiSuggest = async () => {
@@ -423,18 +420,6 @@ const AntiWastePage = () => {
         unit: "g",
       }));
       if (pantryItems.length > 0) await deductPantryFromMeal(user.id, pantryItems);
-
-      // Track waste savings
-      for (const ing of recipe.ingredients) {
-        if (ing.available && ing.expiring) {
-          await supabase.from("waste_savings" as any).insert({
-            user_id: user.id, item_name: ing.name,
-            weight_g: ing.grams || parseFloat(ing.qty) || 100,
-            estimated_price: 0.8,
-            source: recipe.source === "ai" ? "ai_suggestion" : "cooked",
-          } as any);
-        }
-      }
 
       const mealLabel = MEAL_TYPES.find(m => m.value === mealType)?.label || mealType;
       toast({ title: `"${recipe.title}" aggiunto a ${mealLabel}! ✅`, description: "Pasto e dispensa aggiornati" });
@@ -550,45 +535,6 @@ const AntiWastePage = () => {
       <MobileHeader title="Cosa mangio oggi?" />
       <main className="space-y-4 px-4 py-5 pb-28">
 
-        {/* Expiring items summary */}
-        {expiringItems.length > 0 && (
-          <div className="rounded-[18px] bg-warning/8 shadow-card p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              <p className="text-sm font-semibold text-foreground">
-                {expiringItems.length} aliment{expiringItems.length === 1 ? "o" : "i"} in scadenza
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {expiringItems.slice(0, 6).map(item => (
-                <Badge key={item.id} variant="outline" className="text-[10px] border-warning/40 text-warning">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {item.product.name} · {getDaysToExpiry(item.expiry_date)}gg
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Mode toggle */}
-        <div className="flex gap-2">
-          <button onClick={() => setMode("all")}
-            className={`flex-1 rounded-xl py-2.5 text-[13px] font-semibold transition-colors ${mode === "all" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-            <Leaf className="h-4 w-4 inline mr-1" /> Anti-spreco
-          </button>
-          <button onClick={() => setMode("expiring")}
-            className={`flex-1 rounded-xl py-2.5 text-[13px] font-semibold transition-colors ${mode === "expiring" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-            <Refrigerator className="h-4 w-4 inline mr-1" /> Svuota frigo
-          </button>
-        </div>
-
-        {mode === "expiring" && expiringItems.length > 0 && (
-          <div className="rounded-xl bg-warning/5 border border-warning/20 p-3">
-            <p className="text-[13px] text-foreground">
-              🧊 <span className="font-semibold">Hai {expiringItems.length} alimenti che scadono presto.</span> Ecco cosa puoi cucinare.
-            </p>
-          </div>
-        )}
 
         {/* AI suggest button */}
         <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
@@ -685,4 +631,4 @@ const AntiWastePage = () => {
   );
 };
 
-export default AntiWastePage;
+export default SuggestMealPage;
