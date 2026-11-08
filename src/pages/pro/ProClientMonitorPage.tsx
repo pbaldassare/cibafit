@@ -11,10 +11,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 const MEAL_ORDER = ["colazione", "pranzo", "spuntino", "cena"];
 
@@ -157,7 +157,7 @@ const ProClientMonitorPage = () => {
         </div>
 
         {/* Daily adherence */}
-        <Card className="border-2 border-accent">
+        <Card className="border border-border">
           <CardContent className="py-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">Aderenza giornaliera</span>
@@ -225,7 +225,7 @@ const ProClientMonitorPage = () => {
                 </div>
               </CardHeader>
               <CardContent className="px-4 pb-3 space-y-2">
-                <div className="grid grid-cols-4 gap-1 text-[10px] text-center">
+                <div className="grid grid-cols-4 gap-1 text-[11px] text-center">
                   <div>
                     <p className="text-muted-foreground">Kcal</p>
                     <p className="font-semibold">{Math.round(consumed.kcal)}/{target.kcal_target}</p>

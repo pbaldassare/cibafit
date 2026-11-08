@@ -18,21 +18,21 @@ import {
 } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 type GoalType = "balanced" | "high_protein" | "low_carb" | "low_fat" | "deficit" | "surplus";
 
 const GOALS: { value: GoalType; label: string; emoji: string; description: string }[] = [
-  { value: "balanced", label: "Equilibrio", emoji: "⚖️", description: "Macro bilanciati rispetto al target" },
-  { value: "high_protein", label: "Proteine alte", emoji: "💪", description: "Massimizza proteine, carbo flessibili" },
-  { value: "low_carb", label: "Low carb", emoji: "🥬", description: "Riduce carboidrati, favorisce proteine e grassi" },
-  { value: "low_fat", label: "Low fat", emoji: "🫒", description: "Riduce grassi, favorisce carbo e proteine" },
-  { value: "deficit", label: "Deficit calorico", emoji: "📉", description: "Target kcal ridotto del 10%" },
-  { value: "surplus", label: "Massa", emoji: "📈", description: "Target kcal aumentato del 10% (surplus controllato)" },
+  { value: "balanced", label: "Equilibrio", emoji: "", description: "Macro bilanciati rispetto al target" },
+  { value: "high_protein", label: "Proteine alte", emoji: "", description: "Massimizza proteine, carbo flessibili" },
+  { value: "low_carb", label: "Low carb", emoji: "", description: "Riduce carboidrati, favorisce proteine e grassi" },
+  { value: "low_fat", label: "Low fat", emoji: "", description: "Riduce grassi, favorisce carbo e proteine" },
+  { value: "deficit", label: "Deficit calorico", emoji: "", description: "Target kcal ridotto del 10%" },
+  { value: "surplus", label: "Massa", emoji: "", description: "Target kcal aumentato del 10% (surplus controllato)" },
 ];
 
 const GOAL_BADGE_LABELS: Record<GoalType, string> = {
@@ -181,6 +181,8 @@ const UserPantryRecipesPage = () => {
           .select("id, kcal_day, protein_g_day, carbs_g_day, fats_g_day, diet_plan_meal_targets(*)")
           .eq("client_user_id", user.id)
           .eq("is_active", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
           .maybeSingle(),
         supabase
           .from("nutrition_targets")
@@ -458,7 +460,7 @@ const UserPantryRecipesPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: error.message });
     } else {
-      toast({ title: "Ricetta aggiunta al pasto! 🎉" });
+      toast({ title: "Ricetta aggiunta al pasto!" });
     }
   };
 
@@ -521,7 +523,7 @@ const UserPantryRecipesPage = () => {
           </div>
         )}
         {targetSource === "personal" && (
-          <div className="rounded-lg bg-accent/10 border border-accent/20 p-2.5 flex items-center gap-2">
+          <div className="rounded-lg bg-accent/10 border border-border p-2.5 flex items-center gap-2">
             <Target className="h-4 w-4 text-accent-foreground shrink-0" />
             <p className="text-[11px] text-muted-foreground">
               Target basati sui tuoi <span className="font-semibold text-foreground">obiettivi personali</span>
@@ -531,7 +533,7 @@ const UserPantryRecipesPage = () => {
         {targetSource === "none" && (
           <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5">
             <p className="text-[11px] text-amber-700">
-              ⚠️ Nessun target nutrizionale impostato.{" "}
+              Nessun target nutrizionale impostato.{" "}
               <button className="underline font-semibold" onClick={() => navigate("/meals/targets")}>Imposta obiettivi</button>
             </p>
           </div>
@@ -583,7 +585,7 @@ const UserPantryRecipesPage = () => {
 
         {/* Priority toggle */}
         <div className="flex items-center justify-between rounded-lg bg-secondary/50 p-3">
-          <span className="text-sm font-medium text-foreground">🔥 Priorità scadenze</span>
+          <span className="text-sm font-medium text-foreground">Priorità scadenze</span>
           <Switch checked={priorityExpiry} onCheckedChange={setPriorityExpiry} />
         </div>
 
@@ -613,7 +615,7 @@ const UserPantryRecipesPage = () => {
           </div>
         ) : targetSource !== "none" ? (
           <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
-            <p className="text-xs text-destructive font-medium">⚠️ Nessun target per questo pasto.</p>
+            <p className="text-xs text-destructive font-medium">Nessun target per questo pasto.</p>
           </div>
         ) : null}
 
@@ -624,8 +626,8 @@ const UserPantryRecipesPage = () => {
               Ingredienti ({selectedCount}/{filtered.length})
             </h3>
             <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="text-[10px] h-6 px-2" onClick={selectAll}>Tutti</Button>
-              <Button size="sm" variant="ghost" className="text-[10px] h-6 px-2" onClick={deselectAll}>Nessuno</Button>
+              <Button size="sm" variant="ghost" className="text-[11px] h-6 px-2" onClick={selectAll}>Tutti</Button>
+              <Button size="sm" variant="ghost" className="text-[11px] h-6 px-2" onClick={deselectAll}>Nessuno</Button>
             </div>
           </div>
 
@@ -647,16 +649,16 @@ const UserPantryRecipesPage = () => {
                     {(() => {
                       const nut = getNutritionPer100g(item.product, templates);
                       return (
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           x{item.quantity} {item.unit || ""} · {item.storage_type}
-                          {nut.source !== "none" ? ` · ${nut.calories} kcal/100g` : " · ⚠️ no kcal"}
-                          {nut.source === "template" && " 📋"}
+                          {nut.source !== "none" ? ` · ${nut.calories} kcal/100g` : " · no kcal"}
+                          {nut.source === "template" && ""}
                         </p>
                       );
                     })()}
                   </div>
-                  {status === "expired" && <Badge variant="destructive" className="text-[8px] px-1 py-0">Scaduto</Badge>}
-                  {status === "expiring" && <Badge className="bg-amber-500/20 text-amber-700 border-0 text-[8px] px-1 py-0">In scadenza</Badge>}
+                  {status === "expired" && <Badge variant="destructive" className="text-[11px] px-1 py-0">Scaduto</Badge>}
+                  {status === "expiring" && <Badge className="bg-amber-500/20 text-amber-700 border-0 text-[11px] px-1 py-0">In scadenza</Badge>}
                 </label>
               );
             })}
@@ -677,7 +679,7 @@ const UserPantryRecipesPage = () => {
         {recipes.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">🍽️ Ricette generate</h3>
+              <h3 className="text-sm font-semibold text-foreground">Ricette generate</h3>
               <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={generateRecipes}>
                 <RefreshCw className="h-3 w-3" /> Rigenera
               </Button>
@@ -693,7 +695,7 @@ const UserPantryRecipesPage = () => {
                 : mealTarget?.kcal_target ?? 0;
 
               return (
-                <Card key={idx} className="border-2 border-accent overflow-hidden">
+                <Card key={idx} className="border border-border overflow-hidden">
                   <CardHeader className="pb-2 pt-3 px-4">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm flex-1">{recipe.title}</CardTitle>
@@ -711,12 +713,12 @@ const UserPantryRecipesPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       {goalInfo && (
-                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 gap-0.5">
+                        <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-0.5">
                           {goalInfo.emoji} {GOAL_BADGE_LABELS[recipe.goal]}
                         </Badge>
                       )}
                       {recipe.partial_estimate && (
-                        <Badge variant="secondary" className="gap-1 text-[9px] px-1 py-0">
+                        <Badge variant="secondary" className="gap-1 text-[11px] px-1 py-0">
                           <AlertTriangle className="h-3 w-3" /> Stima parziale
                         </Badge>
                       )}
@@ -725,7 +727,7 @@ const UserPantryRecipesPage = () => {
                   <CardContent className="px-4 pb-4 space-y-3">
                     {/* Macro comparison */}
                     {mealTarget && (
-                      <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                      <div className="grid grid-cols-4 gap-1.5 text-center text-[11px]">
                         <div className="rounded-md bg-primary/10 p-1.5">
                           <p className="font-bold text-primary">{recipe.kcal_total}</p>
                           <p className="text-muted-foreground">/{effectiveKcal} kcal</p>

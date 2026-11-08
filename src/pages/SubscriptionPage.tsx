@@ -133,7 +133,7 @@ const SubscriptionCheckout = () => {
                 <Check className="h-5 w-5 text-primary" />
                 <div>
                   <p className="font-medium text-foreground text-sm">
-                    {activeSub.status === "trial" ? "Trial attivo" : "Abbonamento attivo"}
+                    {activeSub.status === "trial" ? "Prova attiva" : "Abbonamento attivo"}
                   </p>
                   {activeSub.is_free_override && (
                     <p className="text-xs text-primary">Accesso gratuito</p>
@@ -195,12 +195,12 @@ const SubscriptionCheckout = () => {
                   }`}
                 >
                   {isYearly && (
-                    <Badge className="absolute -top-2.5 left-4 text-[9px] px-2">
+                    <Badge className="absolute -top-2.5 left-4 text-[11px] px-2">
                       Più conveniente
                     </Badge>
                   )}
                   {plan.trial_days > 0 && (
-                    <Badge variant="secondary" className="absolute -top-2.5 right-4 text-[9px] px-2">
+                    <Badge variant="secondary" className="absolute -top-2.5 right-4 text-[11px] px-2">
                       {plan.trial_days}gg gratis
                     </Badge>
                   )}

@@ -20,12 +20,12 @@ const DAYS_OF_WEEK = [
 ];
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  spuntino_mattina: "🍎 Spuntino mattina",
-  pranzo: "🍝 Pranzo",
-  spuntino_pomeriggio: "🥤 Spuntino pomeriggio",
-  cena: "🌙 Cena",
-  extra: "📝 Note/Extra",
+  colazione: "Colazione",
+  spuntino_mattina: "Spuntino mattina",
+  pranzo: "Pranzo",
+  spuntino_pomeriggio: "Spuntino pomeriggio",
+  cena: "Cena",
+  extra: "Note/Extra",
 };
 
 const UserWeeklyPlanPage = () => {
@@ -155,13 +155,13 @@ const UserWeeklyPlanPage = () => {
                   {plan.end_date && ` al ${new Date(plan.end_date).toLocaleDateString("it-IT", { day: "numeric", month: "long" })}`}
                 </p>
               </div>
-              <Badge className="bg-success/15 text-success border-0 text-[10px] font-semibold">Attivo</Badge>
+              <Badge className="bg-success/15 text-success border-0 text-[11px] font-semibold">Attivo</Badge>
             </div>
 
             {/* Macro targets if set */}
             {plan.calories_target && (
               <div className="flex items-center gap-3 text-sm">
-                <span className="font-bold text-foreground">🔥 {plan.calories_target} kcal</span>
+                <span className="font-bold text-foreground">{plan.calories_target} kcal</span>
                 {plan.protein_target && <span className="text-muted-foreground">P {plan.protein_target}g</span>}
                 {plan.carbs_target && <span className="text-muted-foreground">C {plan.carbs_target}g</span>}
                 {plan.fat_target && <span className="text-muted-foreground">G {plan.fat_target}g</span>}
@@ -169,7 +169,7 @@ const UserWeeklyPlanPage = () => {
             )}
 
             {plan.notes_general && (
-              <p className="text-xs text-muted-foreground bg-muted rounded-lg p-2">📝 {plan.notes_general}</p>
+              <p className="text-xs text-muted-foreground bg-muted rounded-lg p-2">{plan.notes_general}</p>
             )}
 
             {/* History button */}
@@ -194,7 +194,7 @@ const UserWeeklyPlanPage = () => {
                         {new Date(p.created_at).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="text-[9px]">Archiviato</Badge>
+                    <Badge variant="secondary" className="text-[11px]">Archiviato</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -219,7 +219,7 @@ const UserWeeklyPlanPage = () => {
                 <div className="px-4 pb-4 space-y-2">
                   {week.notes && (
                     <p className="text-xs text-muted-foreground bg-primary/5 rounded-lg p-2 border border-primary/10">
-                      📋 {week.notes}
+                      {week.notes}
                     </p>
                   )}
 
@@ -236,7 +236,7 @@ const UserWeeklyPlanPage = () => {
                             <button className="w-full flex items-center justify-between px-3 py-2 hover:bg-accent/30 transition-colors">
                               <span className="text-sm font-medium text-foreground">{dayLabel}</span>
                               <div className="flex items-center gap-1.5">
-                                <Badge variant="secondary" className="text-[9px]">{meals.length} pasti</Badge>
+                                <Badge variant="secondary" className="text-[11px]">{meals.length} pasti</Badge>
                                 {openDays[dayKey] ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                               </div>
                             </button>

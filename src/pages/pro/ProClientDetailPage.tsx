@@ -1,3 +1,4 @@
+import { User as UserIcon } from "lucide-react";
 import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -13,10 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { HeartPulse, Loader2, Send, Flame, ChevronLeft, ChevronRight, MessageSquare, ClipboardList, Activity, Lightbulb, ChefHat, Pencil, History, MessageCircle, FileDown, Ruler, CalendarDays } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "🌅 Colazione",
-  pranzo: "🍝 Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 const ProClientDetailPage = () => {
@@ -33,7 +34,8 @@ const ProClientDetailPage = () => {
   const [newNote, setNewNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [savingNote, setSavingNote] = useState(false);
-  const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [activePlan, setActivePlan] = useState<any>(null);
+  const hasActivePlan = !!activePlan;
 
   useEffect(() => {
     if (!clientId || !user) return;
@@ -41,14 +43,14 @@ const ProClientDetailPage = () => {
       setLoading(true);
       const [profileRes, targetsRes, notesRes, planRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", clientId).single(),
-        supabase.from("nutrition_targets").select("*").eq("user_id", clientId).single(),
+        supabase.from("nutrition_targets").select("*").eq("user_id", clientId).maybeSingle(),
         supabase.from("professional_notes").select("*").eq("professional_id", user.id).eq("client_user_id", clientId).order("created_at", { ascending: false }).limit(20),
-        supabase.from("diet_plans").select("id").eq("professional_id", user.id).eq("client_user_id", clientId).eq("is_active", true).maybeSingle(),
+        supabase.from("diet_plans").select("id, kcal_day, protein_g_day, carbs_g_day, fats_g_day").eq("professional_id", user.id).eq("client_user_id", clientId).eq("is_active", true).maybeSingle(),
       ]);
       setClientProfile(profileRes.data);
       setTargets(targetsRes.data);
       setNotes(notesRes.data ?? []);
-      setHasActivePlan(!!planRes.data);
+      setActivePlan(planRes.data);
       setLoading(false);
     };
     load();
@@ -63,7 +65,7 @@ const ProClientDetailPage = () => {
         .select("id")
         .eq("user_id", clientId)
         .eq("day_date", dayDate)
-        .single();
+        .maybeSingle();
 
       if (!dayData) {
         setMeals([]);
@@ -132,7 +134,11 @@ const ProClientDetailPage = () => {
     );
   }
 
-  const kcalTarget = targets?.kcal_day ?? 2000;
+  // Same priority as the client's home: the active plan first, then the client's own targets
+  const kcalTarget: number | null = activePlan?.kcal_day ?? targets?.kcal_day ?? null;
+  const proteinTarget: number | null = activePlan?.protein_g_day ?? targets?.protein_g ?? null;
+  const carbsTarget: number | null = activePlan?.carbs_g_day ?? targets?.carbs_g ?? null;
+  const fatsTarget: number | null = activePlan?.fats_g_day ?? targets?.fats_g ?? null;
 
   return (
     <div>
@@ -140,7 +146,7 @@ const ProClientDetailPage = () => {
       <main className="px-4 py-5 pb-28 space-y-4">
         {/* Client info */}
         <div className="flex items-center gap-3">
-          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl">👤</div>
+          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-2xl"><UserIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" /></div>
           <div>
             <h2 className="text-lg font-bold text-foreground">{clientProfile?.full_name || "Senza nome"}</h2>
             <p className="text-sm text-muted-foreground">{clientProfile?.email}</p>
@@ -165,28 +171,28 @@ const ProClientDetailPage = () => {
 
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-2">
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/clinical`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/clinical`)}>
             <HeartPulse className="h-4 w-4" /> Scheda clinica
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/plan`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/plan`)}>
             <ClipboardList className="h-4 w-4" /> Piano obiettivi
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/weekly-plan`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/weekly-plan`)}>
             <CalendarDays className="h-4 w-4" /> Piano settimanale
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/monitor`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/monitor`)}>
             <Activity className="h-4 w-4" /> Monitor
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/suggest`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/suggest`)}>
             <Lightbulb className="h-4 w-4" /> Suggerisci
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/pantry`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/pantry`)}>
             <ChefHat className="h-4 w-4" /> Dispensa
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/messages`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/messages`)}>
             <MessageCircle className="h-4 w-4" /> Chat
           </Button>
-          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${clientId}/measurements`)}>
+          <Button size="sm" variant="outline" className="flex-col h-auto py-2.5 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${clientId}/measurements`)}>
             <Ruler className="h-4 w-4" /> Misurazioni
           </Button>
         </div>
@@ -200,7 +206,7 @@ const ProClientDetailPage = () => {
         </div>
 
         {/* Kcal summary */}
-        <Card className="border-2 border-accent">
+        <Card className="border border-border">
           <CardContent className="py-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -208,23 +214,27 @@ const ProClientDetailPage = () => {
                 <span className="text-sm font-medium text-foreground">Calorie</span>
               </div>
               <span className="text-lg font-bold text-foreground">
-                {totalKcal} / {kcalTarget} kcal
+                {totalKcal}{kcalTarget ? ` / ${kcalTarget}` : ""} kcal
               </span>
             </div>
-            <Progress value={Math.min((totalKcal / kcalTarget) * 100, 100)} className="h-2" />
+            {kcalTarget ? (
+              <Progress value={Math.min((totalKcal / kcalTarget) * 100, 100)} className="h-2" />
+            ) : (
+              <p className="text-xs text-muted-foreground">Obiettivi non impostati</p>
+            )}
 
             {/* Macros */}
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { label: "Proteine", val: totalMacros.protein, target: targets?.protein_g ?? 120, color: "bg-blue-500" },
-                { label: "Carbo", val: totalMacros.carbs, target: targets?.carbs_g ?? 220, color: "bg-amber-500" },
-                { label: "Grassi", val: totalMacros.fats, target: targets?.fats_g ?? 70, color: "bg-red-500" },
+                { label: "Proteine", val: totalMacros.protein, target: proteinTarget, color: "bg-blue-500" },
+                { label: "Carbo", val: totalMacros.carbs, target: carbsTarget, color: "bg-amber-500" },
+                { label: "Grassi", val: totalMacros.fats, target: fatsTarget, color: "bg-red-500" },
               ].map((m) => (
                 <div key={m.label}>
                   <p className="text-xs text-muted-foreground">{m.label}</p>
-                  <p className="text-sm font-semibold">{Math.round(m.val)}g / {m.target}g</p>
+                  <p className="text-sm font-semibold">{Math.round(m.val)}g / {m.target != null ? `${m.target}g` : "—"}</p>
                   <div className="h-1.5 rounded-full bg-secondary mt-1">
-                    <div className={`h-full rounded-full ${m.color}`} style={{ width: `${Math.min((m.val / m.target) * 100, 100)}%` }} />
+                    <div className={`h-full rounded-full ${m.color}`} style={{ width: `${m.target ? Math.min((m.val / m.target) * 100, 100) : 0}%` }} />
                   </div>
                 </div>
               ))}
@@ -267,7 +277,7 @@ const ProClientDetailPage = () => {
         )}
 
         {/* Notes section */}
-        <Card className="border-2 border-accent">
+        <Card className="border border-border">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
             <MessageSquare className="h-5 w-5 text-primary" />
             <CardTitle className="text-base">Note</CardTitle>

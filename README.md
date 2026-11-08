@@ -23,11 +23,14 @@ Variabili: vedi `.env.example`. Per le mappe serve `VITE_GOOGLE_MAPS_KEY`.
 
 Il database richiede che `cibafit` sia tra gli "Exposed schemas" (Supabase > Data API).
 
+## Pagamenti
+
+`PAYMENTS_ENABLED` in `src/lib/features.ts` è `false`: le funzioni Plus sono aperte a tutti e prezzi e coupon non si vedono. Va attivato insieme a Stripe.
+
 ## Funzioni non deployate di proposito
 
 - `cibafit-create-checkout-session`, `cibafit-stripe-webhook`, `cibafit-process-coupon-payment`:
   usano le chiavi Stripe live di Cibarius, serve una configurazione separata.
-- `cibafit-delete-user`, `cibafit-create-user`: agiscono sull'account condiviso con Cibarius.
 - `cibafit-send-email`, `cibafit-send-expiry-alerts`, `cibafit-auth-email-hook`: email ancora a nome Cibarius.
 - `cibafit-seed-template-recipes`, `cibafit-seed-off-products`, `cibafit-extract-product`.
 

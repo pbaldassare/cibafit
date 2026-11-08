@@ -74,7 +74,7 @@ const PlanPdfView = ({ plan, mealTargets, proName, clientName }: PlanPdfViewProp
         <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Riepilogo Giornaliero</h3>
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-blue-50">
+            <tr className="bg-[#EEF3E4]">
               <th className="text-left p-2 border border-gray-200 font-semibold">Nutriente</th>
               <th className="text-right p-2 border border-gray-200 font-semibold">Target</th>
             </tr>
@@ -94,7 +94,7 @@ const PlanPdfView = ({ plan, mealTargets, proName, clientName }: PlanPdfViewProp
           <h3 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Posologia per Pasto</h3>
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="bg-blue-50">
+              <tr className="bg-[#EEF3E4]">
                 <th className="text-left p-2 border border-gray-200 font-semibold">Pasto</th>
                 <th className="text-right p-2 border border-gray-200 font-semibold">kcal</th>
                 <th className="text-right p-2 border border-gray-200 font-semibold">Proteine</th>

@@ -66,10 +66,15 @@ export default function ProLinkRequests({ onApproved }: { onApproved?: () => voi
     if (!user) return;
     setActing(req.id);
 
-    await supabase
-      .from("professional_link_requests")
-      .update({ status: action, responded_at: new Date().toISOString() })
-      .eq("id", req.id);
+    const markRequest = async () => {
+      const { data, error } = await supabase
+        .from("professional_link_requests")
+        .update({ status: action, responded_at: new Date().toISOString() })
+        .eq("id", req.id)
+        .select("id");
+      if (error) console.error("professional_link_requests update failed:", error);
+      return !error && !!data?.length;
+    };
 
     if (action === "approved") {
       const code = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -91,18 +96,30 @@ export default function ProLinkRequests({ onApproved }: { onApproved?: () => voi
       });
 
       if (linkErr) {
-        if (linkErr.code === "23505") {
-          await supabase
+        // Already linked in the past: reactivate the existing link
+        let linkFailed = linkErr.code !== "23505";
+        if (!linkFailed) {
+          const { data: reactivated, error: reactivateErr } = await supabase
             .from("client_links")
             .update({ status: "active", activated_at: new Date().toISOString() })
             .eq("professional_id", user.id)
-            .eq("client_user_id", req.user_id);
-        } else {
-          console.error("client_links insert error:", linkErr);
-          toast({ variant: "destructive", title: "Errore collegamento", description: linkErr.message });
+            .eq("client_user_id", req.user_id)
+            .select("id");
+          linkFailed = !!reactivateErr || !reactivated?.length;
+        }
+        if (linkFailed) {
+          console.error("client_links save failed:", linkErr);
+          toast({ variant: "destructive", title: "Richiesta non approvata", description: "Il collegamento con l'utente non è stato creato. Controlla la connessione e riprova." });
           setActing(null);
           return;
         }
+      }
+
+      // Marked as approved only now, so a failed link never leaves the user with a false approval
+      if (!(await markRequest())) {
+        toast({ variant: "destructive", title: "Approvazione non completata", description: "L'utente è collegato, ma la richiesta risulta ancora in sospeso. Riprova ad approvarla." });
+        setActing(null);
+        return;
       }
 
       const { data: coupon } = await supabase
@@ -122,7 +139,7 @@ export default function ProLinkRequests({ onApproved }: { onApproved?: () => voi
       await supabase.from("in_app_notifications").insert({
         user_id: req.user_id,
         type: "link_approved",
-        title: "Richiesta approvata! 🎉",
+        title: "Richiesta approvata!",
         body: `${proProfile?.full_name || "Il nutrizionista"} ha accettato la tua richiesta di collegamento.${
           coupon ? ` Usa il codice ${coupon.coupon_code} per uno sconto del ${coupon.client_discount_percent}% sull'abbonamento Plus!` : ""
         }`,
@@ -137,6 +154,12 @@ export default function ProLinkRequests({ onApproved }: { onApproved?: () => voi
       toast({ title: "Richiesta approvata!", description: `${req.user_name || "Utente"} è stato collegato.` });
       onApproved?.();
     } else {
+      if (!(await markRequest())) {
+        toast({ variant: "destructive", title: "Richiesta non rifiutata", description: "La richiesta è ancora in sospeso. Controlla la connessione e riprova." });
+        setActing(null);
+        return;
+      }
+
       const { data: proProfile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -176,7 +199,7 @@ export default function ProLinkRequests({ onApproved }: { onApproved?: () => voi
       <div className="bg-primary/5 px-4 py-2.5 flex items-center gap-2">
         <Bell className="h-4 w-4 text-primary" />
         <span className="font-semibold text-sm text-foreground">Richieste di collegamento</span>
-        <Badge className="bg-primary text-primary-foreground text-[10px] ml-auto">{requests.length}</Badge>
+        <Badge className="bg-primary text-primary-foreground text-[11px] ml-auto">{requests.length}</Badge>
       </div>
       <CardContent className="p-0 divide-y divide-border">
         {requests.map((req) => {

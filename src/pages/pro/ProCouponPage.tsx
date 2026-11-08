@@ -290,7 +290,7 @@ const ProCouponPage = () => {
 
         {/* Referral link card */}
         {coupon && (
-          <Card className="border-2 border-accent">
+          <Card className="border border-border">
             <CardHeader className="flex flex-row items-center gap-3 pb-2">
               <Link2 className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">Link referral diretto</CardTitle>
@@ -324,28 +324,28 @@ const ProCouponPage = () => {
             <CardContent className="flex flex-col items-center py-4">
               <Users className="h-5 w-5 text-primary mb-1" />
               <span className="text-xl font-bold">{clientCount}</span>
-              <span className="text-[10px] text-muted-foreground text-center">Clienti collegati</span>
+              <span className="text-[11px] text-muted-foreground text-center">Clienti collegati</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="flex flex-col items-center py-4">
               <Link2 className="h-5 w-5 text-primary mb-1" />
               <span className="text-xl font-bold">{referralCount}</span>
-              <span className="text-[10px] text-muted-foreground text-center">Via link referral</span>
+              <span className="text-[11px] text-muted-foreground text-center">Via link referral</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="flex flex-col items-center py-4">
               <Banknote className="h-5 w-5 text-amber-500 mb-1" />
               <span className="text-xl font-bold">€{totalPending.toFixed(2)}</span>
-              <span className="text-[10px] text-muted-foreground text-center">Pending</span>
+              <span className="text-[11px] text-muted-foreground text-center">Pending</span>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="flex flex-col items-center py-4">
               <Banknote className="h-5 w-5 text-emerald-500 mb-1" />
               <span className="text-xl font-bold">€{totalPaid.toFixed(2)}</span>
-              <span className="text-[10px] text-muted-foreground text-center">Pagate</span>
+              <span className="text-[11px] text-muted-foreground text-center">Pagate</span>
             </CardContent>
           </Card>
         </div>
@@ -386,7 +386,7 @@ const ProCouponPage = () => {
                           €{Number(c.commission_amount).toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={statusVariant(c.status)} className="text-[10px]">
+                          <Badge variant={statusVariant(c.status)} className="text-[11px]">
                             {statusLabel[c.status] || c.status}
                           </Badge>
                         </TableCell>

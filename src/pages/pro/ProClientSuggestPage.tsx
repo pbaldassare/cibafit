@@ -26,10 +26,10 @@ interface FoodResult {
 }
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 const ProClientSuggestPage = () => {
@@ -188,7 +188,7 @@ const ProClientSuggestPage = () => {
     const { error } = await supabase.from("pro_suggestions").insert({ professional_id: user.id, client_user_id: clientId, type: "food", payload });
     setSendingFood(false);
     if (error) { toast({ variant: "destructive", title: "Errore", description: error.message }); }
-    else { toast({ title: "Suggerimento inviato! ✅" }); setSelectedFood(null); setFoodMessage(""); setFoodSearch(""); loadSuggestions(); }
+    else { toast({ title: "Suggerimento inviato!" }); setSelectedFood(null); setFoodMessage(""); setFoodSearch(""); loadSuggestions(); }
   };
 
   const sendRecipeSuggestion = async (recipe: any) => {
@@ -203,7 +203,7 @@ const ProClientSuggestPage = () => {
     const { error } = await supabase.from("pro_suggestions").insert({ professional_id: user.id, client_user_id: clientId, type: "recipe", payload });
     setSendingRecipe(null);
     if (error) { toast({ variant: "destructive", title: "Errore", description: error.message }); }
-    else { toast({ title: "Ricetta suggerita! ✅" }); loadSuggestions(); }
+    else { toast({ title: "Ricetta suggerita!" }); loadSuggestions(); }
   };
 
   // AI recipe generation
@@ -265,13 +265,14 @@ const ProClientSuggestPage = () => {
     }).select().single();
 
     if (saveErr) {
-      toast({ variant: "destructive", title: "Errore", description: saveErr.message });
+      console.error("generated_recipes insert failed:", saveErr);
+      toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." });
       setLoading(false);
       return;
     }
 
     // Send as suggestion
-    await supabase.from("pro_suggestions").insert({
+    const { error: suggestionErr } = await supabase.from("pro_suggestions").insert({
       professional_id: user.id,
       client_user_id: clientId,
       type: "recipe",
@@ -286,8 +287,16 @@ const ProClientSuggestPage = () => {
       } as any,
     });
 
+    if (suggestionErr) {
+      console.error("pro_suggestions insert failed:", suggestionErr);
+      await supabase.from("generated_recipes").delete().eq("id", saved.id);
+      toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." });
+      setLoading(false);
+      return;
+    }
+
     setLoading(false);
-    toast({ title: "Ricetta inviata al cliente! ✅" });
+    toast({ title: "Ricetta inviata al cliente!" });
     setAiRecipe(null);
     loadSuggestions();
   };
@@ -298,7 +307,7 @@ const ProClientSuggestPage = () => {
     const { error } = await supabase.from("pro_suggestions").insert({ professional_id: user.id, client_user_id: clientId, type: "note", payload: { message: freeText.trim() } });
     setSendingText(false);
     if (error) { toast({ variant: "destructive", title: "Errore", description: error.message }); }
-    else { toast({ title: "Nota inviata! ✅" }); setFreeText(""); loadSuggestions(); }
+    else { toast({ title: "Nota inviata!" }); setFreeText(""); loadSuggestions(); }
   };
 
   const deleteSuggestion = async (id: string) => {
@@ -395,7 +404,7 @@ const ProClientSuggestPage = () => {
                       <div>
                         <p className="text-sm font-medium">{r.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {r._generated ? "🧪 Generata" : r.category || "Ricetta pubblica"}
+                          {r._generated ? "Generata" : r.category || "Ricetta pubblica"}
                           {r.kcal_total ? ` · ${r.kcal_total} kcal` : ""}
                         </p>
                       </div>
@@ -431,7 +440,7 @@ const ProClientSuggestPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-destructive">⚠️ Nessun target impostato per questo pasto. Crea prima un piano alimentare.</p>
+                  <p className="text-xs text-destructive">Nessun target impostato per questo pasto. Crea prima un piano alimentare.</p>
                 )}
 
                 <Button className="w-full gap-2" onClick={generateAiRecipe} disabled={aiGenerating || !currentMealTarget}>
@@ -480,7 +489,7 @@ const ProClientSuggestPage = () => {
             <h3 className="text-sm font-semibold text-muted-foreground">Suggerimenti inviati</h3>
             {suggestions.map((s) => {
               const p = s.payload as any;
-              const icon = s.type === "food" ? "🍎" : s.type === "recipe" ? "📖" : "💬";
+              const icon = s.type === "food" ? "" : s.type === "recipe" ? "" : "";
               return (
                 <div key={s.id} className="flex items-center gap-2 rounded-lg bg-secondary/50 p-2.5 text-xs">
                   <span>{icon}</span>
@@ -488,7 +497,7 @@ const ProClientSuggestPage = () => {
                     <p className="font-medium truncate">{p?.name || p?.title || p?.message?.slice(0, 60) || s.type}</p>
                     <p className="text-muted-foreground">{new Date(s.created_at).toLocaleDateString("it-IT")}</p>
                   </div>
-                  {s.seen_at && <span className="text-[10px]" style={{ color: "hsl(var(--primary))" }}>Letto</span>}
+                  {s.seen_at && <span className="text-[11px]" style={{ color: "hsl(var(--primary))" }}>Letto</span>}
                   <button className="text-muted-foreground hover:text-destructive transition-colors p-1" onClick={() => deleteSuggestion(s.id)} disabled={deletingId === s.id}>
                     {deletingId === s.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                   </button>

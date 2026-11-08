@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { replaceChildRows } from "@/lib/supabase-result";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -20,10 +21,10 @@ import {
 
 /* ─── Constants ─── */
 const MEAL_TYPES_TARGETS = [
-  { key: "colazione", label: "☀️ Colazione" },
-  { key: "pranzo", label: "🌤️ Pranzo" },
-  { key: "cena", label: "🌙 Cena" },
-  { key: "spuntino", label: "🍎 Spuntino" },
+  { key: "colazione", label: "Colazione" },
+  { key: "pranzo", label: "Pranzo" },
+  { key: "cena", label: "Cena" },
+  { key: "spuntino", label: "Spuntino" },
 ];
 
 const DAYS_OF_WEEK = [
@@ -37,12 +38,12 @@ const DAYS_OF_WEEK = [
 ];
 
 const WEEKLY_MEAL_TYPES = [
-  { key: "colazione", label: "☀️ Colazione", emoji: "☀️" },
-  { key: "spuntino_mattina", label: "🍎 Spuntino mattina", emoji: "🍎" },
-  { key: "pranzo", label: "🍝 Pranzo", emoji: "🍝" },
-  { key: "spuntino_pomeriggio", label: "🥤 Spuntino pomeriggio", emoji: "🥤" },
-  { key: "cena", label: "🌙 Cena", emoji: "🌙" },
-  { key: "extra", label: "📝 Note/Extra", emoji: "📝" },
+  { key: "colazione", label: "Colazione", emoji: "" },
+  { key: "spuntino_mattina", label: "Spuntino mattina", emoji: "" },
+  { key: "pranzo", label: "Pranzo", emoji: "" },
+  { key: "spuntino_pomeriggio", label: "Spuntino pomeriggio", emoji: "" },
+  { key: "cena", label: "Cena", emoji: "" },
+  { key: "extra", label: "Note/Extra", emoji: "" },
 ];
 
 interface MealTarget {
@@ -315,24 +316,33 @@ const ProTemplateEditorPage = () => {
         tmplId = data.id;
       }
 
-      // Save meal targets
-      await supabase.from("diet_plan_template_meals").delete().eq("template_id", tmplId!);
+      // Save meal targets: new rows first, so the old ones survive a failure
       const hasMealTargets = mealTargets.some((mt) => mt.kcal_target > 0 || mt.protein_g > 0);
-      if (hasMealTargets) {
-        await supabase.from("diet_plan_template_meals").insert(
-          mealTargets.map((mt) => ({
-            template_id: tmplId,
-            meal_type: mt.meal_type,
-            kcal_target: mt.kcal_target,
-            protein_g: mt.protein_g,
-            carbs_g: mt.carbs_g,
-            fats_g: mt.fats_g,
-            sugars_g: mt.sugars_g || 0,
-            fiber_g: mt.fiber_g || null,
-            saturated_fats_g: mt.saturated_fats_g || null,
-            unsaturated_fats_g: mt.unsaturated_fats_g || null,
-          }))
+      try {
+        await replaceChildRows(
+          supabase,
+          "diet_plan_template_meals",
+          "template_id",
+          tmplId!,
+          hasMealTargets
+            ? mealTargets.map((mt) => ({
+                template_id: tmplId,
+                meal_type: mt.meal_type,
+                kcal_target: mt.kcal_target,
+                protein_g: mt.protein_g,
+                carbs_g: mt.carbs_g,
+                fats_g: mt.fats_g,
+                sugars_g: mt.sugars_g || 0,
+                fiber_g: mt.fiber_g || null,
+                saturated_fats_g: mt.saturated_fats_g || null,
+                unsaturated_fats_g: mt.unsaturated_fats_g || null,
+              }))
+            : []
         );
+      } catch (mealsErr) {
+        // A brand new template without its meals would stay behind and duplicate on retry
+        if (!isEdit) await supabase.from("diet_plan_templates").delete().eq("id", tmplId!);
+        throw mealsErr;
       }
 
       // Save meal text suggestions for autocomplete
@@ -348,10 +358,11 @@ const ProTemplateEditorPage = () => {
         await saveMealTextSuggestions(user.id, allMealTexts);
       }
 
-      toast({ title: isEdit ? "Template aggiornato! ✅" : "Template creato! 📋" });
+      toast({ title: isEdit ? "Template aggiornato!" : "Template creato!" });
       navigate("/pro/templates");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message });
+      console.error("Template save failed:", err);
+      toast({ variant: "destructive", title: "Template non salvato", description: "Il salvataggio non è andato a buon fine. Controlla la connessione e riprova." });
     }
     setSaving(false);
   };
@@ -390,9 +401,9 @@ const ProTemplateEditorPage = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="targets" className="text-xs">🎯 Target</TabsTrigger>
-            <TabsTrigger value="meals" className="text-xs">🍽️ Pasti</TabsTrigger>
-            <TabsTrigger value="weekly" className="text-xs">📅 Settimane</TabsTrigger>
+            <TabsTrigger value="targets" className="text-xs">Target</TabsTrigger>
+            <TabsTrigger value="meals" className="text-xs">Pasti</TabsTrigger>
+            <TabsTrigger value="weekly" className="text-xs">Settimane</TabsTrigger>
           </TabsList>
 
           {/* ─── TAB 1: Daily Targets ─── */}
@@ -402,19 +413,19 @@ const ProTemplateEditorPage = () => {
                 <p className="text-xs font-semibold text-foreground">Target giornalieri</p>
                 <div className="grid grid-cols-4 gap-2">
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Kcal</label>
+                    <label className="text-[11px] text-muted-foreground">Kcal</label>
                     <Input type="number" value={kcalDay} onChange={(e) => setKcalDay(e.target.value)} className="h-8 text-xs" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Proteine (g)</label>
+                    <label className="text-[11px] text-muted-foreground">Proteine (g)</label>
                     <Input type="number" value={proteinDay} onChange={(e) => setProteinDay(e.target.value)} className="h-8 text-xs" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Carbo (g)</label>
+                    <label className="text-[11px] text-muted-foreground">Carbo (g)</label>
                     <Input type="number" value={carbsDay} onChange={(e) => setCarbsDay(e.target.value)} className="h-8 text-xs" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground">Grassi (g)</label>
+                    <label className="text-[11px] text-muted-foreground">Grassi (g)</label>
                     <Input type="number" value={fatsDay} onChange={(e) => setFatsDay(e.target.value)} className="h-8 text-xs" />
                   </div>
                 </div>
@@ -431,19 +442,19 @@ const ProTemplateEditorPage = () => {
                 {showAdvanced && (
                   <div className="grid grid-cols-4 gap-2">
                     <div>
-                      <label className="text-[10px] text-muted-foreground">Zuccheri (g)</label>
+                      <label className="text-[11px] text-muted-foreground">Zuccheri (g)</label>
                       <Input type="number" value={sugarsDay} onChange={(e) => setSugarsDay(e.target.value)} className="h-8 text-xs" placeholder="—" />
                     </div>
                     <div>
-                      <label className="text-[10px] text-muted-foreground">Fibre (g)</label>
+                      <label className="text-[11px] text-muted-foreground">Fibre (g)</label>
                       <Input type="number" value={fiberDay} onChange={(e) => setFiberDay(e.target.value)} className="h-8 text-xs" placeholder="—" />
                     </div>
                     <div>
-                      <label className="text-[10px] text-muted-foreground">Grassi sat.</label>
+                      <label className="text-[11px] text-muted-foreground">Grassi sat.</label>
                       <Input type="number" value={satFatsDay} onChange={(e) => setSatFatsDay(e.target.value)} className="h-8 text-xs" placeholder="—" />
                     </div>
                     <div>
-                      <label className="text-[10px] text-muted-foreground">Grassi ins.</label>
+                      <label className="text-[11px] text-muted-foreground">Grassi ins.</label>
                       <Input type="number" value={unsatFatsDay} onChange={(e) => setUnsatFatsDay(e.target.value)} className="h-8 text-xs" placeholder="—" />
                     </div>
                   </div>
@@ -471,7 +482,7 @@ const ProTemplateEditorPage = () => {
                 </span>
               </div>
               {!allMatch && (
-                <Button size="sm" variant="outline" className="h-6 text-[10px] gap-1" onClick={autoBalance}>
+                <Button size="sm" variant="outline" className="h-6 text-[11px] gap-1" onClick={autoBalance}>
                   <Wand2 className="h-3 w-3" /> Bilancia
                 </Button>
               )}
@@ -485,19 +496,19 @@ const ProTemplateEditorPage = () => {
                     <p className="text-sm font-semibold">{label}</p>
                     <div className="grid grid-cols-4 gap-2">
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Kcal</label>
+                        <label className="text-[11px] text-muted-foreground">Kcal</label>
                         <Input type="number" value={mt.kcal_target || ""} onChange={(e) => updateMealTarget(idx, "kcal_target", e.target.value)} className="h-7 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Prot</label>
+                        <label className="text-[11px] text-muted-foreground">Prot</label>
                         <Input type="number" value={mt.protein_g || ""} onChange={(e) => updateMealTarget(idx, "protein_g", e.target.value)} className="h-7 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Carbo</label>
+                        <label className="text-[11px] text-muted-foreground">Carbo</label>
                         <Input type="number" value={mt.carbs_g || ""} onChange={(e) => updateMealTarget(idx, "carbs_g", e.target.value)} className="h-7 text-xs" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Grassi</label>
+                        <label className="text-[11px] text-muted-foreground">Grassi</label>
                         <Input type="number" value={mt.fats_g || ""} onChange={(e) => updateMealTarget(idx, "fats_g", e.target.value)} className="h-7 text-xs" />
                       </div>
                     </div>
@@ -521,7 +532,7 @@ const ProTemplateEditorPage = () => {
                       <div className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4 text-primary" />
                         <span className="font-semibold text-sm">{week.week_title}</span>
-                        <Badge variant="secondary" className="text-[10px]">
+                        <Badge variant="secondary" className="text-[11px]">
                           {week.days.reduce((s, d) => s + filledMeals(d), 0)} pasti
                         </Badge>
                       </div>
@@ -559,7 +570,7 @@ const ProTemplateEditorPage = () => {
                                 <button className="w-full flex items-center justify-between px-3 py-2 hover:bg-accent/30 transition-colors">
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium">{dayLabel}</span>
-                                    {filled > 0 && <Badge variant="default" className="text-[9px] px-1.5">{filled}</Badge>}
+                                    {filled > 0 && <Badge variant="default" className="text-[11px] px-1.5">{filled}</Badge>}
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); setShowCopyDay({ weekIdx, dayIdx }); }}>

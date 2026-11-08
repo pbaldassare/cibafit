@@ -117,8 +117,8 @@ const UserFavoritesPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
-                      {p.brand && <p className="text-[10px] text-muted-foreground">{p.brand}</p>}
-                      <div className="flex gap-2 text-[10px] text-muted-foreground mt-0.5">
+                      {p.brand && <p className="text-[11px] text-muted-foreground">{p.brand}</p>}
+                      <div className="flex gap-2 text-[11px] text-muted-foreground mt-0.5">
                         {p.calories_100g != null && (
                           <span className="flex items-center gap-0.5">
                             <Flame className="h-2.5 w-2.5" /> {p.calories_100g} kcal
@@ -129,8 +129,8 @@ const UserFavoritesPage = () => {
                         {mac?.fats != null && <span>G {mac.fats}g</span>}
                       </div>
                       {!p.nutrition_available && (
-                        <Badge variant="outline" className="text-[8px] px-1 py-0 mt-0.5 border-muted-foreground text-muted-foreground">
-                          ⚠️ No macro
+                        <Badge variant="outline" className="text-[11px] px-1 py-0 mt-0.5 border-muted-foreground text-muted-foreground">
+                          No macro
                         </Badge>
                       )}
                     </div>
@@ -155,7 +155,7 @@ const UserFavoritesPage = () => {
             <div className="text-center py-12 space-y-2">
               <Heart className="h-10 w-10 mx-auto text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">Nessun alimento preferito salvato.</p>
-              <p className="text-xs text-muted-foreground">Tocca il ❤️ su un prodotto o ricetta per aggiungerlo qui.</p>
+              <p className="text-xs text-muted-foreground">Tocca il su un prodotto o ricetta per aggiungerlo qui.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -172,7 +172,7 @@ const UserFavoritesPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{snap.name || "Senza nome"}</p>
-                      <div className="flex gap-2 text-[10px] text-muted-foreground">
+                      <div className="flex gap-2 text-[11px] text-muted-foreground">
                         <span>{snap.kcal || 0} kcal</span>
                         {snap.protein_g != null && <span>P {snap.protein_g}g</span>}
                         {snap.carbs_g != null && <span>C {snap.carbs_g}g</span>}
@@ -181,7 +181,7 @@ const UserFavoritesPage = () => {
                       {fav.meal_types.length > 0 && (
                         <div className="flex gap-1 mt-1">
                           {fav.meal_types.map((mt) => (
-                            <span key={mt} className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{mt}</span>
+                            <span key={mt} className="text-[11px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{mt}</span>
                           ))}
                         </div>
                       )}
@@ -225,7 +225,7 @@ const UserFavoritesPage = () => {
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-foreground">{combo.title}</p>
-                          <p className="text-[10px] text-muted-foreground">{combo.items.length} ingredienti · {totalKcal} kcal</p>
+                          <p className="text-[11px] text-muted-foreground">{combo.items.length} ingredienti · {totalKcal} kcal</p>
                         </div>
                       </div>
                       <button onClick={() => handleDeleteCombo(combo.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors">
@@ -239,7 +239,7 @@ const UserFavoritesPage = () => {
                         </p>
                       ))}
                     </div>
-                    <div className="flex gap-3 text-[10px] text-muted-foreground pl-11 pt-1 border-t border-border/50">
+                    <div className="flex gap-3 text-[11px] text-muted-foreground pl-11 pt-1 border-t border-border/50">
                       <span className="font-medium text-primary">{totalKcal} kcal</span>
                       <span>P {totalP.toFixed(1)}g</span>
                       <span>C {totalC.toFixed(1)}g</span>

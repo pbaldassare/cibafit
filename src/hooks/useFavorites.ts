@@ -57,7 +57,11 @@ export function useFavorites() {
         (f) => f.item_type === itemType && f.item_id === itemId
       );
       if (existing) {
-        await supabase.from("user_favorites").delete().eq("id", existing.id);
+        const { error } = await supabase.from("user_favorites").delete().eq("id", existing.id);
+        if (error) {
+          toast.error("Preferito non rimosso. Riprova.");
+          return;
+        }
         setFavorites((prev) => prev.filter((f) => f.id !== existing.id));
         toast.success("Rimosso dai preferiti");
       } else {

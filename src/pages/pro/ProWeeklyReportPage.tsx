@@ -16,10 +16,10 @@ interface ClientReport {
   clientId: string;
   clientName: string;
   clientEmail: string;
-  kcalTarget: number;
-  proteinTarget: number;
-  carbsTarget: number;
-  fatsTarget: number;
+  kcalTarget: number | null;
+  proteinTarget: number | null;
+  carbsTarget: number | null;
+  fatsTarget: number | null;
   daysTracked: number;
   totalDays: number;
   avgKcal: number;
@@ -28,7 +28,7 @@ interface ClientReport {
   avgFats: number;
   mealsLogged: number;
   mealsExpected: number;
-  kcalAdherence: number; // percentage
+  kcalAdherence: number | null; // percentage, null without a kcal target
   isCritical: boolean;
 }
 
@@ -80,13 +80,15 @@ const ProWeeklyReportPage = () => {
       const clientIds = links.map((l) => l.client_user_id);
 
       // 2. Get profiles + targets for all clients
-      const [profilesRes, targetsRes] = await Promise.all([
+      const [profilesRes, targetsRes, plansRes] = await Promise.all([
         supabase.from("profiles").select("id, full_name, email").in("id", clientIds),
         supabase.from("nutrition_targets").select("*").in("user_id", clientIds),
+        supabase.from("diet_plans").select("client_user_id, kcal_day, protein_g_day, carbs_g_day, fats_g_day").eq("professional_id", user.id).eq("is_active", true).in("client_user_id", clientIds),
       ]);
 
       const profiles = profilesRes.data ?? [];
       const targets = targetsRes.data ?? [];
+      const activePlans = plansRes.data ?? [];
 
       // 3. Get meal_days for the week
       const { data: mealDays } = await supabase
@@ -119,6 +121,7 @@ const ProWeeklyReportPage = () => {
       const clientReports: ClientReport[] = clientIds.map((cid) => {
         const profile = profiles.find((p) => p.id === cid);
         const target = targets.find((t) => t.user_id === cid);
+        const plan = activePlans.find((p) => p.client_user_id === cid);
         const clientMealDays = (mealDays ?? []).filter((d) => d.user_id === cid);
         const clientMealDayIds = clientMealDays.map((d) => d.id);
         const clientMeals = mealsData.filter((m) => clientMealDayIds.includes(m.meal_day_id));
@@ -153,23 +156,24 @@ const ProWeeklyReportPage = () => {
         const avgCarbs = daysTracked > 0 ? Math.round(values.reduce((s, v) => s + v.carbs, 0) / daysTracked) : 0;
         const avgFats = daysTracked > 0 ? Math.round(values.reduce((s, v) => s + v.fats, 0) / daysTracked) : 0;
 
-        const kcalTarget = target?.kcal_day ?? 2000;
-        const kcalAdherence = kcalTarget > 0 && avgKcal > 0 ? Math.round((avgKcal / kcalTarget) * 100) : 0;
+        // Same priority as the client's home: the active plan first, then the client's own targets
+        const kcalTarget = plan?.kcal_day ?? target?.kcal_day ?? null;
+        const kcalAdherence = kcalTarget ? (avgKcal > 0 ? Math.round((avgKcal / kcalTarget) * 100) : 0) : null;
 
         const mealsExpected = totalDaysInRange * EXPECTED_MEALS_PER_DAY;
         const missedMealsRatio = mealsExpected > 0 ? totalMealsLogged / mealsExpected : 0;
 
-        // Critical: <60% adherence OR <50% meals logged OR 0 days tracked
-        const isCritical = daysTracked === 0 || kcalAdherence < 60 || missedMealsRatio < 0.5;
+        // Critical: <60% adherence (only with a real target) OR <50% meals logged OR 0 days tracked
+        const isCritical = daysTracked === 0 || (kcalAdherence !== null && kcalAdherence < 60) || missedMealsRatio < 0.5;
 
         return {
           clientId: cid,
           clientName: profile?.full_name || "Senza nome",
           clientEmail: profile?.email || "",
           kcalTarget,
-          proteinTarget: target?.protein_g ?? 120,
-          carbsTarget: target?.carbs_g ?? 220,
-          fatsTarget: target?.fats_g ?? 70,
+          proteinTarget: plan?.protein_g_day ?? target?.protein_g ?? null,
+          carbsTarget: plan?.carbs_g_day ?? target?.carbs_g ?? null,
+          fatsTarget: plan?.fats_g_day ?? target?.fats_g ?? null,
           daysTracked,
           totalDays: totalDaysInRange,
           avgKcal,
@@ -186,7 +190,7 @@ const ProWeeklyReportPage = () => {
       // Sort: critical first, then by adherence ascending
       clientReports.sort((a, b) => {
         if (a.isCritical !== b.isCritical) return a.isCritical ? -1 : 1;
-        return a.kcalAdherence - b.kcalAdherence;
+        return (a.kcalAdherence ?? Infinity) - (b.kcalAdherence ?? Infinity);
       });
 
       setReports(clientReports);
@@ -199,7 +203,8 @@ const ProWeeklyReportPage = () => {
   // Summary stats
   const totalClients = reports.length;
   const criticalCount = reports.filter((r) => r.isCritical).length;
-  const avgAdherence = totalClients > 0 ? Math.round(reports.reduce((s, r) => s + r.kcalAdherence, 0) / totalClients) : 0;
+  const adherenceValues = reports.flatMap((r) => (r.kcalAdherence !== null ? [r.kcalAdherence] : []));
+  const avgAdherence = adherenceValues.length > 0 ? Math.round(adherenceValues.reduce((s, v) => s + v, 0) / adherenceValues.length) : null;
   const totalMissed = reports.reduce((s, r) => s + (r.mealsExpected - r.mealsLogged), 0);
 
   const adherenceIcon = (val: number) => {
@@ -243,26 +248,30 @@ const ProWeeklyReportPage = () => {
         <div className="grid grid-cols-2 gap-3">
           <Card className="border border-border">
             <CardContent className="py-4 text-center">
-              <p className={`text-2xl font-bold ${adherenceColor(avgAdherence)}`}>{avgAdherence}%</p>
-              <p className="text-[10px] text-muted-foreground">Aderenza media kcal</p>
+              {avgAdherence !== null ? (
+                <p className={`text-2xl font-bold ${adherenceColor(avgAdherence)}`}>{avgAdherence}%</p>
+              ) : (
+                <p className="text-2xl font-bold text-foreground">—</p>
+              )}
+              <p className="text-[11px] text-muted-foreground">Aderenza media kcal</p>
             </CardContent>
           </Card>
           <Card className="border border-border">
             <CardContent className="py-4 text-center">
               <p className="text-2xl font-bold text-foreground">{totalMissed}</p>
-              <p className="text-[10px] text-muted-foreground">Pasti non registrati</p>
+              <p className="text-[11px] text-muted-foreground">Pasti non registrati</p>
             </CardContent>
           </Card>
           <Card className="border border-border">
             <CardContent className="py-4 text-center">
               <p className="text-2xl font-bold text-foreground">{totalClients}</p>
-              <p className="text-[10px] text-muted-foreground">Clienti monitorati</p>
+              <p className="text-[11px] text-muted-foreground">Clienti monitorati</p>
             </CardContent>
           </Card>
           <Card className={`border ${criticalCount > 0 ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
             <CardContent className="py-4 text-center">
               <p className={`text-2xl font-bold ${criticalCount > 0 ? "text-destructive" : "text-foreground"}`}>{criticalCount}</p>
-              <p className="text-[10px] text-muted-foreground">Clienti critici</p>
+              <p className="text-[11px] text-muted-foreground">Clienti critici</p>
             </CardContent>
           </Card>
         </div>
@@ -286,7 +295,7 @@ const ProWeeklyReportPage = () => {
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-foreground">{r.clientName}</p>
                       {r.isCritical && (
-                        <Badge variant="destructive" className="text-[9px] gap-0.5">
+                        <Badge variant="destructive" className="text-[11px] gap-0.5">
                           <AlertTriangle className="h-2.5 w-2.5" /> Critico
                         </Badge>
                       )}
@@ -294,21 +303,29 @@ const ProWeeklyReportPage = () => {
                     <p className="text-xs text-muted-foreground">{r.daysTracked}/{r.totalDays} giorni tracciati</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    {adherenceIcon(r.kcalAdherence)}
-                    <span className={`text-lg font-bold ${adherenceColor(r.kcalAdherence)}`}>{r.kcalAdherence}%</span>
+                    {r.kcalAdherence !== null ? (
+                      <>
+                        {adherenceIcon(r.kcalAdherence)}
+                        <span className={`text-lg font-bold ${adherenceColor(r.kcalAdherence)}`}>{r.kcalAdherence}%</span>
+                      </>
+                    ) : (
+                      <span className="text-lg font-bold text-foreground">—</span>
+                    )}
                   </div>
                 </div>
 
                 {/* Kcal adherence bar */}
                 <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                  <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
                     <span>Kcal media: {r.avgKcal}</span>
-                    <span>Target: {r.kcalTarget}</span>
+                    <span>{r.kcalTarget ? `Target: ${r.kcalTarget}` : "Obiettivi non impostati"}</span>
                   </div>
-                  <Progress
-                    value={Math.min(r.kcalAdherence, 100)}
-                    className="h-2"
-                  />
+                  {r.kcalAdherence !== null && (
+                    <Progress
+                      value={Math.min(r.kcalAdherence, 100)}
+                      className="h-2"
+                    />
+                  )}
                 </div>
 
                 {/* Macro averages */}
@@ -318,12 +335,14 @@ const ProWeeklyReportPage = () => {
                     { label: "Carbo", avg: r.avgCarbs, target: r.carbsTarget },
                     { label: "Grassi", avg: r.avgFats, target: r.fatsTarget },
                   ].map((m) => {
-                    const pct = m.target > 0 ? Math.round((m.avg / m.target) * 100) : 0;
+                    const pct = m.target ? Math.round((m.avg / m.target) * 100) : null;
                     return (
                       <div key={m.label}>
-                        <p className="text-[10px] text-muted-foreground">{m.label}</p>
-                        <p className="text-xs font-semibold">{m.avg}g / {m.target}g</p>
-                        <p className={`text-[10px] ${pct >= 80 && pct <= 120 ? "text-green-600" : "text-amber-600"}`}>{pct}%</p>
+                        <p className="text-[11px] text-muted-foreground">{m.label}</p>
+                        <p className="text-xs font-semibold">{m.avg}g / {m.target != null ? `${m.target}g` : "—"}</p>
+                        {pct !== null && (
+                          <p className={`text-[11px] ${pct >= 80 && pct <= 120 ? "text-green-600" : "text-amber-600"}`}>{pct}%</p>
+                        )}
                       </div>
                     );
                   })}

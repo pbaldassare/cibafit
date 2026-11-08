@@ -70,13 +70,13 @@ export const WeightGoalPlanCard = () => {
           <Target className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-semibold text-foreground">Obiettivo peso</span>
         </div>
-        <span className="text-xs font-bold text-primary">🎯 {targetWeight} kg</span>
+        <span className="text-xs font-bold text-primary">{targetWeight} kg</span>
       </div>
       {latestWeight && (
         <div className="flex items-center gap-2 text-xs">
           <span className="font-bold text-foreground">{latestWeight} kg</span>
           {weightDiff !== null && weightDiff !== 0 && (
-            <span className={`flex items-center gap-0.5 text-[10px] font-semibold ${
+            <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${
               (isLosingGoal && weightDiff < 0) || (!isLosingGoal && weightDiff > 0)
                 ? "text-success" : "text-destructive"
             }`}>
@@ -106,8 +106,8 @@ export const WeightGoalBadge = () => {
   return (
     <div className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1">
       <Target className="h-3 w-3 text-primary" />
-      <span className="text-[10px] font-semibold text-primary">
-        🎯 {targetWeight} kg
+      <span className="text-[11px] font-semibold text-primary">
+        {targetWeight} kg
         {remaining !== null && remaining > 0 && (
           <span className="text-muted-foreground font-normal ml-1">(-{remaining})</span>
         )}
@@ -132,7 +132,7 @@ export const WeightGoalHomeBar = () => {
           <TrendingUp className="h-3.5 w-3.5 text-primary" />
           <span className="text-[11px] font-semibold text-foreground">Percorso peso</span>
         </div>
-        <span className="text-[10px] font-bold text-primary">🎯 {targetWeight} kg</span>
+        <span className="text-[11px] font-bold text-primary">{targetWeight} kg</span>
       </div>
       <div className="flex items-center gap-2">
         {latestWeight && (
@@ -142,7 +142,7 @@ export const WeightGoalHomeBar = () => {
           <Progress value={progressPct ?? 0} className="h-1.5" />
         </div>
         {remaining !== null && remaining > 0 && (
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">-{remaining} kg</span>
+          <span className="text-[11px] text-muted-foreground whitespace-nowrap">-{remaining} kg</span>
         )}
       </div>
     </div>

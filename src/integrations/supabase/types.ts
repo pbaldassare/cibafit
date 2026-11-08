@@ -2876,6 +2876,7 @@ export type Database = {
       owns_np_day: { Args: { _day_id: string }; Returns: boolean }
       owns_np_week: { Args: { _week_id: string }; Returns: boolean }
       owns_nutrition_plan: { Args: { _plan_id: string }; Returns: boolean }
+      redeem_invite: { Args: { code: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

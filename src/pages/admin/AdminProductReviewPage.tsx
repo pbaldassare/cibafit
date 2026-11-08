@@ -66,7 +66,7 @@ const AdminProductReviewPage = () => {
         .eq("id", sub.id);
       if (uErr) throw uErr;
 
-      toast({ title: `"${sub.name}" approvato e aggiunto al catalogo ✓` });
+      toast({ title: `"${sub.name}" approvato e aggiunto al catalogo` });
       setSubmissions((prev) => prev.filter((s) => s.id !== sub.id));
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore", description: err.message });

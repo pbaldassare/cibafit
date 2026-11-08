@@ -51,14 +51,14 @@ const DuplicateProductDialog = ({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
                 <div className="flex items-center gap-2">
-                  {p.brand && <span className="text-[10px] text-muted-foreground">{p.brand}</span>}
+                  {p.brand && <span className="text-[11px] text-muted-foreground">{p.brand}</span>}
                   {p.calories_100g != null && (
-                    <span className="flex items-center gap-0.5 text-[10px] font-medium text-primary">
+                    <span className="flex items-center gap-0.5 text-[11px] font-medium text-primary">
                       <Flame className="h-2.5 w-2.5" /> {p.calories_100g} kcal
                     </span>
                   )}
                   {!p.nutrition_available && (
-                    <Badge variant="outline" className="text-[8px] px-1 py-0 border-muted-foreground text-muted-foreground">
+                    <Badge variant="outline" className="text-[11px] px-1 py-0 border-muted-foreground text-muted-foreground">
                       No macro
                     </Badge>
                   )}
@@ -66,7 +66,7 @@ const DuplicateProductDialog = ({
               </div>
               <div className="shrink-0 flex items-center gap-1 text-primary">
                 <Check className="h-4 w-4" />
-                <span className="text-[10px] font-medium">Usa</span>
+                <span className="text-[11px] font-medium">Usa</span>
               </div>
             </button>
           ))}

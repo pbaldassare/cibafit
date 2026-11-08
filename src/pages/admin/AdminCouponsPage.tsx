@@ -203,7 +203,7 @@ const AdminCouponsPage = () => {
                       </TableCell>
                       <TableCell className="text-xs">
                         {c.applies_to_role_type ? (
-                          <Badge variant="secondary" className="text-[10px]">{c.applies_to_role_type}</Badge>
+                          <Badge variant="secondary" className="text-[11px]">{c.applies_to_role_type}</Badge>
                         ) : "Tutti"}
                       </TableCell>
                       <TableCell className="text-center text-sm">
@@ -297,7 +297,7 @@ const AdminCouponsPage = () => {
                       <TableCell className="text-right text-xs">€{Number(c.final_paid_amount).toFixed(2)}</TableCell>
                       <TableCell className="text-right text-xs font-semibold">€{Number(c.commission_amount).toFixed(2)}</TableCell>
                       <TableCell>
-                        <Badge variant={c.status === "paid" ? "default" : c.status === "cancelled" ? "destructive" : "secondary"} className="text-[10px]">
+                        <Badge variant={c.status === "paid" ? "default" : c.status === "cancelled" ? "destructive" : "secondary"} className="text-[11px]">
                           {statusLabel[c.status] || c.status}
                         </Badge>
                       </TableCell>

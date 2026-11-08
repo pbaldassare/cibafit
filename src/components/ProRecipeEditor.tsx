@@ -170,7 +170,7 @@ export default function ProRecipeEditor({ initialRecipe, onSend, sending, sendLa
               </button>
             </div>
           ))}
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-1">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground px-1">
             <span className="flex-1" />
             <span>g</span>
             <span className="w-[55px] text-center">kcal</span>

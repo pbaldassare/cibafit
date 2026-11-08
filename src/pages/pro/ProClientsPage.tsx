@@ -1,3 +1,4 @@
+import { User as UserIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -168,41 +169,39 @@ const ProClientsPage = () => {
               ) : (
                 <div className="space-y-3">
                   {activeClients.map((c) => (
-                    <Card key={c.id} className="border-2 border-accent">
+                    <Card key={c.id} className="border border-border">
                       <CardContent className="py-3 space-y-2">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                            👤
-                          </div>
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg"><UserIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" /></div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-foreground truncate">
                               {c.profiles?.full_name || "Senza nome"}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">{c.profiles?.email}</p>
                           </div>
-                          <Badge variant={c.hasPlan ? "default" : "secondary"} className="text-[10px]">
+                          <Badge variant={c.hasPlan ? "default" : "secondary"} className="text-[11px]">
                             {c.hasPlan ? "Piano attivo" : "No piano"}
                           </Badge>
                         </div>
                         {/* Action buttons */}
                         <div className="grid grid-cols-5 gap-1.5">
-                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/plan`)}>
+                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/plan`)}>
                             <ClipboardList className="h-4 w-4" />
                             Piano
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/monitor`)}>
+                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/monitor`)}>
                             <Activity className="h-4 w-4" />
                             Monitor
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/suggest`)}>
+                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/suggest`)}>
                             <Lightbulb className="h-4 w-4" />
                             Suggerisci
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[10px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/pantry`)}>
+                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[11px]" onClick={() => navigate(`/pro/client/${c.client_user_id}/pantry`)}>
                             <ChefHat className="h-4 w-4" />
                             Dispensa
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[10px] border-primary/30 text-primary" onClick={() => navigate(`/pro/client/${c.client_user_id}/pantry-recipes`)}>
+                          <Button size="sm" variant="outline" className="flex-col h-auto py-2 gap-1 text-[11px] border-primary/30 text-primary" onClick={() => navigate(`/pro/client/${c.client_user_id}/pantry-recipes`)}>
                             <Salad className="h-4 w-4" />
                             Ricette
                           </Button>
@@ -230,7 +229,7 @@ const ProClientsPage = () => {
                   {otherClients.map((c) => (
                     <Card key={c.id} className="border border-border opacity-60">
                       <CardContent className="flex items-center gap-3 py-3">
-                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-lg">👤</div>
+                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-lg"><UserIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" /></div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">
                             {c.profiles?.full_name || "Senza nome"}

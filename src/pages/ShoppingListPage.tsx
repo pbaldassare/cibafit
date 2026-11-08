@@ -115,7 +115,7 @@ const ShoppingListPage = () => {
     const text = items
       .map((i) => {
         const qty = i.quantity ? `${i.quantity}${i.unit ? " " + i.unit : ""}` : "";
-        return `${checked.has(i.name) ? "✅" : "⬜"} ${i.name}${qty ? " - " + qty : ""}`;
+        return `${checked.has(i.name) ? "" : ""} ${i.name}${qty ? " - " + qty : ""}`;
       })
       .join("\n");
 

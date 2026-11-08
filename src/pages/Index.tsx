@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Package,
   Plus,
+  Refrigerator,
   ScanLine,
   HeartPulse,
   Sparkles,
@@ -46,7 +47,7 @@ const MEALS: { type: string; label: string; until: number }[] = [
 
 const ACTIONS: { label: string; icon: LucideIcon; to: string }[] = [
   { label: "Foto pasto", icon: Camera, to: "/meals/photo" },
-  { label: "Barcode", icon: ScanLine, to: "/scan" },
+  { label: "Prodotto", icon: ScanLine, to: "/meals?add=" },
   { label: "Cosa mangio?", icon: Sparkles, to: "/suggest-meal" },
   { label: "Ricette", icon: BookOpen, to: "/recipes" },
 ];
@@ -59,13 +60,11 @@ const MacroBar = ({ label, value, target }: { label: string; value: number; targ
   const percent = target ? Math.min(100, Math.round((value / target) * 100)) : 0;
   return (
     <div>
-      <div className="flex items-baseline justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium tabular-nums text-foreground">
-          {Math.round(value)}
-          {target ? ` / ${Math.round(target)}` : ""} g
-        </span>
-      </div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium tabular-nums text-foreground">
+        {Math.round(value)}
+        <span className="text-xs font-normal text-muted-foreground">{target ? ` / ${Math.round(target)}` : ""} g</span>
+      </p>
       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
         <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${percent}%` }} />
       </div>
@@ -176,7 +175,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <MobileHeader title="" showBack={false} />
 
-      <main className="space-y-6 px-4 pb-28 pt-1">
+      <main className="space-y-6 px-4 pb-28 pt-4">
         <div data-tour="home-greeting">
           <h1 className="text-lg font-semibold text-foreground">
             {greetingFor(now.getHours())}{firstName ? `, ${firstName}` : ""}
@@ -280,7 +279,7 @@ const Index = () => {
           {ACTIONS.map(({ label, icon: Icon, to }) => (
             <button
               key={to}
-              onClick={() => navigate(to)}
+              onClick={() => navigate(to.endsWith("=") ? `${to}${nextMeal}` : to)}
               className="flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-lg bg-card px-1 py-3 text-center shadow-card transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Icon className="h-5 w-5 text-primary-dark" strokeWidth={1.75} aria-hidden="true" />
@@ -328,6 +327,13 @@ const Index = () => {
               <button onClick={() => navigate("/pantry")} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50">
                 <Package className="h-5 w-5 shrink-0 text-primary-dark" strokeWidth={1.75} aria-hidden="true" />
                 <span className="flex-1 text-sm font-medium text-foreground">Dispensa</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              </button>
+            </li>
+            <li>
+              <button onClick={() => navigate("/products")} className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50">
+                <Refrigerator className="h-5 w-5 shrink-0 text-primary-dark" strokeWidth={1.75} aria-hidden="true" />
+                <span className="flex-1 text-sm font-medium text-foreground">Frigo e congelatore</span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </button>
             </li>

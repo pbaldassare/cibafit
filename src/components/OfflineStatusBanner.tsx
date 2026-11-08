@@ -41,7 +41,7 @@ const OfflineStatusBanner = () => {
       <div className="rounded-xl border-2 border-green-300 bg-green-50 dark:bg-green-950/20 p-3 flex items-center gap-3">
         <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">Tutto sincronizzato ✓</p>
+          <p className="text-sm font-semibold text-foreground">Tutto sincronizzato</p>
           <p className="text-xs text-muted-foreground">I pasti offline sono stati salvati nel database.</p>
         </div>
       </div>

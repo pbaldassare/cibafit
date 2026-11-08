@@ -19,7 +19,7 @@ const getScoreLabel = (score: number) => {
 
 const ScoreBadge = ({ score, size = "md" }: ScoreBadgeProps) => {
   const sizeClasses = {
-    sm: "h-5 w-5 text-[10px]",
+    sm: "h-5 w-5 text-[11px]",
     md: "h-6 w-6 text-xs",
     lg: "h-8 w-8 text-sm",
   };

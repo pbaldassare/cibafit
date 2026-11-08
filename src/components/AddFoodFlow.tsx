@@ -59,10 +59,10 @@ interface AddFoodFlowProps {
 }
 
 const mealOptions: { type: MealType; emoji: string; label: string }[] = [
-  { type: "colazione", emoji: "☀️", label: "Colazione" },
-  { type: "pranzo", emoji: "🌤️", label: "Pranzo" },
-  { type: "cena", emoji: "🌙", label: "Cena" },
-  { type: "spuntino", emoji: "🍎", label: "Spuntino" },
+  { type: "colazione", emoji: "", label: "Colazione" },
+  { type: "pranzo", emoji: "", label: "Pranzo" },
+  { type: "cena", emoji: "", label: "Cena" },
+  { type: "spuntino", emoji: "", label: "Spuntino" },
 ];
 
 const storageOptions = [
@@ -352,7 +352,7 @@ const AddFoodFlow = ({
         unit: "g" as const,
       }));
       await deductPantryFromMeal(user.id, pantryItems);
-      toast({ title: `"${title}" registrato! ✅` });
+      toast({ title: `"${title}" registrato!` });
       setSaved(true);
       if (navigator.vibrate) navigator.vibrate(50);
       await new Promise((r) => setTimeout(r, 600));
@@ -822,7 +822,7 @@ const AddFoodFlow = ({
 
       setNotFound(false);
       setStep("summary");
-      toast({ title: "Prodotto analizzato dall'AI ✓" });
+      toast({ title: "Prodotto analizzato dall'AI" });
     } catch (err: any) {
       toast({
         variant: "destructive",
@@ -1021,7 +1021,7 @@ const AddFoodFlow = ({
           const stLabel = storageOptions.find(s => s.key === storageType)?.label ?? "Prodotti";
           const path = storageType === "ambiente" ? "/pantry" : "/products?storage=frigo";
           toast({
-            title: `Aggiunto in ${stLabel}! ✓`,
+            title: `Aggiunto in ${stLabel}!`,
             action: (
               <button
                 onClick={() => navigate(path)}
@@ -1099,7 +1099,7 @@ const AddFoodFlow = ({
           if (invErr) throw invErr;
         }
 
-        toast({ title: `Aggiunto a ${selectedMealType || preselectedMealType}! ✓` });
+        toast({ title: `Aggiunto a ${selectedMealType || preselectedMealType}!` });
 
       }
 
@@ -1151,7 +1151,7 @@ const AddFoodFlow = ({
               <button onClick={goBack} className="p-1 -ml-1 text-muted-foreground">
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <SheetTitle className="flex-1 text-base" style={{ color: "#111827" }}>
+              <SheetTitle className="flex-1 text-base" style={{ color: "hsl(var(--foreground))" }}>
                 {stepTitle()}
               </SheetTitle>
             </div>
@@ -1164,7 +1164,7 @@ const AddFoodFlow = ({
                 {/* Meal type selector for meal context */}
                 {context === "meal" && !preselectedMealType && (
                   <div className="space-y-2">
-                    <p className="text-sm font-semibold" style={{ color: "#111827" }}>Tipo di pasto</p>
+                    <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>Tipo di pasto</p>
                     <div className="grid grid-cols-4 gap-2">
                       {mealOptions.map(({ type, emoji, label }) => (
                         <button
@@ -1176,7 +1176,6 @@ const AddFoodFlow = ({
                               : "bg-card border border-border text-foreground"
                           }`}
                         >
-                          <span className="text-xl">{emoji}</span>
                           {label}
                         </button>
                       ))}
@@ -1184,7 +1183,7 @@ const AddFoodFlow = ({
                   </div>
                 )}
 
-                <p className="text-sm font-semibold" style={{ color: "#111827" }}>Come vuoi aggiungere?</p>
+                <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>Come vuoi aggiungere?</p>
                 <div className="grid grid-cols-1 gap-2">
                   {/* Scansiona barcode (first, recommended) */}
                   <button
@@ -1203,17 +1202,17 @@ const AddFoodFlow = ({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold" style={{ color: "#111827" }}>📷 Scansiona barcode</p>
-                        <Badge className="text-[9px] bg-primary/20 text-primary border-0">consigliato</Badge>
+                        <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Scansiona barcode</p>
+                        <Badge className="text-[11px] bg-primary/20 text-primary border-0">consigliato</Badge>
                       </div>
-                      <p className="text-xs" style={{ color: "#4B5563" }}>Inquadra il codice a barre sulla confezione. Lo trovi di solito sul retro o sul fondo del prodotto.</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Inquadra il codice a barre sulla confezione. Lo trovi di solito sul retro o sul fondo del prodotto.</p>
                     </div>
                   </button>
 
                   {/* ── Gruppo Scontrino – only for inventory context ── */}
                   {context !== "meal" && (
                     <div data-tour="add-receipt" className="rounded-2xl border border-border bg-card overflow-hidden">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-4 pt-3 pb-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-4 pt-3 pb-1">
                         Scontrino
                       </p>
                       <button
@@ -1224,8 +1223,8 @@ const AddFoodFlow = ({
                           <Receipt className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold" style={{ color: "#111827" }}>📋 Foto scontrino</p>
-                          <p className="text-xs" style={{ color: "#4B5563" }}>Fotografa lo scontrino della spesa per aggiungere tutti i prodotti insieme</p>
+                          <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Foto scontrino</p>
+                          <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Fotografa lo scontrino della spesa per aggiungere tutti i prodotti insieme</p>
                         </div>
                       </button>
                       <div className="border-t border-border" />
@@ -1237,8 +1236,8 @@ const AddFoodFlow = ({
                           <ScanLine className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold" style={{ color: "#111827" }}>📱 QR Scontrino</p>
-                          <p className="text-xs" style={{ color: "#4B5563" }}>Inquadra il QR code stampato sullo scontrino</p>
+                          <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>QR Scontrino</p>
+                          <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Inquadra il QR code stampato sullo scontrino</p>
                         </div>
                       </button>
                     </div>
@@ -1265,8 +1264,8 @@ const AddFoodFlow = ({
                       <Sparkles className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold" style={{ color: "#111827" }}>📸 Foto AI</p>
-                      <p className="text-xs" style={{ color: "#4B5563" }}>Scatta foto del prodotto (fronte, retro, scadenza) e l'AI riconosce tutto automaticamente</p>
+                      <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Foto AI</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Scatta foto del prodotto (fronte, retro, scadenza) e l'AI riconosce tutto automaticamente</p>
                     </div>
                   </button>
 
@@ -1286,8 +1285,8 @@ const AddFoodFlow = ({
                       <Search className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold" style={{ color: "#111827" }}>🔍 Cerca prodotto</p>
-                      <p className="text-xs" style={{ color: "#4B5563" }}>Scrivi il nome del prodotto per cercarlo nel nostro archivio</p>
+                      <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Cerca prodotto</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Scrivi il nome del prodotto per cercarlo nel nostro archivio</p>
                     </div>
                   </button>
 
@@ -1307,8 +1306,8 @@ const AddFoodFlow = ({
                       <Keyboard className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold" style={{ color: "#111827" }}>✏️ Inserisci manualmente</p>
-                      <p className="text-xs" style={{ color: "#4B5563" }}>Inserisci a mano nome, quantità e valori nutrizionali</p>
+                      <p className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Inserisci manualmente</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Inserisci a mano nome, quantità e valori nutrizionali</p>
                     </div>
                   </button>
 
@@ -1328,7 +1327,7 @@ const AddFoodFlow = ({
                         <UtensilsCrossed className="h-5 w-5 text-success" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-foreground">🍽️ Ricette dal piano</p>
+                        <p className="text-sm font-bold text-foreground">Ricette dal piano</p>
                         <p className="text-xs text-muted-foreground">Scegli tra le ricette suggerite</p>
                       </div>
                     </button>
@@ -1385,12 +1384,12 @@ const AddFoodFlow = ({
                 <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <Camera className="h-5 w-5 text-primary" />
-                    <p className="text-sm font-semibold" style={{ color: "#111827" }}>
+                    <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>
                       Aggiungi foto del prodotto
                     </p>
                     <span className="text-xs text-muted-foreground ml-auto">{aiPhotos.length}/5</span>
                   </div>
-                  <p className="text-xs" style={{ color: "#4B5563" }}>
+                  <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                     Scatta foto di: fronte confezione, retro ingredienti, tabella nutrizionale, data scadenza
                   </p>
 
@@ -1448,7 +1447,7 @@ const AddFoodFlow = ({
                 </Button>
 
                 {aiPhotos.length === 0 && (
-                  <p className="text-center text-xs" style={{ color: "#4B5563" }}>
+                  <p className="text-center text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                     Aggiungi almeno una foto per procedere
                   </p>
                 )}
@@ -1466,7 +1465,7 @@ const AddFoodFlow = ({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="pl-10"
-                    style={{ color: "#111827" }}
+                    style={{ color: "hsl(var(--foreground))" }}
                   />
                 </div>
 
@@ -1540,9 +1539,9 @@ const AddFoodFlow = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-sm font-medium truncate" style={{ color: "#111827" }}>{p.name}</p>
+                          <p className="text-sm font-medium truncate" style={{ color: "hsl(var(--foreground))" }}>{p.name}</p>
                           {(p as any)._source && (p as any)._source !== "local" && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 uppercase">
+                            <Badge variant="outline" className="text-[11px] px-1 py-0 shrink-0 uppercase">
                               {(p as any)._source}
                             </Badge>
                           )}
@@ -1550,7 +1549,7 @@ const AddFoodFlow = ({
                         {p.brand ? (
                           <p className="text-xs text-muted-foreground">{p.brand}</p>
                         ) : (p as any)._serving_label && (p as any)._serving_label !== "100 g" ? (
-                          <p className="text-[10px] text-muted-foreground">{(p as any)._serving_label} ({p.serving_size_g}g)</p>
+                          <p className="text-[11px] text-muted-foreground">{(p as any)._serving_label} ({p.serving_size_g}g)</p>
                         ) : null}
                       </div>
                       {p.calories_100g != null && (
@@ -1559,7 +1558,7 @@ const AddFoodFlow = ({
                             {Math.round(p.calories_100g * (p.serving_size_g && p.serving_size_g !== 100 ? p.serving_size_g : 100) / 100)} kcal
                           </span>
                           {p.serving_size_g && p.serving_size_g !== 100 && (p as any)._serving_label && (
-                            <span className="block text-[9px] text-muted-foreground">/{(p as any)._serving_label}</span>
+                            <span className="block text-[11px] text-muted-foreground">/{(p as any)._serving_label}</span>
                           )}
                         </div>
                       )}
@@ -1579,10 +1578,10 @@ const AddFoodFlow = ({
                 {scanLoading && (
                   <div className="flex flex-col items-center gap-2 py-4">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    <p className="text-sm" style={{ color: "#4B5563" }}>Ricerca su OpenFoodFacts…</p>
+                    <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Ricerca su OpenFoodFacts…</p>
                   </div>
                 )}
-                <p className="text-center text-xs" style={{ color: "#4B5563" }}>
+                <p className="text-center text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                   Inquadra il codice a barre del prodotto
                 </p>
               </div>
@@ -1757,7 +1756,7 @@ const AddFoodFlow = ({
                             }
                             addedCount++;
                           }
-                          toast({ title: `${addedCount} prodotti aggiunti! ✓` });
+                          toast({ title: `${addedCount} prodotti aggiunti!` });
                           setSaved(true);
                           if (navigator.vibrate) navigator.vibrate(50);
                           await new Promise(r => setTimeout(r, 600));
@@ -1832,7 +1831,7 @@ const AddFoodFlow = ({
             {step === "summary" && (
               <div className="space-y-4 pb-20">
                 {notFound && (
-                  <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 space-y-2">
+                  <div className="rounded-xl border border-border bg-accent/5 p-3 space-y-2">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
                       <p className="text-xs text-muted-foreground">
@@ -1892,10 +1891,10 @@ const AddFoodFlow = ({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
-                                {s.brand && <p className="text-[10px] text-muted-foreground">{s.brand}</p>}
+                                {s.brand && <p className="text-[11px] text-muted-foreground">{s.brand}</p>}
                               </div>
                               {s.calories_100g != null && (
-                                <span className="text-[10px] font-medium text-primary shrink-0">{s.calories_100g} kcal</span>
+                                <span className="text-[11px] font-medium text-primary shrink-0">{s.calories_100g} kcal</span>
                               )}
                             </button>
                           ))}
@@ -1918,7 +1917,7 @@ const AddFoodFlow = ({
                       {computed.calories != null && (
                         <div className="text-right shrink-0">
                           <p className="text-xl font-bold text-primary leading-tight">{computed.calories}</p>
-                          <p className="text-[10px] text-muted-foreground">kcal</p>
+                          <p className="text-[11px] text-muted-foreground">kcal</p>
                         </div>
                       )}
                     </div>
@@ -1958,8 +1957,8 @@ const AddFoodFlow = ({
                       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
                         {result.details.map((d) => (
                           <div key={d.macro} className="flex items-center justify-between">
-                            <span className={`text-[10px] ${d.over ? cfg.text : "text-muted-foreground"}`}>{d.label}</span>
-                            <span className={`text-[10px] font-medium ${d.over ? cfg.text : "text-foreground"}`}>
+                            <span className={`text-[11px] ${d.over ? cfg.text : "text-muted-foreground"}`}>{d.label}</span>
+                            <span className={`text-[11px] font-medium ${d.over ? cfg.text : "text-foreground"}`}>
                               {d.macro === "kcal" ? Math.round(d.value) : `${d.value.toFixed(1)}g`}
                               {" / "}
                               {d.macro === "kcal" ? Math.round(d.remaining) : `${d.remaining.toFixed(1)}g`}
@@ -1975,8 +1974,7 @@ const AddFoodFlow = ({
                 {computed.calories != null && computed.macros && (
                   <div className="rounded-2xl border border-border bg-card overflow-hidden">
                     {/* Header row */}
-                    <div className="grid grid-cols-5 bg-muted/40 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      <span></span>
+                    <div className="grid grid-cols-5 bg-muted/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       <span className="text-center">Kcal</span>
                       <span className="text-center">Prot</span>
                       <span className="text-center">Carbo</span>
@@ -1984,7 +1982,7 @@ const AddFoodFlow = ({
                     </div>
                     {/* Per porzione */}
                     <div className="grid grid-cols-5 items-center px-3 py-2.5 border-b border-border">
-                      <span className="text-[10px] font-semibold text-muted-foreground">{quantity}{unit}</span>
+                      <span className="text-[11px] font-semibold text-muted-foreground">{quantity}{unit}</span>
                       <p className="text-center text-lg font-bold text-primary">{computed.calories}</p>
                       <p className="text-center text-base font-bold text-blue-600">{computed.macros.protein}g</p>
                       <p className="text-center text-base font-bold text-amber-600">{computed.macros.carbs}g</p>
@@ -1993,7 +1991,7 @@ const AddFoodFlow = ({
                     {/* Per 100g */}
                     {calories100g != null && (
                       <div className="grid grid-cols-5 items-center px-3 py-2 bg-muted/20">
-                        <span className="text-[10px] font-medium text-muted-foreground">100g</span>
+                        <span className="text-[11px] font-medium text-muted-foreground">100g</span>
                         <p className="text-center text-sm font-semibold text-primary/75">{calories100g}</p>
                         <p className="text-center text-sm font-semibold text-blue-600/75">{macros100g?.protein ?? 0}g</p>
                         <p className="text-center text-sm font-semibold text-amber-600/75">{macros100g?.carbs ?? 0}g</p>
@@ -2020,7 +2018,7 @@ const AddFoodFlow = ({
                         const isUncertain = conf > 0 && conf < CONFIDENCE_LOW;
                         if (!has && conf === 0) return null;
                         return (
-                          <span key={key} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          <span key={key} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
                             isUncertain
                               ? "bg-amber-100 text-amber-700"
                               : has
@@ -2028,7 +2026,7 @@ const AddFoodFlow = ({
                               : "bg-secondary text-muted-foreground"
                           }`}>
                             {isUncertain ? <HelpCircle className="h-3 w-3" /> : has ? <CheckCircle2 className="h-3 w-3" /> : null}
-                            {label} {isUncertain ? "?" : has ? "✓" : ""}
+                            {label} {isUncertain ? "?" : has ? "" : ""}
                           </span>
                         );
                       })}
@@ -2074,7 +2072,7 @@ const AddFoodFlow = ({
                     >
                       <CalendarSearch className="h-3.5 w-3.5" />
                       {new Date(expiryDate).toLocaleDateString("it-IT")}
-                      {!expiryTouched && <span className="text-[10px] ml-0.5 opacity-75">(default)</span>}
+                      {!expiryTouched && <span className="text-[11px] ml-0.5 opacity-75">(default)</span>}
                     </button>
                   )}
                 </div>
@@ -2169,7 +2167,7 @@ const AddFoodFlow = ({
                               expiryDate === c.date ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
                             }`}>
                             {new Date(c.date).toLocaleDateString("it-IT")}
-                            <span className="text-[9px] ml-1 opacity-70">{c.label}</span>
+                            <span className="text-[11px] ml-1 opacity-70">{c.label}</span>
                           </button>
                         ))}
                       </div>
@@ -2237,7 +2235,7 @@ const AddFoodFlow = ({
                       step={5}
                     />
                     {servingSizeG && computed.calories != null && (
-                      <p className="text-[10px] text-center text-muted-foreground">
+                      <p className="text-[11px] text-center text-muted-foreground">
                         {quantity} × {servingSizeG}g = <span className="font-semibold text-foreground">{quantity * servingSizeG}g</span> → {computed.calories} kcal
                       </p>
                     )}
@@ -2262,7 +2260,6 @@ const AddFoodFlow = ({
                           className={`flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-semibold transition-colors ${
                             selectedMealType === type ? "bg-primary text-primary-foreground" : "bg-card border border-border text-foreground"
                           }`}>
-                          <span className="text-base">{emoji}</span>
                           {label}
                         </button>
                       ))}
@@ -2282,19 +2279,19 @@ const AddFoodFlow = ({
                     {/* Editable name/brand */}
                     <div className={`rounded-xl border p-3 space-y-2 ${isLowConfidence("name") ? "border-amber-400 bg-amber-50/30" : "border-border"}`}>
                       {isLowConfidence("name") && (
-                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">⚠️ Da confermare</Badge>
+                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[11px]">Da confermare</Badge>
                       )}
                       <Input placeholder="Nome prodotto *" value={name} onChange={(e) => setName(e.target.value)}
                         className="font-bold border-0 p-0 h-auto bg-transparent focus-visible:ring-0 text-sm" />
                       <Input placeholder="Brand (opzionale)" value={brand} onChange={(e) => setBrand(e.target.value)}
                         className="text-xs border-0 p-0 h-auto bg-transparent focus-visible:ring-0 text-muted-foreground" />
-                      {barcode && <Badge variant="outline" className="text-[10px] font-mono">{barcode}</Badge>}
+                      {barcode && <Badge variant="outline" className="text-[11px] font-mono">{barcode}</Badge>}
                     </div>
 
                     {/* Nutrition editable */}
                     <div className={`rounded-xl border p-3 space-y-2 ${isLowConfidence("nutrition") ? "border-amber-400 bg-amber-50/30" : "border-border"}`}>
                       {isLowConfidence("nutrition") && (
-                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[10px]">⚠️ Valori incerti</Badge>
+                        <Badge className="bg-amber-100 text-amber-700 border-0 text-[11px]">Valori incerti</Badge>
                       )}
                       <p className="text-xs font-semibold text-foreground">Calorie / 100g <span className="text-muted-foreground font-normal">(opzionale)</span></p>
                       <Input type="number" placeholder="kcal / 100g" value={calories100g ?? ""}
@@ -2302,17 +2299,17 @@ const AddFoodFlow = ({
                         className="h-8 text-sm" />
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Proteine</label>
+                          <label className="text-[11px] text-muted-foreground">Proteine</label>
                           <Input type="number" placeholder="g" className="h-8 text-sm" value={macros100g?.protein ?? ""}
                             onChange={(e) => setMacros100g((prev) => ({ protein: parseFloat(e.target.value) || 0, carbs: prev?.carbs ?? 0, fats: prev?.fats ?? 0 }))} />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Carbo</label>
+                          <label className="text-[11px] text-muted-foreground">Carbo</label>
                           <Input type="number" placeholder="g" className="h-8 text-sm" value={macros100g?.carbs ?? ""}
                             onChange={(e) => setMacros100g((prev) => ({ protein: prev?.protein ?? 0, carbs: parseFloat(e.target.value) || 0, fats: prev?.fats ?? 0 }))} />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Grassi</label>
+                          <label className="text-[11px] text-muted-foreground">Grassi</label>
                           <Input type="number" placeholder="g" className="h-8 text-sm" value={macros100g?.fats ?? ""}
                             onChange={(e) => setMacros100g((prev) => ({ protein: prev?.protein ?? 0, carbs: prev?.carbs ?? 0, fats: parseFloat(e.target.value) || 0 }))} />
                         </div>
@@ -2366,11 +2363,11 @@ const AddFoodFlow = ({
       <Dialog open={expiryModalOpen} onOpenChange={setExpiryModalOpen}>
         <DialogContent className="max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle style={{ color: "#111827" }}>Lettura scadenza</DialogTitle>
+            <DialogTitle style={{ color: "hsl(var(--foreground))" }}>Lettura scadenza</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {expiryImage && (
-              <div className="rounded-xl overflow-hidden border-2 border-accent bg-secondary max-h-48">
+              <div className="rounded-xl overflow-hidden border border-border bg-secondary max-h-48">
                 <img src={expiryImage} alt="Etichetta" className="w-full h-full object-contain" />
               </div>
             )}
@@ -2382,7 +2379,7 @@ const AddFoodFlow = ({
             )}
             {!expiryAnalyzing && expiryCandidates.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-semibold" style={{ color: "#111827" }}>Date trovate:</p>
+                <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>Date trovate:</p>
                 {expiryCandidates.map((c, i) => (
                   <button
                     key={i}
@@ -2392,10 +2389,10 @@ const AddFoodFlow = ({
                     onClick={() => setExpiryDate(c.date)}
                   >
                     <div className="text-left">
-                      <p className="font-bold" style={{ color: "#111827" }}>
+                      <p className="font-bold" style={{ color: "hsl(var(--foreground))" }}>
                         {new Date(c.date).toLocaleDateString("it-IT")}
                       </p>
-                      <p className="text-xs" style={{ color: "#4B5563" }}>{c.label}</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{c.label}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{Math.round(c.confidence * 100)}%</Badge>

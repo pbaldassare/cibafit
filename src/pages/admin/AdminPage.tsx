@@ -53,7 +53,6 @@ const AdminPage = () => {
   const statCards = [
     { label: "Utenti", value: stats.totalUsers, icon: Users, color: "text-blue-600" },
     { label: "Nutrizionisti", value: stats.totalProfessionals, icon: Stethoscope, color: "text-emerald-600" },
-    { label: "In scadenza (3gg)", value: stats.expiringItems, icon: AlertTriangle, color: "text-amber-600" },
     { label: "Prodotti in attesa", value: stats.pendingProducts, icon: Clock, color: "text-violet-600" },
     { label: "Segnalazioni aperte", value: stats.openSupport, icon: MessageSquareWarning, color: "text-red-600" },
   ];

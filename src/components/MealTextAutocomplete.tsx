@@ -114,7 +114,7 @@ const MealTextAutocomplete = ({ value, onChange, mealType, placeholder, classNam
       {showDropdown && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
           {value.trim().length < 2 && topSuggestions.length > 0 && (
-            <div className="px-3 py-1.5 flex items-center gap-1 text-[10px] text-muted-foreground border-b border-border">
+            <div className="px-3 py-1.5 flex items-center gap-1 text-[11px] text-muted-foreground border-b border-border">
               <TrendingUp className="h-3 w-3" /> Più usati
             </div>
           )}
@@ -127,7 +127,7 @@ const MealTextAutocomplete = ({ value, onChange, mealType, placeholder, classNam
             >
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-foreground truncate">{s.meal_text}</p>
-                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <Clock className="h-2.5 w-2.5" /> usato {s.usage_count}x
                 </p>
               </div>

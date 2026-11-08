@@ -64,8 +64,7 @@ const AdminStatsPage = () => {
     { label: "Utenti totali", value: data.totalUsers, icon: Users, sub: `+${data.newUsersWeek} questa settimana` },
     { label: "Nutrizionisti", value: data.totalProfessionals, icon: Stethoscope },
     { label: "Prodotti catalogo", value: data.totalProducts, icon: Package },
-    { label: "Articoli in inventario", value: data.totalInventory, icon: TrendingUp },
-    { label: "Articoli scaduti", value: data.expiredItems, icon: AlertTriangle },
+    { label: "Prodotti in dispensa", value: data.totalInventory, icon: TrendingUp },
     { label: "Chiamate IA effettuate", value: data.aiCalls, icon: Brain, sub: `${totalAiRequests} richieste totali` },
     { label: "Chiamate IA risparmiate", value: data.aiSaved, icon: Zap, sub: `${savingsPercent}% tasso di risparmio` },
   ];

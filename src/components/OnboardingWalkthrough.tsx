@@ -20,7 +20,7 @@ const SLIDES_BY_ROLE: Record<string, Slide[]> = {
     {
       icon: <ScanLine className="h-10 w-10" />,
       title: "Scansiona i prodotti",
-      text: "Fotografa l'etichetta o scansiona il barcode: l'AI riconosce calorie, macro e scadenza automaticamente.",
+      text: "Fotografa l'etichetta o scansiona il barcode: l'AI riconosce calorie e macro.",
     },
     {
       icon: <Clock className="h-10 w-10" />,

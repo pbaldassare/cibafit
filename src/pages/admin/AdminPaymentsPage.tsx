@@ -172,7 +172,7 @@ const AdminPaymentsPage = () => {
       admin_id: user!.id, action: "create_coupon", entity_type: "custom_coupons",
       details: { code: couponForm.code.toUpperCase(), assigned_to: couponForm.assigned_to_email || null },
     });
-    toast({ title: "Coupon creato ✓" });
+    toast({ title: "Coupon creato" });
     setShowCouponDialog(false);
     setCouponForm({ code: "", description: "", discount_type: "percent", discount_value: "10", applies_to_role_type: "", max_uses: "", valid_until: "", assigned_to_email: "" });
     setUserSearchQuery("");
@@ -180,30 +180,55 @@ const AdminPaymentsPage = () => {
     fetchAll();
   };
 
+  // Updates and inserts here use .select("id"): an operation blocked by access rules touches zero rows without an error
+  const saved = async (operation: PromiseLike<{ data: any; error: any }>, failureTitle: string) => {
+    const { data, error } = await operation;
+    if (!error && data?.length > 0) return true;
+    if (error) console.error(`${failureTitle}:`, error);
+    toast({ variant: "destructive", title: failureTitle, description: "La modifica non è stata salvata. Controlla la connessione e riprova." });
+    return false;
+  };
+
   const handleCreateOverride = async () => {
     const { data: profile } = await supabase.from("profiles").select("id").eq("email", overrideForm.user_email).maybeSingle();
     if (!profile) { toast({ variant: "destructive", title: "Utente non trovato" }); return; }
 
-    await supabase.from("manual_subscription_overrides").insert({
+    const failureTitle = "Accesso gratuito non concesso";
+    const { data: override, error: overrideErr } = await supabase.from("manual_subscription_overrides").insert({
       user_id: profile.id, role_type: overrideForm.role_type, override_type: "free",
       reason: overrideForm.reason, end_date: overrideForm.end_date || null, granted_by_admin_id: user?.id,
-    });
+    }).select("id").single();
+    if (overrideErr) {
+      console.error(`${failureTitle}:`, overrideErr);
+      toast({ variant: "destructive", title: failureTitle, description: "La modifica non è stata salvata. Controlla la connessione e riprova." });
+      return;
+    }
 
-    const { data: existingSub } = await supabase
+    const { data: existingSub, error: existingSubErr } = await supabase
       .from("subscriptions").select("id").eq("user_id", profile.id).eq("plan_type", overrideForm.role_type)
-      .in("status", ["active", "trial"]).maybeSingle();
+      .in("status", ["active", "trial"]).limit(1).maybeSingle();
 
-    if (!existingSub) {
-      await supabase.from("subscriptions").insert({
-        user_id: profile.id, plan_type: overrideForm.role_type, status: "active",
-        start_date: new Date().toISOString(), is_free_override: true,
-        free_override_reason: overrideForm.reason, granted_by_admin_id: user?.id,
-      });
-    } else {
-      await supabase.from("subscriptions").update({
-        is_free_override: true, free_override_reason: overrideForm.reason,
-        granted_by_admin_id: user?.id, status: "active",
-      }).eq("id", existingSub.id);
+    const subscriptionSaved = !existingSubErr && await saved(
+      !existingSub
+        ? supabase.from("subscriptions").insert({
+            user_id: profile.id, plan_type: overrideForm.role_type, status: "active",
+            start_date: new Date().toISOString(), is_free_override: true,
+            free_override_reason: overrideForm.reason, granted_by_admin_id: user?.id,
+          }).select("id")
+        : supabase.from("subscriptions").update({
+            is_free_override: true, free_override_reason: overrideForm.reason,
+            granted_by_admin_id: user?.id, status: "active",
+          }).eq("id", existingSub.id).select("id"),
+      failureTitle,
+    );
+    if (!subscriptionSaved) {
+      // Without this, a retry would create a second override
+      await supabase.from("manual_subscription_overrides").delete().eq("id", override.id);
+      if (existingSubErr) {
+        console.error(`${failureTitle}:`, existingSubErr);
+        toast({ variant: "destructive", title: failureTitle, description: "La modifica non è stata salvata. Controlla la connessione e riprova." });
+      }
+      return;
     }
 
     await supabase.from("admin_audit_log").insert({
@@ -223,11 +248,13 @@ const AdminPaymentsPage = () => {
     if (settingsForm.secret_key) updates.secret_key_masked = settingsForm.secret_key.slice(0, 12) + "..." + settingsForm.secret_key.slice(-4);
     if (settingsForm.webhook_secret) updates.webhook_secret_masked = settingsForm.webhook_secret.slice(0, 8) + "..." + settingsForm.webhook_secret.slice(-4);
 
-    if (settings?.id) {
-      await supabase.from("stripe_settings").update(updates).eq("id", settings.id);
-    } else {
-      await supabase.from("stripe_settings").insert(updates);
-    }
+    const settingsSaved = await saved(
+      settings?.id
+        ? supabase.from("stripe_settings").update(updates).eq("id", settings.id).select("id")
+        : supabase.from("stripe_settings").insert(updates).select("id"),
+      "Configurazione non aggiornata",
+    );
+    if (!settingsSaved) return;
     toast({ title: "Configurazione aggiornata" });
     setShowSettingsDialog(false);
     setSettingsForm({ publishable_key: "", secret_key: "", webhook_secret: "" });
@@ -235,12 +262,12 @@ const AdminPaymentsPage = () => {
   };
 
   const handleTogglePlan = async (planId: string, currentActive: boolean) => {
-    await supabase.from("subscription_plans").update({ is_active: !currentActive }).eq("id", planId);
+    if (!(await saved(supabase.from("subscription_plans").update({ is_active: !currentActive }).eq("id", planId).select("id"), "Piano non aggiornato"))) return;
     fetchAll();
   };
 
   const handleToggleCoupon = async (couponId: string, currentActive: boolean) => {
-    await supabase.from("custom_coupons").update({ is_active: !currentActive }).eq("id", couponId);
+    if (!(await saved(supabase.from("custom_coupons").update({ is_active: !currentActive }).eq("id", couponId).select("id"), "Coupon non aggiornato"))) return;
     fetchAll();
   };
 
@@ -250,7 +277,7 @@ const AdminPaymentsPage = () => {
     if (error) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Coupon eliminato 🗑️" });
+      toast({ title: "Coupon eliminato" });
       await supabase.from("admin_audit_log").insert({
         admin_id: user!.id, action: "delete_coupon", entity_type: "custom_coupons",
         entity_id: couponId, details: { code },
@@ -260,39 +287,39 @@ const AdminPaymentsPage = () => {
   };
 
   const handleToggleNutriCoupon = async (id: string, currentActive: boolean) => {
-    await supabase.from("nutritionist_coupons" as any).update({ is_active: !currentActive }).eq("id", id);
+    if (!(await saved(supabase.from("nutritionist_coupons" as any).update({ is_active: !currentActive }).eq("id", id).select("id"), "Coupon non aggiornato"))) return;
     fetchAll();
   };
 
   const updateNutriPercent = async (id: string, field: string, value: string) => {
     const num = parseFloat(value);
     if (isNaN(num) || num < 0 || num > 100) return;
-    await supabase.from("nutritionist_coupons" as any).update({ [field]: num }).eq("id", id);
+    if (!(await saved(supabase.from("nutritionist_coupons" as any).update({ [field]: num }).eq("id", id).select("id"), "Percentuale non aggiornata"))) return;
     toast({ title: "Percentuale aggiornata" });
     fetchAll();
   };
 
   const markPaid = async (commissionId: string) => {
-    await supabase.from("nutritionist_commissions" as any).update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", commissionId);
+    if (!(await saved(supabase.from("nutritionist_commissions" as any).update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", commissionId).select("id"), "Commissione non aggiornata"))) return;
     toast({ title: "Commissione segnata come pagata" });
     fetchAll();
   };
 
   const handleManualActivate = async (subId: string) => {
-    await supabase.from("subscriptions").update({ status: "active", updated_at: new Date().toISOString() }).eq("id", subId);
+    if (!(await saved(supabase.from("subscriptions").update({ status: "active", updated_at: new Date().toISOString() }).eq("id", subId).select("id"), "Abbonamento non attivato"))) return;
     toast({ title: "Abbonamento attivato manualmente" });
     fetchAll();
   };
 
   const handleCancelSub = async (subId: string) => {
-    await supabase.from("subscriptions").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", subId);
+    if (!(await saved(supabase.from("subscriptions").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", subId).select("id"), "Abbonamento non cancellato"))) return;
     toast({ title: "Abbonamento cancellato" });
     fetchAll();
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: "Codice copiato! 📋" });
+    toast({ title: "Codice copiato!" });
   };
 
   const filteredSubs = subs.filter((s: any) => {
@@ -375,7 +402,7 @@ const AdminPaymentsPage = () => {
             <CardContent className="pt-3 pb-2 text-center">
               <Icon className={`h-5 w-5 mx-auto mb-1 ${color}`} />
               <p className="text-xl font-bold text-foreground">{value}</p>
-              <p className="text-[10px] text-muted-foreground">{label}</p>
+              <p className="text-[11px] text-muted-foreground">{label}</p>
             </CardContent>
           </Card>
         ))}
@@ -402,7 +429,7 @@ const AdminPaymentsPage = () => {
                 <SelectContent>
                   <SelectItem value="all">Tutti</SelectItem>
                   <SelectItem value="user_plus">User Plus</SelectItem>
-                  <SelectItem value="trial">Trial</SelectItem>
+                  <SelectItem value="trial">Prova</SelectItem>
                   <SelectItem value="active">Attivi</SelectItem>
                   <SelectItem value="expired">Scaduti</SelectItem>
                   <SelectItem value="past_due">Pagamento fallito</SelectItem>
@@ -427,16 +454,16 @@ const AdminPaymentsPage = () => {
                       <tr key={s.id} className="border-b border-border/50">
                         <td className="py-2">
                           <p className="font-medium text-foreground text-xs">{s.profile?.full_name || "—"}</p>
-                          <p className="text-[10px] text-muted-foreground">{s.profile?.email || s.user_id.slice(0, 8)}</p>
+                          <p className="text-[11px] text-muted-foreground">{s.profile?.email || s.user_id.slice(0, 8)}</p>
                         </td>
                         <td className="py-2">
-                          <Badge variant="outline" className="text-[10px]">
+                          <Badge variant="outline" className="text-[11px]">
                             Plus
                           </Badge>
-                          {s.is_free_override && <Badge className="ml-1 text-[9px] bg-primary/20 text-primary">Gratis</Badge>}
+                          {s.is_free_override && <Badge className="ml-1 text-[11px] bg-primary/20 text-primary">Gratis</Badge>}
                         </td>
                         <td className="py-2">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[s.status] || ""}`}>
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${statusColors[s.status] || ""}`}>
                             {statusLabels[s.status] || s.status}
                           </span>
                         </td>
@@ -446,12 +473,12 @@ const AdminPaymentsPage = () => {
                         <td className="py-2">
                           <div className="flex gap-1">
                             {s.status !== "active" && (
-                              <Button size="sm" variant="ghost" className="h-7 text-[10px]" onClick={() => handleManualActivate(s.id)}>
+                              <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => handleManualActivate(s.id)}>
                                 Attiva
                               </Button>
                             )}
                             {["active", "trial"].includes(s.status) && (
-                              <Button size="sm" variant="ghost" className="h-7 text-[10px] text-destructive" onClick={() => handleCancelSub(s.id)}>
+                              <Button size="sm" variant="ghost" className="h-7 text-[11px] text-destructive" onClick={() => handleCancelSub(s.id)}>
                                 Cancella
                               </Button>
                             )}
@@ -524,7 +551,7 @@ const AdminPaymentsPage = () => {
                           {c.assigned_profile ? (
                             <span className="text-foreground">{c.assigned_profile.full_name || c.assigned_profile.email}</span>
                           ) : c.applies_to_role_type ? (
-                            <Badge variant="secondary" className="text-[10px]">{c.applies_to_role_type}</Badge>
+                            <Badge variant="secondary" className="text-[11px]">{c.applies_to_role_type}</Badge>
                           ) : (
                             <span className="text-muted-foreground">Tutti</span>
                           )}
@@ -641,7 +668,7 @@ const AdminPaymentsPage = () => {
                         <TableCell className="text-right text-xs">€{Number(c.final_paid_amount).toFixed(2)}</TableCell>
                         <TableCell className="text-right text-xs font-semibold">€{Number(c.commission_amount).toFixed(2)}</TableCell>
                         <TableCell>
-                          <Badge variant={c.status === "paid" ? "default" : c.status === "cancelled" ? "destructive" : "secondary"} className="text-[10px]">
+                          <Badge variant={c.status === "paid" ? "default" : c.status === "cancelled" ? "destructive" : "secondary"} className="text-[11px]">
                             {commissionStatusLabel[c.status] || c.status}
                           </Badge>
                         </TableCell>
@@ -710,7 +737,7 @@ const AdminPaymentsPage = () => {
                         {o.role_type} · {o.override_type}
                         {o.end_date ? ` · fino al ${format(new Date(o.end_date), "dd/MM/yyyy")}` : " · illimitato"}
                       </p>
-                      {o.reason && <p className="text-[10px] text-muted-foreground mt-0.5">{o.reason}</p>}
+                      {o.reason && <p className="text-[11px] text-muted-foreground mt-0.5">{o.reason}</p>}
                     </div>
                   </div>
                 </CardContent>
@@ -741,9 +768,9 @@ const AdminPaymentsPage = () => {
                         <td className="py-2 text-xs">{format(new Date(p.created_at), "dd/MM/yy HH:mm")}</td>
                         <td className="py-2 text-xs font-medium">€{Number(p.amount).toFixed(2)}</td>
                         <td className="py-2">
-                          <Badge variant={p.status === "paid" ? "default" : "destructive"} className="text-[10px]">{p.status}</Badge>
+                          <Badge variant={p.status === "paid" ? "default" : "destructive"} className="text-[11px]">{p.status}</Badge>
                         </td>
-                        <td className="py-2 text-[10px] text-muted-foreground font-mono">{p.stripe_invoice_id?.slice(0, 20) || "—"}</td>
+                        <td className="py-2 text-[11px] text-muted-foreground font-mono">{p.stripe_invoice_id?.slice(0, 20) || "—"}</td>
                       </tr>
                     ))}
                     {payments.length === 0 && (
@@ -813,7 +840,7 @@ const AdminPaymentsPage = () => {
                     >
                       <div>
                         <p className="font-medium text-foreground text-xs">{u.full_name || "—"}</p>
-                        <p className="text-[10px] text-muted-foreground">{u.email}</p>
+                        <p className="text-[11px] text-muted-foreground">{u.email}</p>
                       </div>
                     </button>
                   ))}

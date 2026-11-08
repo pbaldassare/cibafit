@@ -13,10 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, Plus, Upload, Copy, FileText, Pencil } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 const SYSTEM_PRO_ID = "00000000-0000-0000-0000-000000000000";
@@ -99,7 +99,7 @@ const ProTemplatesPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: error.message });
     } else {
-      toast({ title: "Template creato! 📋" });
+      toast({ title: "Template creato!" });
       setCreateOpen(false);
       setCreateForm({ title: "", kcal: "2000", protein: "120", carbs: "220", fats: "70", notes: "" });
       await load();
@@ -175,7 +175,7 @@ const ProTemplatesPage = () => {
         );
       }
 
-      toast({ title: "Template importato! 📋" });
+      toast({ title: "Template importato!" });
       setImportOpen(false);
       setImportPreview(null);
       // Navigate to editor for further refinement
@@ -214,7 +214,7 @@ const ProTemplatesPage = () => {
         );
       }
 
-      toast({ title: "Template duplicato! 📋" });
+      toast({ title: "Template duplicato!" });
       await load();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore", description: err.message });
@@ -230,7 +230,7 @@ const ProTemplatesPage = () => {
             <p className="text-sm font-semibold text-foreground">{tmpl.title}</p>
             <p className="text-xs text-muted-foreground">
               {isSystem ? (
-                <Badge variant="secondary" className="text-[9px]">Di base</Badge>
+                <Badge variant="secondary" className="text-[11px]">Di base</Badge>
               ) : (
                 new Date(tmpl.created_at).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })
               )}
@@ -241,7 +241,7 @@ const ProTemplatesPage = () => {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-[10px] gap-1"
+                className="h-7 text-[11px] gap-1"
                 onClick={() => duplicateTemplate(tmpl)}
                 disabled={duplicating === tmpl.id}
               >
@@ -264,19 +264,19 @@ const ProTemplatesPage = () => {
         <div className="grid grid-cols-4 gap-2 text-center">
           <div className="rounded-lg bg-primary/10 p-1.5">
             <p className="text-sm font-bold text-primary">{tmpl.kcal_day}</p>
-            <p className="text-[9px] text-muted-foreground">kcal</p>
+            <p className="text-[11px] text-muted-foreground">kcal</p>
           </div>
           <div className="rounded-lg bg-blue-500/10 p-1.5">
             <p className="text-sm font-bold text-blue-600">{tmpl.protein_g_day}g</p>
-            <p className="text-[9px] text-muted-foreground">prot</p>
+            <p className="text-[11px] text-muted-foreground">prot</p>
           </div>
           <div className="rounded-lg bg-amber-500/10 p-1.5">
             <p className="text-sm font-bold text-amber-600">{tmpl.carbs_g_day}g</p>
-            <p className="text-[9px] text-muted-foreground">carbo</p>
+            <p className="text-[11px] text-muted-foreground">carbo</p>
           </div>
           <div className="rounded-lg bg-red-500/10 p-1.5">
             <p className="text-sm font-bold text-red-600">{tmpl.fats_g_day}g</p>
-            <p className="text-[9px] text-muted-foreground">grassi</p>
+            <p className="text-[11px] text-muted-foreground">grassi</p>
           </div>
         </div>
 
@@ -331,7 +331,6 @@ const ProTemplatesPage = () => {
         {/* My templates */}
         {templates.length === 0 && systemTemplates.length === 0 ? (
           <div className="text-center py-12 space-y-2">
-            <p className="text-4xl">📋</p>
             <p className="text-sm text-muted-foreground">Nessun template salvato.</p>
             <p className="text-xs text-muted-foreground">Crea un template o importa un piano alimentare da PDF/CSV.</p>
           </div>
@@ -423,19 +422,19 @@ const ProTemplatesPage = () => {
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div className="rounded-lg bg-primary/10 p-2">
                   <p className="text-sm font-bold text-primary">{importPreview.kcal_day}</p>
-                  <p className="text-[9px] text-muted-foreground">kcal</p>
+                  <p className="text-[11px] text-muted-foreground">kcal</p>
                 </div>
                 <div className="rounded-lg bg-primary/5 p-2">
                   <p className="text-sm font-bold text-foreground">{importPreview.protein_g_day}g</p>
-                  <p className="text-[9px] text-muted-foreground">prot</p>
+                  <p className="text-[11px] text-muted-foreground">prot</p>
                 </div>
                 <div className="rounded-lg bg-primary/5 p-2">
                   <p className="text-sm font-bold text-foreground">{importPreview.carbs_g_day}g</p>
-                  <p className="text-[9px] text-muted-foreground">carbo</p>
+                  <p className="text-[11px] text-muted-foreground">carbo</p>
                 </div>
                 <div className="rounded-lg bg-primary/5 p-2">
                   <p className="text-sm font-bold text-foreground">{importPreview.fats_g_day}g</p>
-                  <p className="text-[9px] text-muted-foreground">grassi</p>
+                  <p className="text-[11px] text-muted-foreground">grassi</p>
                 </div>
               </div>
               {importPreview.meals?.length > 0 && (
@@ -452,16 +451,16 @@ const ProTemplatesPage = () => {
               {importPreview.weekly_data?.weeks?.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-foreground">
-                    📅 Piano settimanale estratto: {importPreview.weekly_data.weeks.length} settimana/e,{" "}
+                    Piano settimanale estratto: {importPreview.weekly_data.weeks.length} settimana/e,{" "}
                     {importPreview.weekly_data.weeks.reduce((sum: number, w: any) => sum + (w.days?.length || 0), 0)} giorni
                   </p>
-                  <p className="text-[10px] text-muted-foreground">Potrai modificare i dettagli nell'editor dopo l'importazione.</p>
+                  <p className="text-[11px] text-muted-foreground">Potrai modificare i dettagli nell'editor dopo l'importazione.</p>
                 </div>
               )}
               {importPreview.notes && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-foreground">Note:</p>
-                  <p className="text-[10px] text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2 whitespace-pre-wrap">{importPreview.notes}</p>
+                  <p className="text-[11px] text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2 whitespace-pre-wrap">{importPreview.notes}</p>
                 </div>
               )}
             </div>

@@ -397,13 +397,14 @@ const SuggestMealPage = () => {
         mealData = nm;
       }
 
-      await supabase.from("meal_items").insert({
+      const { data: mealItem, error: itemErr } = await supabase.from("meal_items").insert({
         meal_id: mealData!.id, source_type: "custom", custom_name: recipe.title, dish_name: recipe.title,
         calories: recipe.estimatedKcal, quantity: 1, unit: "porzione", macros: recipe.estimatedMacros,
-      });
+      }).select("id").single();
+      if (itemErr) throw itemErr;
 
       // Also log in meal_logs for daily progress tracking
-      await supabase.from("meal_logs").insert({
+      const { error: logErr } = await supabase.from("meal_logs").insert({
         user_id: user.id,
         meal_type: mealType,
         dish_name: recipe.title,
@@ -413,19 +414,36 @@ const SuggestMealPage = () => {
         fat_g: recipe.estimatedMacros.fats,
         portion_g: recipe.ingredients.reduce((s, i) => s + (i.grams || 0), 0),
       });
+      if (logErr) {
+        // Half a registration would duplicate the meal on retry
+        await supabase.from("meal_items").delete().eq("id", mealItem.id);
+        throw logErr;
+      }
 
-      // Deduct pantry
+      // Deduct pantry: only now, after the meal is really saved
       const pantryItems = recipe.ingredients.filter(i => i.available).map(i => ({
         custom_name: i.name, dish_name: i.name,
         quantity: i.grams || parseFloat(i.qty) || 100,
         unit: "g",
       }));
-      if (pantryItems.length > 0) await deductPantryFromMeal(user.id, pantryItems);
+      let pantryUpdated = true;
+      if (pantryItems.length > 0) {
+        try {
+          await deductPantryFromMeal(user.id, pantryItems);
+        } catch (pantryErr) {
+          console.error("Pantry deduction failed:", pantryErr);
+          pantryUpdated = false;
+        }
+      }
 
       const mealLabel = MEAL_TYPES.find(m => m.value === mealType)?.label || mealType;
-      toast({ title: `"${recipe.title}" aggiunto a ${mealLabel}! ✅`, description: "Pasto e dispensa aggiornati" });
+      toast({
+        title: `"${recipe.title}" aggiunto a ${mealLabel}!`,
+        description: pantryUpdated ? "Pasto e dispensa aggiornati" : "Il pasto è salvato, ma la dispensa non è stata aggiornata: controlla le quantità.",
+      });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Errore", description: e.message });
+      console.error("Recipe not logged:", e);
+      toast({ variant: "destructive", title: "Pasto non aggiunto", description: "Non è stato registrato nulla e la dispensa non è cambiata. Controlla la connessione e riprova." });
     } finally {
       setCooking(null);
       setPendingRecipe(null);
@@ -440,7 +458,7 @@ const SuggestMealPage = () => {
     const key = `${recipe.source}-${idx}`;
 
     return (
-      <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
+      <div className="rounded-lg bg-card shadow-card overflow-hidden">
         <div className="p-4 pb-3 space-y-2">
           {/* Title + kcal */}
           <div className="flex items-start justify-between">
@@ -461,12 +479,12 @@ const SuggestMealPage = () => {
           {/* Badges */}
           <div className="flex flex-wrap gap-1">
             {recipe.usesExpiringCount > 0 && (
-              <Badge variant="outline" className="text-[9px] border-warning/40 text-warning h-5">
+              <Badge variant="outline" className="text-[11px] border-warning/40 text-warning h-5">
                 <Clock className="h-3 w-3 mr-0.5" /> Usa {recipe.usesExpiringCount} in scadenza
               </Badge>
             )}
             {missingCount > 0 && (
-              <Badge variant="outline" className="text-[9px] border-muted-foreground/40 text-muted-foreground h-5">
+              <Badge variant="outline" className="text-[11px] border-muted-foreground/40 text-muted-foreground h-5">
                 {missingCount} mancant{missingCount === 1 ? "e" : "i"}
               </Badge>
             )}
@@ -477,7 +495,7 @@ const SuggestMealPage = () => {
         {recipe.instructions && (
           <div className="px-4 pb-2">
             <p className="text-[12px] text-muted-foreground leading-relaxed">
-              📝 {recipe.instructions}
+              {recipe.instructions}
             </p>
           </div>
         )}
@@ -493,7 +511,7 @@ const SuggestMealPage = () => {
           <CollapsibleContent>
             <div className="px-4 pb-3 space-y-1">
               {/* Header */}
-              <div className="flex text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border/50 pb-1 mb-1">
+              <div className="flex text-[11px] text-muted-foreground uppercase tracking-wider border-b border-border/50 pb-1 mb-1">
                 <span className="flex-1">Ingrediente</span>
                 <span className="w-12 text-right">g</span>
                 <span className="w-12 text-right">kcal</span>
@@ -538,7 +556,7 @@ const SuggestMealPage = () => {
 
 
         {/* AI suggest button */}
-        <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
+        <div className="rounded-lg bg-card shadow-card overflow-hidden">
           <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, hsl(var(--primary)), hsl(262 83% 58%))" }} />
           <div className="p-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl shrink-0 bg-primary/10">
@@ -546,7 +564,7 @@ const SuggestMealPage = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-semibold text-foreground">Suggerimenti AI personalizzati</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Analizza dispensa, scadenze e pasti di oggi</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Analizza dispensa, scadenze e pasti di oggi</p>
             </div>
             <Button size="sm" onClick={handleAiSuggest} disabled={aiLoading} className="shrink-0 h-8 rounded-lg text-[11px] font-semibold px-3">
               {aiLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Sparkles className="h-3.5 w-3.5 mr-1" /> Genera</>}
@@ -567,7 +585,7 @@ const SuggestMealPage = () => {
             ].map(({ n, label, color }) => (
               <div key={label} className="flex-1 rounded-xl bg-card shadow-card p-2.5 text-center">
                 <p className={`text-base font-bold ${color}`}>{n}</p>
-                <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{label}</p>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</p>
               </div>
             ))}
           </div>

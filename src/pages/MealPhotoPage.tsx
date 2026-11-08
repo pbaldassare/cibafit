@@ -28,10 +28,10 @@ interface IngredientRow {
 type Confidence = "high" | "medium" | "low";
 
 const MEAL_TYPES = [
-  { value: "colazione", label: "☀️ Colazione" },
-  { value: "pranzo", label: "🌤️ Pranzo" },
-  { value: "cena", label: "🌙 Cena" },
-  { value: "spuntino", label: "🍎 Spuntino" },
+  { value: "colazione", label: "Colazione" },
+  { value: "pranzo", label: "Pranzo" },
+  { value: "cena", label: "Cena" },
+  { value: "spuntino", label: "Spuntino" },
 ];
 
 const confidenceColor: Record<Confidence, string> = {
@@ -324,7 +324,7 @@ const MealPhotoPage = () => {
         // Cache failure is non-critical
       }
 
-      toast({ title: "Pasto salvato nel diario! 🎉" });
+      toast({ title: "Pasto salvato nel diario!" });
       navigate("/meals");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore salvataggio", description: err.message });
@@ -343,7 +343,7 @@ const MealPhotoPage = () => {
           <>
             <div
               onClick={() => fileRef.current?.click()}
-              className="relative flex h-48 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-accent bg-card overflow-hidden active:scale-[0.98] transition-transform"
+              className="relative flex h-48 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card overflow-hidden active:scale-[0.98] transition-transform"
             >
               {imagePreview ? (
                 <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
@@ -437,7 +437,7 @@ const MealPhotoPage = () => {
               </div>
             )}
 
-            <div className="space-y-2 rounded-xl border-2 border-accent bg-card p-4">
+            <div className="space-y-2 rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-semibold">Porzione totale</Label>
                 <div className="flex items-center gap-1">
@@ -468,10 +468,9 @@ const MealPhotoPage = () => {
                 { label: "Grassi", portion: totals.fats, per100: Math.round(totals.fats * f100 * 10) / 10, unit: "g", color: "text-red-500" },
               ];
               return (
-                <div className="rounded-2xl border-2 border-accent bg-card overflow-hidden">
+                <div className="rounded-2xl border border-border bg-card overflow-hidden">
                   {/* Header */}
-                  <div className="grid grid-cols-3 bg-muted/50 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    <span></span>
+                  <div className="grid grid-cols-3 bg-muted/50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     <span className="text-center">Porzione ({portionG}g)</span>
                     <span className="text-center">Per 100g</span>
                   </div>
@@ -479,7 +478,7 @@ const MealPhotoPage = () => {
                   {rows.map((r, idx) => (
                     <div
                       key={r.label}
-                      className={`grid grid-cols-3 items-center px-3 py-2.5 ${idx < rows.length - 1 ? "border-b border-accent" : ""}`}
+                      className={`grid grid-cols-3 items-center px-3 py-2.5 ${idx < rows.length - 1 ? "border-b border-border" : ""}`}
                     >
                       <span className="text-xs font-medium text-muted-foreground">{r.label}</span>
                       <p className={`text-center text-lg font-bold ${r.color}`}>
@@ -501,7 +500,7 @@ const MealPhotoPage = () => {
                   const factor = ing.grams / 100;
                   const kcal = ing.per100 ? Math.round(ing.per100.kcal * factor) : 0;
                   return (
-                    <div key={ing.id} className="flex items-center gap-2 rounded-xl border border-accent bg-card p-3">
+                    <div key={ing.id} className="flex items-center gap-2 rounded-xl border border-border bg-card p-3">
                       <div className="flex-1 min-w-0 space-y-1">
                         <IngredientAutocomplete
                           value={ing.name}
@@ -532,20 +531,20 @@ const MealPhotoPage = () => {
                             min={0}
                             step={5}
                           />
-                          <span className="text-[10px] text-muted-foreground">g</span>
+                          <span className="text-[11px] text-muted-foreground">g</span>
                           {ing.per100 ? (
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-[10px] text-muted-foreground">
+                              <span className="text-[11px] text-muted-foreground">
                                 {kcal} kcal · P{Math.round(ing.per100.protein * factor * 10) / 10} C
                                 {Math.round(ing.per100.carbs * factor * 10) / 10} G
                                 {Math.round(ing.per100.fats * factor * 10) / 10}
                               </span>
-                              <span className="text-[9px] text-muted-foreground/60">
+                              <span className="text-[11px] text-muted-foreground/60">
                                 /100g: {Math.round(ing.per100.kcal)} kcal · P{Math.round(ing.per100.protein * 10) / 10} C{Math.round(ing.per100.carbs * 10) / 10} G{Math.round(ing.per100.fats * 10) / 10}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-[10px] text-yellow-600">⚠ macro non trovati</span>
+                            <span className="text-[11px] text-yellow-600">macro non trovati</span>
                           )}
                         </div>
                       </div>

@@ -121,7 +121,7 @@ const ProClientMeasurementsPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: (error as any).message });
     } else {
-      toast({ title: "Obiettivi salvati ✅" });
+      toast({ title: "Obiettivi salvati" });
       setShowGoalForm(false);
       loadData();
     }
@@ -152,7 +152,7 @@ const ProClientMeasurementsPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: error.message });
     } else {
-      toast({ title: "Misurazione salvata ✅" });
+      toast({ title: "Misurazione salvata" });
       setShowForm(false);
       setForm({ measured_at: localDateString(), weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "" });
       loadData();
@@ -218,15 +218,15 @@ const ProClientMeasurementsPage = () => {
               <div className="space-y-2 border-t border-border pt-3">
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[10px] font-medium text-muted-foreground">Altezza (cm)</label>
+                    <label className="text-[11px] font-medium text-muted-foreground">Altezza (cm)</label>
                     <Input type="number" step="0.1" placeholder="170" value={goalForm.height_cm} onChange={(e) => setGoalForm({ ...goalForm, height_cm: e.target.value })} className="h-8 text-xs" />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-muted-foreground">Peso partenza</label>
+                    <label className="text-[11px] font-medium text-muted-foreground">Peso partenza</label>
                     <Input type="number" step="0.1" placeholder="80" value={goalForm.starting_weight_kg} onChange={(e) => setGoalForm({ ...goalForm, starting_weight_kg: e.target.value })} className="h-8 text-xs" />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-muted-foreground">Peso obiettivo</label>
+                    <label className="text-[11px] font-medium text-muted-foreground">Peso obiettivo</label>
                     <Input type="number" step="0.1" placeholder="70" value={goalForm.target_weight_kg} onChange={(e) => setGoalForm({ ...goalForm, target_weight_kg: e.target.value })} className="h-8 text-xs" />
                   </div>
                 </div>
@@ -240,9 +240,9 @@ const ProClientMeasurementsPage = () => {
             {goal && !showGoalForm && (
               <div className="space-y-2.5">
                 <div className="flex items-center gap-3 text-xs">
-                  {heightCm && <span className="text-muted-foreground">📏 {heightCm} cm</span>}
-                  {startWeight && <span className="text-muted-foreground">🏁 {startWeight} kg</span>}
-                  {targetWeight && <span className="font-semibold text-primary">🎯 {targetWeight} kg</span>}
+                  {heightCm && <span className="text-muted-foreground">{heightCm} cm</span>}
+                  {startWeight && <span className="text-muted-foreground">{startWeight} kg</span>}
+                  {targetWeight && <span className="font-semibold text-primary">{targetWeight} kg</span>}
                 </div>
 
                 {latestWeight && (
@@ -251,7 +251,7 @@ const ProClientMeasurementsPage = () => {
                     {weightDiff !== null && (
                       <Badge
                         variant="outline"
-                        className={`text-[10px] gap-0.5 ${
+                        className={`text-[11px] gap-0.5 ${
                           (isLosingGoal && weightDiff < 0) || (!isLosingGoal && weightDiff > 0)
                             ? "border-success text-success"
                             : weightDiff === 0
@@ -264,7 +264,7 @@ const ProClientMeasurementsPage = () => {
                       </Badge>
                     )}
                     {bmi && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[11px]">
                         BMI {bmi}
                       </Badge>
                     )}
@@ -274,7 +274,7 @@ const ProClientMeasurementsPage = () => {
                 {progressPct !== null && totalToLose && (
                   <div className="space-y-1">
                     <Progress value={progressPct} className="h-2.5" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <div className="flex justify-between text-[11px] text-muted-foreground">
                       <span>{progressPct}% completato</span>
                       <span>{remaining} kg {isLosingGoal ? "da perdere" : "da prendere"}</span>
                     </div>
@@ -350,7 +350,7 @@ const ProClientMeasurementsPage = () => {
                   <Badge
                     key={m.key}
                     variant={activeMetrics.includes(m.key) ? "default" : "outline"}
-                    className="cursor-pointer text-[10px]"
+                    className="cursor-pointer text-[11px]"
                     style={activeMetrics.includes(m.key) ? { backgroundColor: m.color, borderColor: m.color } : {}}
                     onClick={() => toggleMetric(m.key)}
                   >
@@ -390,9 +390,9 @@ const ProClientMeasurementsPage = () => {
                     <span className="text-xs font-semibold text-foreground">
                       {new Date(m.measured_at).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
                     </span>
-                    {m.weight_kg && <Badge variant="outline" className="text-[10px]">{m.weight_kg} kg</Badge>}
+                    {m.weight_kg && <Badge variant="outline" className="text-[11px]">{m.weight_kg} kg</Badge>}
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
                     {m.waist_cm && <span>Vita {m.waist_cm}cm</span>}
                     {m.hips_cm && <span>Fianchi {m.hips_cm}cm</span>}
                     {m.chest_cm && <span>Petto {m.chest_cm}cm</span>}
@@ -400,7 +400,7 @@ const ProClientMeasurementsPage = () => {
                     {m.thigh_cm && <span>Coscia {m.thigh_cm}cm</span>}
                     {m.body_fat_pct && <span>BF {m.body_fat_pct}%</span>}
                   </div>
-                  {m.notes && <p className="text-[10px] text-muted-foreground mt-1 italic">📝 {m.notes}</p>}
+                  {m.notes && <p className="text-[11px] text-muted-foreground mt-1 italic">{m.notes}</p>}
                 </CardContent>
               </Card>
             ))

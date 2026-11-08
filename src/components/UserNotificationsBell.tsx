@@ -91,10 +91,10 @@ export default function UserNotificationsBell() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button className="relative p-2">
-          <Bell className="h-5 w-5 text-foreground" />
+        <button className="relative p-2" aria-label="Notifiche">
+          <Bell className="h-5 w-5 text-current" />
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[11px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -138,15 +138,15 @@ export default function UserNotificationsBell() {
                       <p className={`text-sm ${!n.read_at ? "font-semibold text-foreground" : "text-foreground"}`}>{n.title}</p>
                       {n.body && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-3">{n.body}</p>}
                       {n.metadata?.coupon_code && (
-                        <div className="mt-1.5 inline-flex items-center gap-1 bg-accent/20 border border-accent/30 rounded-md px-2 py-1">
+                        <div className="mt-1.5 inline-flex items-center gap-1 bg-accent/20 border border-border rounded-md px-2 py-1">
                           <Gift className="h-3 w-3 text-primary" />
                           <span className="text-xs font-mono font-bold text-primary">{n.metadata.coupon_code}</span>
                           {n.metadata.discount_percent && (
-                            <span className="text-[10px] text-muted-foreground">(-{n.metadata.discount_percent}%)</span>
+                            <span className="text-[11px] text-muted-foreground">(-{n.metadata.discount_percent}%)</span>
                           )}
                         </div>
                       )}
-                      <p className="text-[10px] text-muted-foreground mt-1">{timeAgo(n.created_at)}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {!n.read_at && <div className="h-2 w-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
                   </div>

@@ -1,3 +1,4 @@
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useEffect, useState, useRef } from "react";
 import { useTour, TourRole } from "@/components/AppTourContext";
 import MobileHeader from "@/components/MobileHeader";
@@ -6,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ChevronRight, Settings, Heart, Bell, LogOut, Sparkles,
+  ChevronRight, Settings, Heart, Bell, LogOut, HeartPulse, Sparkles,
   MessageSquareWarning, MessageCircle, Trash2, Camera, MapPin, GraduationCap,
   Globe, Instagram, Facebook, Linkedin, Briefcase, Monitor, Building2, Eye, EyeOff, Pencil, X,
   Share2, Copy, Lock, MessageCircleMore, Map as MapIcon,
@@ -334,7 +335,7 @@ const ProfiloPage = () => {
               {profile.avatar_url ? (
                 <AvatarImage src={profile.avatar_url} alt="Avatar" className="object-cover" />
               ) : null}
-              <AvatarFallback className="bg-primary/10 text-2xl">👤</AvatarFallback>
+              <AvatarFallback className="bg-secondary text-2xl font-semibold text-primary-dark">{(profile.full_name || user?.email || "?").charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
               <Camera className="h-5 w-5 text-white" />
@@ -351,7 +352,7 @@ const ProfiloPage = () => {
 
         {/* ═══ Professional Profile Card (only for professionals) ═══ */}
         {role === "professional" && (
-          <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
+          <div className="rounded-lg bg-card shadow-card overflow-hidden">
             <div className="px-4 pt-4 pb-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -390,7 +391,7 @@ const ProfiloPage = () => {
                       <p className="text-sm font-bold text-foreground truncate">{myProProfile.display_name}</p>
                       {myProProfile.specialization && <p className="text-xs text-muted-foreground">{myProProfile.specialization}</p>}
                     </div>
-                    <Badge variant={myProProfile.is_visible ? "default" : "secondary"} className="text-[10px] gap-1">
+                    <Badge variant={myProProfile.is_visible ? "default" : "secondary"} className="text-[11px] gap-1">
                       {myProProfile.is_visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                       {myProProfile.is_visible ? "Visibile" : "Nascosto"}
                     </Badge>
@@ -430,7 +431,7 @@ const ProfiloPage = () => {
                   {myProProfile.additional_roles && myProProfile.additional_roles.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {myProProfile.additional_roles.map(r => (
-                        <Badge key={r} variant="outline" className="text-[10px]">{r}</Badge>
+                        <Badge key={r} variant="outline" className="text-[11px]">{r}</Badge>
                       ))}
                     </div>
                   )}
@@ -456,14 +457,14 @@ const ProfiloPage = () => {
 
 
         {/* ═══ Menu items ═══ */}
-        <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
+        <div className="rounded-lg bg-card shadow-card overflow-hidden">
           {(role === "professional" ? [
-            { icon: Sparkles, label: "Abbonamenti clienti", path: "/pro/clients", badge: 0 },
+            { icon: Sparkles, label: "I miei clienti", path: "/pro/clients", badge: 0 },
           ] : [
             ...[{ icon: MessageCircle, label: "Messaggi", path: "/messages", badge: unreadMsgCount }],
             { icon: Heart, label: "Preferiti", path: "/favorites", badge: 0 },
-            { icon: Sparkles, label: "Abbonamento Premium", path: "/subscription", badge: 0 },
-            { icon: Bell, label: "Promemoria scadenze", path: "/reminders", badge: 0 },
+            { icon: HeartPulse, label: "Scheda salute", path: "/clinical", badge: 0 },
+            ...(PAYMENTS_ENABLED ? [{ icon: Sparkles, label: "Abbonamento Plus", path: "/subscription", badge: 0 }] : []),
             { icon: Bell, label: "Promemoria pasti", path: "/meal-reminders", badge: 0 },
           ]).map((item, i) => (
             <button
@@ -476,7 +477,7 @@ const ProfiloPage = () => {
               <item.icon size={20} className="text-primary shrink-0" />
               <span className="flex-1 text-[15px] font-medium text-foreground">{item.label}</span>
               {item.badge > 0 && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">
+                <Badge variant="destructive" className="text-[11px] px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">
                   {item.badge > 9 ? "9+" : item.badge}
                 </Badge>
               )}
@@ -485,7 +486,7 @@ const ProfiloPage = () => {
           ))}
         </div>
 
-        <div className="rounded-[18px] bg-card shadow-card overflow-hidden">
+        <div className="rounded-lg bg-card shadow-card overflow-hidden">
           <button
             onClick={openSettings}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-secondary"
@@ -512,52 +513,16 @@ const ProfiloPage = () => {
           </button>
         </div>
 
-        {/* ═══ Email Preferences ═══ */}
-        <div className="overflow-hidden rounded-[18px] border border-border bg-card">
-          <div className="px-4 py-3 border-b border-border">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Bell size={16} className="text-primary" />
-              Notifiche email
-            </h3>
-          </div>
-          {[
-            { key: "receive_expiry_alerts" as const, label: "Avvisi scadenze prodotti" },
-            { key: "receive_verification" as const, label: "Email conferma account" },
-            { key: "receive_password_reset" as const, label: "Email recupero password" },
-          ].map((item) => (
-            <div key={item.key} className="flex items-center justify-between px-4 py-3 border-b border-border last:border-b-0">
-              <span className="text-[14px] text-foreground">{item.label}</span>
-              <Switch
-                checked={emailPrefs[item.key]}
-                onCheckedChange={async (checked) => {
-                  const newPrefs = { ...emailPrefs, [item.key]: checked };
-                  setEmailPrefs(newPrefs);
-                  setSavingEmailPrefs(true);
-                  const { error } = await supabase
-                    .from("email_preferences")
-                    .upsert({ user_id: user!.id, ...newPrefs, updated_at: new Date().toISOString() });
-                  setSavingEmailPrefs(false);
-                  if (error) {
-                    toast({ variant: "destructive", title: "Errore", description: "Impossibile salvare le preferenze." });
-                    setEmailPrefs({ ...emailPrefs }); // revert
-                  } else {
-                    toast({ title: "Preferenze aggiornate" });
-                  }
-                }}
-              />
-            </div>
-          ))}
-        </div>
 
         {/* ═══ Condividi CibaFit ═══ */}
-        <div className="rounded-[18px] overflow-hidden border border-border bg-gradient-to-br from-primary/10 via-card to-primary/5">
+        <div className="rounded-lg overflow-hidden border border-border bg-card">
           <div className="px-4 pt-4 pb-4">
             <div className="flex items-center gap-2 mb-1">
               <Share2 size={18} className="text-primary" />
               <h3 className="text-[15px] font-semibold text-foreground">Condividi CibaFit</h3>
             </div>
             <p className="text-[13px] text-muted-foreground mb-3">
-              Invita amici e colleghi a provare CibaFit! Condividi il link dell'app. 🍽️
+              Invita amici e colleghi a provare CibaFit! Condividi il link dell'app. 
             </p>
             <Button
               size="sm"
@@ -566,7 +531,7 @@ const ProfiloPage = () => {
                 if (typeof navigator.share === "function") {
                   navigator.share({
                     title: "CibaFit",
-                    text: "Prova CibaFit! Gestisci dispensa, pasti e ricette in modo intelligente 🍽️",
+                    text: "Prova CibaFit! Gestisci dispensa, pasti e ricette in modo intelligente",
                     url: "https://simple-blue-frame.lovable.app",
                   }).catch(() => {});
                 } else {
@@ -586,31 +551,31 @@ const ProfiloPage = () => {
             localStorage.removeItem("cibafit_tour_done");
             startTour((role as TourRole) ?? "user");
           }}
-          className="flex w-full items-center gap-3 rounded-[18px] border border-border bg-card px-4 py-3.5 text-left transition-colors active:bg-secondary"
+          className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3.5 text-left transition-colors active:bg-secondary"
         >
           <MapIcon size={20} className="text-primary shrink-0" />
           <span className="flex-1 text-[15px] font-medium text-foreground">Rivedi il tour dell'app</span>
           <ChevronRight size={16} className="text-muted-foreground" />
         </button>
 
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-3.5 text-[15px] font-medium text-foreground transition-colors hover:bg-muted/50"
+        >
+          <LogOut size={16} />
+          Esci
+        </button>
+
         {role !== "admin" && (
         <button
           onClick={() => setDeleteOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-[18px] border border-destructive/20 py-3.5 text-sm font-medium text-destructive/70 transition-colors active:bg-destructive/5"
+          className="flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/5"
         >
           <Trash2 size={16} />
           Elimina account
         </button>
         )}
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="flex w-full items-center justify-center gap-2 rounded-[18px] border border-destructive/20 py-3.5 text-sm font-medium text-destructive transition-colors active:bg-destructive/5"
-        >
-          <LogOut size={16} />
-          Esci
-        </button>
       </main>
 
 

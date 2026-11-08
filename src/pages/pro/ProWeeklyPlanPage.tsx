@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { activatePlanExclusive, must, mustRows, PlanActivationError } from "@/lib/supabase-result";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
@@ -28,12 +29,12 @@ const DAYS_OF_WEEK = [
 ];
 
 const MEAL_TYPES = [
-  { key: "colazione", label: "☀️ Colazione", emoji: "☀️" },
-  { key: "spuntino_mattina", label: "🍎 Spuntino mattina", emoji: "🍎" },
-  { key: "pranzo", label: "🍝 Pranzo", emoji: "🍝" },
-  { key: "spuntino_pomeriggio", label: "🥤 Spuntino pomeriggio", emoji: "🥤" },
-  { key: "cena", label: "🌙 Cena", emoji: "🌙" },
-  { key: "extra", label: "📝 Note/Extra", emoji: "📝" },
+  { key: "colazione", label: "Colazione", emoji: "" },
+  { key: "spuntino_mattina", label: "Spuntino mattina", emoji: "" },
+  { key: "pranzo", label: "Pranzo", emoji: "" },
+  { key: "spuntino_pomeriggio", label: "Spuntino pomeriggio", emoji: "" },
+  { key: "cena", label: "Cena", emoji: "" },
+  { key: "extra", label: "Note/Extra", emoji: "" },
 ];
 
 interface MealData {
@@ -265,32 +266,19 @@ const ProWeeklyPlanPage = () => {
     if (!user || !clientId) return;
     setSaving(true);
 
+    // Nothing of the current plan is touched until the new content is fully saved
+    let draftPlanId: string | null = null;
+    const insertedWeekIds: string[] = [];
+
     try {
       let planId = existingPlanId;
+      let previousWeekIds: string[] = [];
 
       if (planId) {
-        // Update existing plan
-        await supabase.from("nutrition_plans" as any).update({
-          title,
-          calories_target: caloriesTarget ? parseInt(caloriesTarget) : null,
-          protein_target: proteinTarget ? parseInt(proteinTarget) : null,
-          carbs_target: carbsTarget ? parseInt(carbsTarget) : null,
-          fat_target: fatTarget ? parseInt(fatTarget) : null,
-          notes_general: notesGeneral || null,
-          updated_at: new Date().toISOString(),
-        } as any).eq("id", planId);
-
-        // Delete old weeks (cascade deletes days and meals)
-        await supabase.from("nutrition_plan_weeks" as any).delete().eq("plan_id", planId);
+        const previousWeeks = must(await supabase.from("nutrition_plan_weeks" as any).select("id").eq("plan_id", planId)) as any[];
+        previousWeekIds = (previousWeeks ?? []).map((w) => w.id);
       } else {
-        // Deactivate other weekly plans
-        await supabase.from("nutrition_plans" as any).update({ is_active: false } as any)
-          .eq("nutritionist_user_id", user.id)
-          .eq("client_user_id", clientId)
-          .eq("plan_mode", "weekly_meal_plan")
-          .eq("is_active", true);
-
-        const { data: newPlan, error } = await supabase.from("nutrition_plans" as any).insert({
+        const newPlan = must(await supabase.from("nutrition_plans" as any).insert({
           nutritionist_user_id: user.id,
           client_user_id: clientId,
           title,
@@ -300,10 +288,10 @@ const ProWeeklyPlanPage = () => {
           carbs_target: carbsTarget ? parseInt(carbsTarget) : null,
           fat_target: fatTarget ? parseInt(fatTarget) : null,
           notes_general: notesGeneral || null,
-        } as any).select("id").single();
-        if (error) throw error;
+          is_active: false,
+        } as any).select("id").single());
         planId = (newPlan as any).id;
-        setExistingPlanId(planId);
+        draftPlanId = planId;
       }
 
       // Save weeks, days, meals
@@ -315,6 +303,7 @@ const ProWeeklyPlanPage = () => {
           notes: week.notes || null,
         } as any).select("id").single();
         if (wErr) throw wErr;
+        insertedWeekIds.push((weekRow as any).id);
 
         for (const day of week.days) {
           const { data: dayRow, error: dErr } = await supabase.from("nutrition_plan_days" as any).insert({
@@ -340,15 +329,48 @@ const ProWeeklyPlanPage = () => {
         }
       }
 
-      // Sync nutrition_targets if macros specified
+      if (draftPlanId) {
+        // Deactivates the other weekly plans; restores them if the new one cannot be activated
+        await activatePlanExclusive(supabase, "nutrition_plans", draftPlanId, {
+          nutritionist_user_id: user.id,
+          client_user_id: clientId,
+          plan_mode: "weekly_meal_plan",
+        });
+        draftPlanId = null;
+        setExistingPlanId(planId);
+      } else {
+        mustRows(await supabase.from("nutrition_plans" as any).update({
+          title,
+          calories_target: caloriesTarget ? parseInt(caloriesTarget) : null,
+          protein_target: proteinTarget ? parseInt(proteinTarget) : null,
+          carbs_target: carbsTarget ? parseInt(carbsTarget) : null,
+          fat_target: fatTarget ? parseInt(fatTarget) : null,
+          notes_general: notesGeneral || null,
+          updated_at: new Date().toISOString(),
+        } as any).eq("id", planId).select("id"));
+
+        // The new weeks are in place: now the old ones can go (cascade deletes days and meals)
+        if (previousWeekIds.length > 0) {
+          mustRows(await supabase.from("nutrition_plan_weeks" as any).delete().in("id", previousWeekIds).select("id"));
+        }
+      }
+      insertedWeekIds.length = 0;
+
+      // Sync nutrition_targets if macros specified. The plan is already saved: a failure must not
+      // undo it. A professional cannot currently write a client's nutrition_targets (RLS).
+      let targetsSynced = true;
       if (caloriesTarget) {
-        await supabase.from("nutrition_targets").upsert({
+        const { error: targetsErr } = await supabase.from("nutrition_targets").upsert({
           user_id: clientId,
           kcal_day: parseInt(caloriesTarget) || 0,
           protein_g: proteinTarget ? parseInt(proteinTarget) : null,
           carbs_g: carbsTarget ? parseInt(carbsTarget) : null,
           fats_g: fatTarget ? parseInt(fatTarget) : null,
         } as any, { onConflict: "user_id" });
+        if (targetsErr) {
+          console.error("nutrition_targets sync failed:", targetsErr);
+          targetsSynced = false;
+        }
       }
 
       // Save meal text suggestions
@@ -364,10 +386,27 @@ const ProWeeklyPlanPage = () => {
         await saveMealTextSuggestions(user.id, allMealTexts);
       }
 
-      toast.success("Piano settimanale salvato! ✅");
+      if (targetsSynced) {
+        toast.success("Piano settimanale salvato!");
+      } else {
+        toast.warning("Piano settimanale salvato, ma obiettivi giornalieri no", {
+          description: "Il cliente vede il piano nuovo, ma nel diario potrebbe trovare gli obiettivi di prima.",
+        });
+      }
       navigate(`/pro/client/${clientId}`);
     } catch (err: any) {
-      toast.error(err?.message || "Errore nel salvataggio");
+      console.error("Weekly plan save failed:", err);
+      // Removing the draft plan also removes its weeks (cascade)
+      if (draftPlanId) {
+        await supabase.from("nutrition_plans" as any).delete().eq("id", draftPlanId);
+      } else if (insertedWeekIds.length > 0) {
+        await supabase.from("nutrition_plan_weeks" as any).delete().in("id", insertedWeekIds);
+      }
+      toast.error("Piano settimanale non salvato", {
+        description: err instanceof PlanActivationError && !err.previousRestored
+          ? "Il cliente potrebbe essere rimasto senza piano settimanale attivo. Riprova a salvare."
+          : "Il cliente continua a vedere il piano precedente. Controlla la connessione e riprova.",
+      });
     }
     setSaving(false);
   };
@@ -404,19 +443,19 @@ const ProWeeklyPlanPage = () => {
             <p className="text-xs text-muted-foreground font-medium">Target giornalieri (opzionale)</p>
             <div className="grid grid-cols-4 gap-2">
               <div>
-                <label className="text-[10px] text-muted-foreground">Kcal</label>
+                <label className="text-[11px] text-muted-foreground">Kcal</label>
                 <Input type="number" placeholder="2000" value={caloriesTarget} onChange={(e) => setCaloriesTarget(e.target.value)} className="h-8 text-xs" />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground">Proteine</label>
+                <label className="text-[11px] text-muted-foreground">Proteine</label>
                 <Input type="number" placeholder="120" value={proteinTarget} onChange={(e) => setProteinTarget(e.target.value)} className="h-8 text-xs" />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground">Carbo</label>
+                <label className="text-[11px] text-muted-foreground">Carbo</label>
                 <Input type="number" placeholder="220" value={carbsTarget} onChange={(e) => setCarbsTarget(e.target.value)} className="h-8 text-xs" />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground">Grassi</label>
+                <label className="text-[11px] text-muted-foreground">Grassi</label>
                 <Input type="number" placeholder="70" value={fatTarget} onChange={(e) => setFatTarget(e.target.value)} className="h-8 text-xs" />
               </div>
             </div>
@@ -439,7 +478,7 @@ const ProWeeklyPlanPage = () => {
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm text-foreground">{week.week_title}</span>
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="secondary" className="text-[11px]">
                       {week.days.reduce((s, d) => s + filledMealsCount(d), 0)} pasti
                     </Badge>
                   </div>
@@ -480,7 +519,7 @@ const ProWeeklyPlanPage = () => {
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-foreground">{dayLabel}</span>
                                 {filled > 0 && (
-                                  <Badge variant="default" className="text-[9px] px-1.5">{filled}</Badge>
+                                  <Badge variant="default" className="text-[11px] px-1.5">{filled}</Badge>
                                 )}
                               </div>
                               <div className="flex items-center gap-1">

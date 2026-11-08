@@ -69,7 +69,6 @@ const ResetPasswordPage = () => {
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="items-center text-center">
-            <div className="mb-2 text-4xl">⚠️</div>
             <CardTitle className="text-2xl">Link non valido</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
@@ -95,7 +94,6 @@ const ResetPasswordPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
-          <div className="mb-2 text-4xl">🔑</div>
           <CardTitle className="text-2xl">Nuova password</CardTitle>
           <CardDescription>Inserisci la tua nuova password</CardDescription>
         </CardHeader>

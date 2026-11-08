@@ -282,7 +282,7 @@ const AppTour = () => {
           <div className="relative rounded-2xl bg-card shadow-xl border border-border overflow-hidden">
             <div className="px-4 pt-3 pb-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-primary uppercase tracking-wider">
                   {currentStep + 1} / {totalSteps}
                 </span>
                 <button

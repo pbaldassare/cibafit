@@ -196,7 +196,7 @@ const UserItemDetailPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: error.message });
     } else {
-      toast({ title: "Prodotto aggiornato ✓" });
+      toast({ title: "Prodotto aggiornato" });
       setEditing(false);
       fetchItem();
     }
@@ -219,7 +219,7 @@ const UserItemDetailPage = () => {
     if (error) {
       toast({ variant: "destructive", title: "Errore", description: error.message });
     } else {
-      toast({ title: "✅ Segnato come consumato" });
+      toast({ title: "Segnato come consumato" });
       navigate(-1);
     }
   };
@@ -250,7 +250,7 @@ const UserItemDetailPage = () => {
         setPhotos((p) => [...p, row as any]);
         setPhotoIdx(photos.length);
       }
-      toast({ title: "Foto aggiunta ✓" });
+      toast({ title: "Foto aggiunta" });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore upload", description: err?.message });
     } finally {
@@ -336,13 +336,13 @@ const UserItemDetailPage = () => {
             )}
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
               {product.data_source === "manual" && (
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-amber-400 text-amber-600">✏️ Manuale</Badge>
+                <Badge variant="outline" className="text-[11px] px-1.5 py-0 border-amber-400 text-amber-600">Manuale</Badge>
               )}
               {product.data_source === "receipt" && (
-                <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-blue-400 text-blue-600">🧾 Scontrino</Badge>
+                <Badge variant="outline" className="text-[11px] px-1.5 py-0 border-blue-400 text-blue-600">Scontrino</Badge>
               )}
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                {(item as any).data_completeness === "enriched" ? "✅ Arricchito" : "📋 Base"}
+              <Badge variant="outline" className="text-[11px] px-1.5 py-0">
+                {(item as any).data_completeness === "enriched" ? "Arricchito" : "Base"}
               </Badge>
             </div>
           </div>
@@ -514,7 +514,7 @@ const UserItemDetailPage = () => {
                 alt={`Foto ${photoIdx + 1}`}
                 className="w-full h-48 object-cover rounded-lg"
               />
-              <Badge className="absolute top-2 left-2 text-[9px] bg-black/60 text-white border-0">
+              <Badge className="absolute top-2 left-2 text-[11px] bg-black/60 text-white border-0">
                 {photoTypeOptions.find((pt) => pt.value === photos[photoIdx]?.photo_type)?.label || "Prodotto"}
               </Badge>
               {photos.length > 1 && (

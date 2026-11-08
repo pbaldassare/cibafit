@@ -263,7 +263,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
       // Show informative toast if product was saved without nutrition data
       setTimeout(() => {
         toast({
-          title: "ℹ️ Prodotto senza dati nutrizionali",
+          title: "ℹProdotto senza dati nutrizionali",
           description: "Questo prodotto resterà in dispensa. Non sarà incluso nei calcoli nutrizionali finché non avrà valori nutrizionali compilati.",
         });
       }, 500);
@@ -418,7 +418,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Cerca prodotto..."
-            className="pl-9 bg-card border-accent/30"
+            className="pl-9 bg-card border-border"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -501,7 +501,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
                 <button
                   key={item.id}
                   onClick={() => mode === "user" ? navigate(`/item/${item.id}`) : openEditDialog(item)}
-                  className="flex w-full items-center gap-3 rounded-2xl border-2 border-accent bg-card p-3 text-left active:scale-[0.98] transition-transform"
+                  className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left active:scale-[0.98] transition-transform"
                 >
                   {/* Image / placeholder */}
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-secondary overflow-hidden">
@@ -521,13 +521,13 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="truncate text-sm font-bold text-foreground">{item.product.name}</p>
                       {(item.product as any).data_source === "manual" && (
-                        <Badge variant="outline" className="text-[8px] px-1 py-0 border-amber-400 text-amber-600 shrink-0">
-                          ✏️ Manuale
+                        <Badge variant="outline" className="text-[11px] px-1 py-0 border-amber-400 text-amber-600 shrink-0">
+                          Manuale
                         </Badge>
                       )}
                       {!(item.product as any).nutrition_available && (
-                        <Badge variant="outline" className="text-[8px] px-1 py-0 border-muted-foreground text-muted-foreground shrink-0">
-                          ⚠️ No macro
+                        <Badge variant="outline" className="text-[11px] px-1 py-0 border-muted-foreground text-muted-foreground shrink-0">
+                          No macro
                         </Badge>
                       )}
                     </div>
@@ -536,14 +536,14 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
                     </p>
                     <div className="flex items-center gap-2">
                       {displayCal != null ? (
-                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-primary">
+                        <span className="flex items-center gap-0.5 text-[11px] font-semibold text-primary">
                           <Flame className="h-3 w-3" /> {displayCal} kcal
                         </span>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground">kcal: —</span>
+                        <span className="text-[11px] text-muted-foreground">kcal: —</span>
                       )}
                       {item.expiry_date && (
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[11px] text-muted-foreground">
                           Scad: {new Date(item.expiry_date).toLocaleDateString("it-IT")}
                         </span>
                       )}
@@ -551,7 +551,7 @@ const InventoryList = ({ mode, storageFilter: externalStorageFilter }: Inventory
                   </div>
 
                   {/* Badge */}
-                  <Badge className={`shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold ${cfg.className}`}>
+                  <Badge className={`shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-bold ${cfg.className}`}>
                     {cfg.label}
                   </Badge>
                 </button>

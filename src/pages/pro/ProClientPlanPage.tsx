@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { activatePlanExclusive, must, mustRows, PlanActivationError, replaceChildRows } from "@/lib/supabase-result";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Wand2, ChevronRight, ChevronLeft, Check, AlertTriangle, RefreshCw, BookmarkPlus, FolderOpen, Plus, Trash2, Search, X } from "lucide-react";
@@ -15,10 +16,10 @@ import { searchFoodProgressive, FoodSearchResult, SearchPhase } from "@/lib/sear
 
 const MEAL_TYPES = ["colazione", "pranzo", "cena", "spuntino"] as const;
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 interface MealTarget {
@@ -327,7 +328,7 @@ const ProClientPlanPage = () => {
         } as any))
       );
       if (mtErr) throw mtErr;
-      toast({ title: "Template salvato! 📋" });
+      toast({ title: "Template salvato!" });
       setShowSaveTemplate(false);
       setTemplateName("");
     } catch (err: any) {
@@ -367,67 +368,80 @@ const ProClientPlanPage = () => {
       );
     }
     setShowLoadTemplate(false);
-    toast({ title: "Template applicato! ✅" });
+    toast({ title: "Template applicato!" });
   };
 
   const isEditMode = !!existingPlanId;
 
+  // Inserts the new items before removing the old ones: on failure the old ones stay
   const savePlanItems = async (planId: string) => {
-    // Delete existing items
-    await supabase.from("diet_plan_items").delete().eq("diet_plan_id", planId);
-    if (planItems.length > 0) {
-      await supabase.from("diet_plan_items").insert(
-        planItems.map((item, idx) => ({
-          diet_plan_id: planId,
-          meal_type: item.meal_type,
-          food_name: item.food_name,
-          quantity: item.quantity,
-          unit: item.unit,
-          calories: item.calories,
-          protein_g: item.protein_g,
-          carbs_g: item.carbs_g,
-          sugars_g: item.sugars_g,
-          fats_g: item.fats_g,
-          notes: item.notes || null,
-          sort_order: idx,
-        }))
-      );
-    }
+    await replaceChildRows(
+      supabase,
+      "diet_plan_items",
+      "diet_plan_id",
+      planId,
+      planItems.map((item, idx) => ({
+        diet_plan_id: planId,
+        meal_type: item.meal_type,
+        food_name: item.food_name,
+        quantity: item.quantity,
+        unit: item.unit,
+        calories: item.calories,
+        protein_g: item.protein_g,
+        carbs_g: item.carbs_g,
+        sugars_g: item.sugars_g,
+        fats_g: item.fats_g,
+        notes: item.notes || null,
+        sort_order: idx,
+      }))
+    );
+  };
+
+  // The plan is already saved at this point: a failure here must not undo it. A professional cannot
+  // currently write a client's nutrition_targets (RLS), so the outcome has to be reported honestly.
+  const syncClientTargets = async () => {
+    const { error } = await supabase.from("nutrition_targets").upsert({
+      user_id: clientId!, kcal_day: targetKcal, protein_g: targetProtein, carbs_g: targetCarbs, fats_g: targetFats,
+      fiber_g: fiberDay ? parseFloat(fiberDay) : null, saturated_fats_g: satFatsDay ? parseFloat(satFatsDay) : null, unsaturated_fats_g: unsatFatsDay ? parseFloat(unsatFatsDay) : null,
+    } as any, { onConflict: "user_id" });
+    if (error) console.error("nutrition_targets sync failed:", error);
+    return !error;
   };
 
   const handleUpdate = async () => {
     if (!user || !clientId || !existingPlanId) return;
     setSaving(true);
     try {
-      const { error: updateErr } = await supabase.from("diet_plans").update({
+      mustRows(await supabase.from("diet_plans").update({
         title, kcal_day: targetKcal, protein_g_day: targetProtein, carbs_g_day: targetCarbs, fats_g_day: targetFats,
         sugars_g_day: sugarsDay ? parseFloat(sugarsDay) : null, fiber_g_day: fiberDay ? parseFloat(fiberDay) : null,
         saturated_fats_g_day: satFatsDay ? parseFloat(satFatsDay) : null, unsaturated_fats_g_day: unsatFatsDay ? parseFloat(unsatFatsDay) : null,
         notes: notes || null,
-      } as any).eq("id", existingPlanId);
-      if (updateErr) throw updateErr;
+      } as any).eq("id", existingPlanId).select("id"));
 
-      await supabase.from("diet_plan_meal_targets").delete().eq("diet_plan_id", existingPlanId);
-      const { error: mtErr } = await supabase.from("diet_plan_meal_targets").insert(
+      // One row per meal (unique index): updating in place never leaves the plan without targets
+      must(await supabase.from("diet_plan_meal_targets").upsert(
         mealTargets.map((mt) => ({
           diet_plan_id: existingPlanId, meal_type: mt.meal_type, kcal_target: mt.kcal_target,
           protein_g: mt.protein_g, carbs_g: mt.carbs_g, fats_g: mt.fats_g, sugars_g: mt.sugars_g,
           fiber_g: mt.fiber_g || null, saturated_fats_g: mt.saturated_fats_g || null, unsaturated_fats_g: mt.unsaturated_fats_g || null,
-        } as any))
-      );
-      if (mtErr) throw mtErr;
+        } as any)),
+        { onConflict: "diet_plan_id,meal_type" }
+      ));
+      must(await supabase.from("diet_plan_meal_targets").delete()
+        .eq("diet_plan_id", existingPlanId)
+        .not("meal_type", "in", `(${mealTargets.map((mt) => mt.meal_type).join(",")})`));
 
       await savePlanItems(existingPlanId);
 
-      await supabase.from("nutrition_targets").upsert({
-        user_id: clientId, kcal_day: targetKcal, protein_g: targetProtein, carbs_g: targetCarbs, fats_g: targetFats,
-        fiber_g: fiberDay ? parseFloat(fiberDay) : null, saturated_fats_g: satFatsDay ? parseFloat(satFatsDay) : null, unsaturated_fats_g: unsatFatsDay ? parseFloat(unsatFatsDay) : null,
-      } as any, { onConflict: "user_id" });
-
-      toast({ title: "Piano aggiornato! ✅" });
+      const targetsSynced = await syncClientTargets();
+      toast(targetsSynced
+        ? { title: "Piano aggiornato!" }
+        : { title: "Piano aggiornato, ma obiettivi giornalieri no", description: "Il cliente vede il piano nuovo, ma nel diario potrebbe trovare gli obiettivi di prima." });
       navigate(`/pro/client/${clientId}`);
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message || "Errore aggiornamento" });
+      console.error("Plan update failed:", err);
+      toast({ variant: "destructive", title: "Piano non aggiornato", description: "Il salvataggio non è andato a buon fine e alcune modifiche potrebbero non essere state applicate. Controlla la connessione e riprova." });
     }
     setSaving(false);
   };
@@ -435,39 +449,46 @@ const ProClientPlanPage = () => {
   const handlePublish = async () => {
     if (!user || !clientId) return;
     setSaving(true);
+    // The new plan stays inactive until it is complete: the client keeps the previous one until then
+    let draftId: string | null = null;
     try {
-      if (existingPlanId) {
-        await supabase.from("diet_plans").update({ is_active: false }).eq("id", existingPlanId);
-      }
-      const { data: plan, error: planErr } = await supabase.from("diet_plans").insert({
+      const plan = must(await supabase.from("diet_plans").insert({
         professional_id: user.id, client_user_id: clientId, title,
         kcal_day: targetKcal, protein_g_day: targetProtein, carbs_g_day: targetCarbs, fats_g_day: targetFats,
         sugars_g_day: sugarsDay ? parseFloat(sugarsDay) : null, fiber_g_day: fiberDay ? parseFloat(fiberDay) : null,
         saturated_fats_g_day: satFatsDay ? parseFloat(satFatsDay) : null, unsaturated_fats_g_day: unsatFatsDay ? parseFloat(unsatFatsDay) : null,
-        notes: notes || null, is_active: true,
-      } as any).select().single();
-      if (planErr || !plan) throw planErr;
+        notes: notes || null, is_active: false,
+      } as any).select().single());
+      draftId = plan.id;
 
-      const { error: mtErr } = await supabase.from("diet_plan_meal_targets").insert(
+      must(await supabase.from("diet_plan_meal_targets").insert(
         mealTargets.map((mt) => ({
           diet_plan_id: plan.id, meal_type: mt.meal_type, kcal_target: mt.kcal_target,
           protein_g: mt.protein_g, carbs_g: mt.carbs_g, fats_g: mt.fats_g, sugars_g: mt.sugars_g,
           fiber_g: mt.fiber_g || null, saturated_fats_g: mt.saturated_fats_g || null, unsaturated_fats_g: mt.unsaturated_fats_g || null,
         } as any))
-      );
-      if (mtErr) throw mtErr;
+      ));
 
       await savePlanItems(plan.id);
 
-      await supabase.from("nutrition_targets").upsert({
-        user_id: clientId, kcal_day: targetKcal, protein_g: targetProtein, carbs_g: targetCarbs, fats_g: targetFats,
-        fiber_g: fiberDay ? parseFloat(fiberDay) : null, saturated_fats_g: satFatsDay ? parseFloat(satFatsDay) : null, unsaturated_fats_g: unsatFatsDay ? parseFloat(unsatFatsDay) : null,
-      } as any, { onConflict: "user_id" });
+      await activatePlanExclusive(supabase, "diet_plans", plan.id, { professional_id: user.id, client_user_id: clientId });
+      draftId = null;
 
-      toast({ title: "Piano pubblicato! ✅" });
+      const targetsSynced = await syncClientTargets();
+      toast(targetsSynced
+        ? { title: "Piano pubblicato!" }
+        : { title: "Piano pubblicato, ma obiettivi giornalieri no", description: "Il cliente vede il piano nuovo, ma nel diario potrebbe trovare gli obiettivi di prima." });
       navigate(`/pro/client/${clientId}`);
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message || "Errore pubblicazione" });
+      console.error("Plan publish failed:", err);
+      if (draftId) await supabase.from("diet_plans").delete().eq("id", draftId);
+      toast({
+        variant: "destructive",
+        title: "Piano non pubblicato",
+        description: err instanceof PlanActivationError && !err.previousRestored
+          ? "Il cliente potrebbe essere rimasto senza piano attivo. Riprova a pubblicare o riattiva il piano precedente dallo Storico."
+          : "Il cliente continua a vedere il piano precedente. Controlla la connessione e riprova.",
+      });
     }
     setSaving(false);
   };
@@ -485,7 +506,7 @@ const ProClientPlanPage = () => {
     const diff = sum - target;
     if (diff === 0) return null;
     return (
-      <span className="text-destructive text-[10px]">
+      <span className="text-destructive text-[11px]">
         {label}: {sum} vs {target} ({diff > 0 ? "+" : ""}{diff})
       </span>
     );
@@ -509,10 +530,10 @@ const ProClientPlanPage = () => {
 
         {/* Step 1: Daily targets */}
         {step === 1 && (
-          <Card className="border-2 border-accent">
+          <Card className="border border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">📊 Target giornalieri</CardTitle>
+                <CardTitle className="text-base">Target giornalieri</CardTitle>
                 <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => { loadTemplates(); setShowLoadTemplate(true); }}>
                   <FolderOpen className="h-3.5 w-3.5" /> Da template
                 </Button>
@@ -575,7 +596,7 @@ const ProClientPlanPage = () => {
         {/* Step 2: Meal posology + food items */}
         {step === 2 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">🍽️ Posologia per pasto</h3>
+            <h3 className="text-sm font-semibold text-foreground">Posologia per pasto</h3>
 
             {/* Live totals bar */}
             <div className={`rounded-lg p-3 text-xs space-y-1 ${allMatch ? "bg-green-500/10 border border-green-500/20" : "bg-destructive/10 border border-destructive/20"}`}>
@@ -614,45 +635,45 @@ const ProClientPlanPage = () => {
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold">{MEAL_LABELS[mt.meal_type]}</p>
                       {mealItems.length > 0 && (
-                        <span className="text-[10px] text-muted-foreground">{itemsKcal} kcal dagli alimenti</span>
+                        <span className="text-[11px] text-muted-foreground">{itemsKcal} kcal dagli alimenti</span>
                       )}
                     </div>
 
                     {/* Macro targets */}
                     <div className="grid grid-cols-4 gap-2">
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Kcal</label>
+                        <label className="text-[11px] text-muted-foreground">Kcal</label>
                         <Input type="number" value={mt.kcal_target || ""} onChange={(e) => updateMealTarget(idx, "kcal_target", e.target.value)} className="h-8 text-xs" placeholder="0" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Prot.</label>
+                        <label className="text-[11px] text-muted-foreground">Prot.</label>
                         <Input type="number" value={mt.protein_g || ""} onChange={(e) => updateMealTarget(idx, "protein_g", e.target.value)} className="h-8 text-xs" placeholder="0" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Carbo</label>
+                        <label className="text-[11px] text-muted-foreground">Carbo</label>
                         <Input type="number" value={mt.carbs_g || ""} onChange={(e) => updateMealTarget(idx, "carbs_g", e.target.value)} className="h-8 text-xs" placeholder="0" />
                       </div>
                       <div>
-                        <label className="text-[10px] text-muted-foreground">Grassi</label>
+                        <label className="text-[11px] text-muted-foreground">Grassi</label>
                         <Input type="number" value={mt.fats_g || ""} onChange={(e) => updateMealTarget(idx, "fats_g", e.target.value)} className="h-8 text-xs" placeholder="0" />
                       </div>
                     </div>
                     {showAdvancedMacros && (
                       <div className="grid grid-cols-4 gap-2">
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Zucch.</label>
+                          <label className="text-[11px] text-muted-foreground">Zucch.</label>
                           <Input type="number" value={mt.sugars_g || ""} onChange={(e) => updateMealTarget(idx, "sugars_g", e.target.value)} className="h-8 text-xs" placeholder="—" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Fibre</label>
+                          <label className="text-[11px] text-muted-foreground">Fibre</label>
                           <Input type="number" value={mt.fiber_g || ""} onChange={(e) => updateMealTarget(idx, "fiber_g", e.target.value)} className="h-8 text-xs" placeholder="—" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">G. saturi</label>
+                          <label className="text-[11px] text-muted-foreground">G. saturi</label>
                           <Input type="number" value={mt.saturated_fats_g || ""} onChange={(e) => updateMealTarget(idx, "saturated_fats_g", e.target.value)} className="h-8 text-xs" placeholder="—" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">G. insat.</label>
+                          <label className="text-[11px] text-muted-foreground">G. insat.</label>
                           <Input type="number" value={mt.unsaturated_fats_g || ""} onChange={(e) => updateMealTarget(idx, "unsaturated_fats_g", e.target.value)} className="h-8 text-xs" placeholder="—" />
                         </div>
                       </div>
@@ -672,12 +693,12 @@ const ProClientPlanPage = () => {
                                     type="number"
                                     value={item.quantity}
                                     onChange={(e) => updatePlanItem(globalIdx, "quantity", e.target.value)}
-                                    className="h-6 w-16 text-[10px] px-1"
+                                    className="h-6 w-16 text-[11px] px-1"
                                   />
-                                  <span className="text-[10px] text-muted-foreground">{item.unit}</span>
-                                  <span className="text-[10px] text-muted-foreground ml-1">{item.calories} kcal</span>
+                                  <span className="text-[11px] text-muted-foreground">{item.unit}</span>
+                                  <span className="text-[11px] text-muted-foreground ml-1">{item.calories} kcal</span>
                                 </div>
-                                <p className="text-[9px] text-muted-foreground">
+                                <p className="text-[11px] text-muted-foreground">
                                   P:{item.protein_g}g C:{item.carbs_g}g {item.sugars_g > 0 ? `(Z:${item.sugars_g}g) ` : ""}G:{item.fats_g}g
                                 </p>
                               </div>
@@ -690,7 +711,7 @@ const ProClientPlanPage = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-6 text-[10px] text-primary gap-1"
+                          className="h-6 text-[11px] text-primary gap-1"
                           onClick={() => recalcMealFromItems(mt.meal_type)}
                         >
                           <RefreshCw className="h-3 w-3" /> Ricalcola macro da alimenti
@@ -715,7 +736,7 @@ const ProClientPlanPage = () => {
                           </button>
                         </div>
                         {searchingFood && (
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             {searchPhase === "local" ? "Ricerca locale..." : searchPhase === "off" ? "Ricerca OpenFoodFacts..." : searchPhase === "usda" ? "Ricerca USDA..." : "Ricerca..."}
                           </p>
                         )}
@@ -729,13 +750,13 @@ const ProClientPlanPage = () => {
                               >
                                 <div className="flex items-center gap-1.5">
                                   <p className="font-medium text-foreground flex-1 truncate">{f.name}</p>
-                                  <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
+                                  <span className={`shrink-0 text-[11px] px-1.5 py-0.5 rounded-full font-medium ${
                                     f.source === "local" ? "bg-primary/15 text-primary" : f.source === "off" ? "bg-accent/20 text-accent-foreground" : "bg-muted text-muted-foreground"
                                   }`}>
                                     {f.source === "local" ? "DB" : f.source === "off" ? "OFF" : "USDA"}
                                   </span>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground">
+                                <p className="text-[11px] text-muted-foreground">
                                   {f.calories_100g ?? 0} kcal/100g · P:{f.protein_100g ?? 0} C:{f.carbs_100g ?? 0} G:{f.fats_100g ?? 0}
                                   {f.brand ? ` · ${f.brand}` : ""}
                                 </p>
@@ -767,8 +788,8 @@ const ProClientPlanPage = () => {
 
         {/* Step 3: Notes */}
         {step === 3 && (
-          <Card className="border-2 border-accent">
-            <CardHeader><CardTitle className="text-base">📝 Note e regole</CardTitle></CardHeader>
+          <Card className="border border-border">
+            <CardHeader><CardTitle className="text-base">Note e regole</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground">Titolo piano</label>
@@ -801,25 +822,25 @@ const ProClientPlanPage = () => {
             )}
 
             <Card className="border-2 border-primary/30">
-              <CardHeader><CardTitle className="text-base">🚀 Riepilogo piano</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">Riepilogo piano</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm font-medium">{title}</p>
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="rounded-lg bg-primary/10 p-2">
                     <p className="text-lg font-bold text-primary">{kcalDay}</p>
-                    <p className="text-[10px] text-muted-foreground">kcal</p>
+                    <p className="text-[11px] text-muted-foreground">kcal</p>
                   </div>
                   <div className="rounded-lg bg-blue-500/10 p-2">
                     <p className="text-lg font-bold text-blue-600">{proteinDay}g</p>
-                    <p className="text-[10px] text-muted-foreground">proteine</p>
+                    <p className="text-[11px] text-muted-foreground">proteine</p>
                   </div>
                   <div className="rounded-lg bg-amber-500/10 p-2">
                     <p className="text-lg font-bold text-amber-600">{carbsDay}g</p>
-                    <p className="text-[10px] text-muted-foreground">carbo</p>
+                    <p className="text-[11px] text-muted-foreground">carbo</p>
                   </div>
                   <div className="rounded-lg bg-red-500/10 p-2">
                     <p className="text-lg font-bold text-red-600">{fatsDay}g</p>
-                    <p className="text-[10px] text-muted-foreground">grassi</p>
+                    <p className="text-[11px] text-muted-foreground">grassi</p>
                   </div>
                 </div>
 
@@ -836,7 +857,7 @@ const ProClientPlanPage = () => {
                         {items.length > 0 && (
                           <div className="mt-1.5 space-y-0.5">
                             {items.map((item, i) => (
-                              <p key={i} className="text-[10px] text-muted-foreground">
+                              <p key={i} className="text-[11px] text-muted-foreground">
                                 • {item.food_name} — {item.quantity}{item.unit} ({item.calories} kcal)
                               </p>
                             ))}

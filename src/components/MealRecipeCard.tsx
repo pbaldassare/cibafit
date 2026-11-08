@@ -65,18 +65,18 @@ const MealRecipeCard = ({
             <h4 className="font-medium text-sm text-foreground leading-tight truncate">{title}</h4>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Badge variant="secondary" className="text-[10px] font-normal gap-1 px-1.5 py-0.5">
+            <Badge variant="secondary" className="text-[11px] font-normal gap-1 px-1.5 py-0.5">
               <Clock className="h-2.5 w-2.5" />
               {prep_time_min}'
             </Badge>
-            <Badge variant="secondary" className="text-[10px] font-normal gap-1 px-1.5 py-0.5">
+            <Badge variant="secondary" className="text-[11px] font-normal gap-1 px-1.5 py-0.5">
               <Flame className="h-2.5 w-2.5" />
               {scale(kcal_total)}
             </Badge>
           </div>
         </div>
 
-        <div className="flex gap-3 text-[10px] text-muted-foreground">
+        <div className="flex gap-3 text-[11px] text-muted-foreground">
           <span>P {scale(protein_total)}g</span>
           <span>C {scale(carbs_total)}g</span>
           <span>G {scale(fats_total)}g</span>

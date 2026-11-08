@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
+import { useFavorites } from "@/hooks/useFavorites";
+import { activatePlanExclusive, must, PlanActivationError, replaceChildRows } from "@/lib/supabase-result";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchFoodProgressive, FoodSearchResult, SearchPhase } from "@/lib/search-food";
 import {
@@ -26,10 +28,10 @@ import {
 } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 const MEAL_ORDER = ["colazione", "pranzo", "spuntino", "cena"];
@@ -112,6 +114,7 @@ const UserDietPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { isActive: plusActive } = useSubscription("user_plus");
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<any>(null);
@@ -466,6 +469,7 @@ const UserDietPage = () => {
       const fats = parseFloat(selfFats) || 70;
 
       let planId = editingPlanId;
+      let createdPlanId: string | null = null;
 
       if (editingPlanId) {
         // Update existing plan
@@ -478,9 +482,6 @@ const UserDietPage = () => {
           notes: selfNotes || null,
         }).eq("id", editingPlanId);
         if (error) throw error;
-
-        // Delete old items, re-insert
-        await supabase.from("diet_plan_items").delete().eq("diet_plan_id", editingPlanId);
       } else {
         // Create new plan
         const { data: newPlan, error } = await supabase.from("diet_plans").insert({
@@ -496,11 +497,16 @@ const UserDietPage = () => {
         }).select().single();
         if (error) throw error;
         planId = newPlan.id;
+        createdPlanId = newPlan.id;
       }
 
-      // Save plan items
-      if (selfPlanItems.length > 0 && planId) {
-        await supabase.from("diet_plan_items").insert(
+      // Save plan items: new rows first, so the old ones survive a failure
+      try {
+        await replaceChildRows(
+          supabase,
+          "diet_plan_items",
+          "diet_plan_id",
+          planId!,
           selfPlanItems.map((item, idx) => ({
             diet_plan_id: planId,
             meal_type: item.meal_type,
@@ -515,19 +521,27 @@ const UserDietPage = () => {
             sort_order: idx,
           }))
         );
+      } catch (itemsErr) {
+        // A new plan without its foods must not stay active
+        if (createdPlanId) await supabase.from("diet_plans").delete().eq("id", createdPlanId);
+        throw itemsErr;
       }
 
-      // Create/update nutrition targets
-      await supabase.from("nutrition_targets").upsert({
+      // Create/update nutrition targets. The plan is already saved: a failure must not undo it.
+      const { error: targetsErr } = await supabase.from("nutrition_targets").upsert({
         user_id: user.id, kcal_day: kcal, protein_g: protein, carbs_g: carbs, fats_g: fats,
       }, { onConflict: "user_id" });
+      if (targetsErr) console.error("nutrition_targets sync failed:", targetsErr);
 
-      toast({ title: editingPlanId ? "Piano aggiornato! ✅" : "Piano creato! 🎉" });
+      toast(targetsErr
+        ? { title: "Piano salvato, ma obiettivi giornalieri no", description: "Il piano è salvato. Per aggiornare gli obiettivi del diario apri Pasti e poi Obiettivi." }
+        : { title: editingPlanId ? "Piano aggiornato!" : "Piano creato!" });
       setShowSelfPlan(false);
       setEditingPlanId(null);
       await loadData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message });
+      console.error("Self plan save failed:", err);
+      toast({ variant: "destructive", title: "Piano non salvato", description: "Il salvataggio non è andato a buon fine. Controlla la connessione e riprova." });
     }
     setSavingSelfPlan(false);
   };
@@ -563,13 +577,13 @@ const UserDietPage = () => {
 
     if (missingMeals.length > 0 && missingMeals.length <= 2) {
       const names = missingMeals.map((t: string) => MEAL_LABELS[t]?.replace(/^..\s/, "") || t).join(" e ");
-      return { icon: "🍽️", text: `Non hai ancora registrato: ${names}. Aggiungili per completare la giornata!` };
+      return { icon: "", text: `Non hai ancora registrato: ${names}. Aggiungili per completare la giornata!` };
     }
-    if (remaining.protein > 15) return { icon: "💪", text: `Ti mancano ancora ~${Math.round(remaining.protein)}g di proteine oggi.` };
-    if (remaining.carbs < -20) return { icon: "⚡", text: `Oggi sei alto di carbo (+${Math.round(Math.abs(remaining.carbs))}g).` };
-    if (remaining.fats < -10) return { icon: "🫒", text: `Grassi un po' sopra target (+${Math.round(Math.abs(remaining.fats))}g).` };
-    if (remaining.kcal > 0 && remaining.kcal < plan.kcal_day * 0.3) return { icon: "🎯", text: `Sei in pista! Mancano solo ${Math.round(remaining.kcal)} kcal.` };
-    if (remaining.kcal <= 0) return { icon: "✅", text: `Hai raggiunto il tuo obiettivo calorico! Complimenti.` };
+    if (remaining.protein > 15) return { icon: "", text: `Ti mancano ancora ~${Math.round(remaining.protein)}g di proteine oggi.` };
+    if (remaining.carbs < -20) return { icon: "", text: `Oggi sei alto di carbo (+${Math.round(Math.abs(remaining.carbs))}g).` };
+    if (remaining.fats < -10) return { icon: "", text: `Grassi un po' sopra target (+${Math.round(Math.abs(remaining.fats))}g).` };
+    if (remaining.kcal > 0 && remaining.kcal < plan.kcal_day * 0.3) return { icon: "", text: `Sei in pista! Mancano solo ${Math.round(remaining.kcal)} kcal.` };
+    if (remaining.kcal <= 0) return { icon: "", text: `Hai raggiunto il tuo obiettivo calorico! Complimenti.` };
     return null;
   }, [plan, todayTotals, todayMeals, mealTargets]);
 
@@ -587,13 +601,9 @@ const UserDietPage = () => {
   const saveTemplateAsPlan = async (tmpl: any) => {
     if (!user || savingTemplate) return;
     setSavingTemplate(true);
+    // The new plan stays inactive until it is complete: the current one is kept until then
+    let draftId: string | null = null;
     try {
-      // Deactivate only self-plans (RLS blocks update on pro-created plans)
-      await supabase.from("diet_plans").update({ is_active: false })
-        .eq("client_user_id", user.id)
-        .eq("professional_id", user.id)
-        .eq("is_active", true);
-
       const { data: newPlan, error } = await supabase.from("diet_plans").insert({
         professional_id: user.id,
         client_user_id: user.id,
@@ -603,14 +613,15 @@ const UserDietPage = () => {
         carbs_g_day: tmpl.carbs_g_day,
         fats_g_day: tmpl.fats_g_day,
         notes: tmpl.notes || null,
-        is_active: true,
+        is_active: false,
       }).select().single();
       if (error) throw error;
+      draftId = newPlan.id;
 
       // Copy template meals as meal targets
       const meals = tmpl.diet_plan_template_meals || [];
       if (meals.length > 0) {
-        await supabase.from("diet_plan_meal_targets").insert(
+        must(await supabase.from("diet_plan_meal_targets").insert(
           meals.map((m: any) => ({
             diet_plan_id: newPlan.id,
             meal_type: m.meal_type,
@@ -620,23 +631,38 @@ const UserDietPage = () => {
             fats_g: m.fats_g,
             sugars_g: m.sugars_g ?? 0,
           }))
-        );
+        ));
       }
 
-      // Update nutrition targets
-      await supabase.from("nutrition_targets").upsert({
+      // Touches only self-plans (RLS blocks update on pro-created plans)
+      await activatePlanExclusive(supabase, "diet_plans", newPlan.id, { professional_id: user.id, client_user_id: user.id });
+      draftId = null;
+
+      // Update nutrition targets. The plan is already active: a failure must not undo it.
+      const { error: targetsErr } = await supabase.from("nutrition_targets").upsert({
         user_id: user.id,
         kcal_day: tmpl.kcal_day,
         protein_g: tmpl.protein_g_day,
         carbs_g: tmpl.carbs_g_day,
         fats_g: tmpl.fats_g_day,
       }, { onConflict: "user_id" });
+      if (targetsErr) console.error("nutrition_targets sync failed:", targetsErr);
 
-      toast({ title: `Piano "${tmpl.title}" attivato! 🎉` });
+      toast(targetsErr
+        ? { title: `Piano "${tmpl.title}" attivato, ma obiettivi giornalieri no`, description: "Il piano è attivo. Per aggiornare gli obiettivi del diario apri Pasti e poi Obiettivi." }
+        : { title: `Piano "${tmpl.title}" attivato!` });
       setConfirmTemplate(null);
       navigate("/plan");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message });
+      console.error("Template activation failed:", err);
+      if (draftId) await supabase.from("diet_plans").delete().eq("id", draftId);
+      toast({
+        variant: "destructive",
+        title: "Piano non attivato",
+        description: err instanceof PlanActivationError && !err.previousRestored
+          ? "Il tuo piano precedente potrebbe essere stato disattivato. Riprova ad attivare questo piano."
+          : "Il tuo piano attuale non è cambiato. Controlla la connessione e riprova.",
+      });
     }
     setSavingTemplate(false);
   };
@@ -673,7 +699,7 @@ const UserDietPage = () => {
               >
                 {!plusActive && <Crown className="h-4 w-4" />}
                 <Sparkles className="h-4 w-4" /> Inizia ora
-                {!plusActive && <Badge variant="secondary" className="text-[9px] ml-1 bg-background/60">Plus</Badge>}
+                {!plusActive && <Badge variant="secondary" className="text-[11px] ml-1 bg-background/60">Plus</Badge>}
               </Button>
             </CardContent>
           </Card>
@@ -724,14 +750,14 @@ const UserDietPage = () => {
                         const info = getTemplateInfo(tmpl.title);
                         return (
                           <div className="mt-1 pt-2 border-t border-dashed border-border space-y-1.5 text-[11px] text-muted-foreground">
-                            <p><span className="font-semibold text-foreground">👤 Per chi:</span> {info.target}</p>
-                            <p><span className="font-semibold text-foreground">🎯 Obiettivi:</span> {info.goals}</p>
-                            <p><span className="font-semibold text-foreground">📋</span> {info.description}</p>
+                            <p><span className="font-semibold text-foreground">Per chi:</span> {info.target}</p>
+                            <p><span className="font-semibold text-foreground">Obiettivi:</span> {info.goals}</p>
+                            <p><span className="font-semibold text-foreground"></span> {info.description}</p>
                           </div>
                         );
                       })()}
                       {tmpl.notes && (
-                        <p className="text-[10px] text-muted-foreground line-clamp-2">{tmpl.notes}</p>
+                        <p className="text-[11px] text-muted-foreground line-clamp-2">{tmpl.notes}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -785,39 +811,39 @@ const UserDietPage = () => {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-foreground">{coach.display_name}</p>
                           {coach.specialization && (
-                            <Badge variant="outline" className="text-[9px] mt-0.5">{coach.specialization}</Badge>
+                            <Badge variant="outline" className="text-[11px] mt-0.5">{coach.specialization}</Badge>
                           )}
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                             {coach.city && (
-                              <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <p className="text-[11px] text-muted-foreground flex items-center gap-0.5">
                                 <MapPin className="h-2.5 w-2.5" /> {coach.city}
                               </p>
                             )}
                             {coach.experience_years != null && (
-                              <p className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                              <p className="text-[11px] text-muted-foreground flex items-center gap-0.5">
                                 <GraduationCap className="h-2.5 w-2.5" /> {coach.experience_years} anni
                               </p>
                             )}
                           </div>
                           {(coach.works_online || coach.works_in_person) && (
                             <div className="flex gap-1 mt-1">
-                              {coach.works_online && <Badge variant="secondary" className="text-[8px] px-1.5 py-0 gap-0.5"><Monitor className="h-2.5 w-2.5" /> Online</Badge>}
-                              {coach.works_in_person && <Badge variant="secondary" className="text-[8px] px-1.5 py-0 gap-0.5"><Building2 className="h-2.5 w-2.5" /> Presenza</Badge>}
+                              {coach.works_online && <Badge variant="secondary" className="text-[11px] px-1.5 py-0 gap-0.5"><Monitor className="h-2.5 w-2.5" /> Online</Badge>}
+                              {coach.works_in_person && <Badge variant="secondary" className="text-[11px] px-1.5 py-0 gap-0.5"><Building2 className="h-2.5 w-2.5" /> Presenza</Badge>}
                             </div>
                           )}
                           {coach.bio && (
-                            <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{coach.bio}</p>
+                            <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{coach.bio}</p>
                           )}
                         </div>
                         {status === "active" ? (
-                          <Badge variant="secondary" className="text-[10px] shrink-0 gap-1"><UserCheck className="h-3 w-3" /> Collegato</Badge>
+                          <Badge variant="secondary" className="text-[11px] shrink-0 gap-1"><UserCheck className="h-3 w-3" /> Collegato</Badge>
                         ) : status === "pending" ? (
-                          <Badge variant="outline" className="text-[10px] shrink-0 gap-1"><Loader2 className="h-3 w-3" /> In attesa</Badge>
+                          <Badge variant="outline" className="text-[11px] shrink-0 gap-1"><Loader2 className="h-3 w-3" /> In attesa</Badge>
                         ) : (
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-[10px] gap-1 shrink-0"
+                            className="h-7 text-[11px] gap-1 shrink-0"
                             disabled={sendingRequest === coach.user_id}
                             onClick={() => handleContactCoach(coach.user_id)}
                           >
@@ -864,7 +890,7 @@ const UserDietPage = () => {
                             className="w-full text-left rounded-lg bg-secondary/40 hover:bg-secondary p-2 text-xs transition-colors"
                           >
                             <p className="font-medium text-foreground">{tmpl.title}</p>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-[11px] text-muted-foreground">
                               {tmpl.kcal_day} kcal · P:{tmpl.protein_g_day}g C:{tmpl.carbs_g_day}g G:{tmpl.fats_g_day}g
                             </p>
                           </button>
@@ -917,7 +943,7 @@ const UserDietPage = () => {
                   </div>
                 </div>
                 {!plusActive && (
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <Crown className="h-3 w-3 text-amber-500" />
                     I macro vengono calcolati automaticamente. Passa a <button onClick={() => navigate("/subscription")} className="text-primary font-semibold underline">Plus</button> per personalizzarli.
                   </p>
@@ -940,7 +966,7 @@ const UserDietPage = () => {
                       <CardContent className="py-3 space-y-2">
                         <div className="flex items-center justify-between">
                           <p className="text-xs font-bold">{MEAL_LABELS[mt]}</p>
-                          <span className="text-[10px] text-muted-foreground">{mealKcal} kcal</span>
+                          <span className="text-[11px] text-muted-foreground">{mealKcal} kcal</span>
                         </div>
 
                         {items.map((item, idx) => {
@@ -949,7 +975,7 @@ const UserDietPage = () => {
                             <div key={idx} className="flex items-center gap-2 text-xs bg-secondary/30 rounded-lg p-2">
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium truncate">{item.food_name}</p>
-                                <p className="text-[10px] text-muted-foreground">
+                                <p className="text-[11px] text-muted-foreground">
                                   {item.calories} kcal · P:{item.protein_g} C:{item.carbs_g} G:{item.fats_g}
                                 </p>
                               </div>
@@ -959,7 +985,7 @@ const UserDietPage = () => {
                                 onChange={(e) => updateSelfFoodQty(globalIdx, e.target.value)}
                                 className="h-7 w-16 text-xs text-center"
                               />
-                              <span className="text-[10px] text-muted-foreground">{item.unit}</span>
+                              <span className="text-[11px] text-muted-foreground">{item.unit}</span>
                               <button onClick={() => removeSelfFoodItem(globalIdx)} className="text-destructive">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -983,7 +1009,7 @@ const UserDietPage = () => {
                               </button>
                             </div>
                             {selfSearching && (
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-[11px] text-muted-foreground">
                                 {selfSearchPhase === "local" ? "Ricerca locale..." : selfSearchPhase === "off" ? "Ricerca OpenFoodFacts..." : selfSearchPhase === "usda" ? "Ricerca USDA..." : "Ricerca..."}
                               </p>
                             )}
@@ -997,13 +1023,13 @@ const UserDietPage = () => {
                                   >
                                     <div className="flex items-center gap-1.5">
                                       <p className="font-medium text-foreground flex-1 truncate">{f.name}</p>
-                                      <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
+                                      <span className={`shrink-0 text-[11px] px-1.5 py-0.5 rounded-full font-medium ${
                                         f.source === "local" ? "bg-primary/15 text-primary" : f.source === "off" ? "bg-accent/20 text-accent-foreground" : "bg-muted text-muted-foreground"
                                       }`}>
                                         {f.source === "local" ? "DB" : f.source === "off" ? "OFF" : "USDA"}
                                       </span>
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground">
+                                    <p className="text-[11px] text-muted-foreground">
                                       {f.calories_100g ?? 0} kcal/100g · P:{f.protein_100g ?? 0} C:{f.carbs_100g ?? 0} G:{f.fats_100g ?? 0}
                                       {f.brand ? ` · ${f.brand}` : ""}
                                     </p>
@@ -1058,7 +1084,7 @@ const UserDietPage = () => {
                     Stai per attivare il piano <strong className="text-foreground">{confirmTemplate?.title}</strong>.
                   </span>
                   <span className="flex gap-3 text-xs">
-                    <span className="text-primary font-medium">🔥 {confirmTemplate?.kcal_day} kcal</span>
+                    <span className="text-primary font-medium">{confirmTemplate?.kcal_day} kcal</span>
                     <span className="font-medium" style={{ color: "hsl(217, 91%, 60%)" }}>P {confirmTemplate?.protein_g_day}g</span>
                     <span className="font-medium" style={{ color: "hsl(38, 92%, 50%)" }}>C {confirmTemplate?.carbs_g_day}g</span>
                     <span className="font-medium" style={{ color: "hsl(350, 89%, 60%)" }}>G {confirmTemplate?.fats_g_day}g</span>
@@ -1117,10 +1143,10 @@ const UserDietPage = () => {
                   <p className="text-xs text-muted-foreground">Il tuo coach</p>
                   <p className="text-sm font-bold text-foreground truncate">Dott. {proDisplayName}</p>
                   {proDetailProfile?.specialization && (
-                    <p className="text-[10px] text-muted-foreground">{proDetailProfile.specialization}</p>
+                    <p className="text-[11px] text-muted-foreground">{proDetailProfile.specialization}</p>
                   )}
                 </div>
-                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 gap-1 text-[10px]">
+                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 gap-1 text-[11px]">
                   <UserCheck className="h-3 w-3" /> Collegato
                 </Badge>
               </div>
@@ -1186,7 +1212,7 @@ const UserDietPage = () => {
                   <DetailBox label="grassi" value={`${plan.fats_g_day}g`} className="text-rose-500" />
                 </div>
                 {plan.notes && (
-                  <p className="text-[11px] text-muted-foreground italic pt-2 border-t border-border mt-2">📝 {plan.notes}</p>
+                  <p className="text-[11px] text-muted-foreground italic pt-2 border-t border-border mt-2">{plan.notes}</p>
                 )}
               </CollapsibleContent>
             </Collapsible>
@@ -1213,7 +1239,7 @@ const UserDietPage = () => {
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground">Genera ricette smart</p>
+              <p className="text-sm font-bold text-foreground">Genera ricette</p>
               <p className="text-[11px] text-muted-foreground">Crea ricette bilanciate con quello che hai in dispensa</p>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -1251,7 +1277,7 @@ const UserDietPage = () => {
           <Card className="border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/messages")}>
             <CardContent className="py-3.5 flex flex-col items-center gap-2">
               <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center"><Send className="h-5 w-5 text-primary" /></div>
-              <p className="text-xs font-bold text-foreground text-center">Chat coach</p>
+              <p className="text-xs font-bold text-foreground text-center">Chat col nutrizionista</p>
             </CardContent>
           </Card>
           <Card className="border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate("/measurements")}>
@@ -1264,7 +1290,7 @@ const UserDietPage = () => {
 
         {/* ═══ 4. MEAL TARGETS with food items ═══ */}
         <div className="space-y-2">
-          <h3 className="text-sm font-bold text-foreground">🍽️ Posologia per pasto</h3>
+          <h3 className="text-sm font-bold text-foreground">Posologia per pasto</h3>
           {mealTargets
             .sort((a: any, b: any) => MEAL_ORDER.indexOf(a.meal_type) - MEAL_ORDER.indexOf(b.meal_type))
             .map((mt: any) => {
@@ -1293,14 +1319,14 @@ const UserDietPage = () => {
                   <CardContent className="py-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold text-foreground">{MEAL_LABELS[mt.meal_type] || mt.meal_type}</span>
-                      <Badge className={`text-[10px] ${statusColor}`}>{statusText}</Badge>
+                      <Badge className={`text-[11px] ${statusColor}`}>{statusText}</Badge>
                     </div>
                     <Progress value={pct} className="h-1.5" />
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground">
                         {Math.round(eaten)} / {mt.kcal_target} kcal · P{mt.protein_g} C{mt.carbs_g}{mt.sugars_g > 0 ? ` (Z${mt.sugars_g})` : ""} G{mt.fats_g}
                       </span>
-                      <Button size="sm" variant="ghost" className="h-6 text-[10px] text-primary gap-1 px-2" onClick={() => navigate("/meals")}>
+                      <Button size="sm" variant="ghost" className="h-6 text-[11px] text-primary gap-1 px-2" onClick={() => navigate("/meals")}>
                         <Plus className="h-3 w-3" /> Aggiungi
                       </Button>
                     </div>
@@ -1308,7 +1334,7 @@ const UserDietPage = () => {
                     {/* Food items collapsible */}
                     {mealFoods.length > 0 && (
                       <Collapsible open={isExpanded} onOpenChange={() => toggleMealExpand(mt.meal_type)}>
-                        <CollapsibleTrigger className="flex items-center gap-1 text-[10px] text-primary font-medium w-full pt-1">
+                        <CollapsibleTrigger className="flex items-center gap-1 text-[11px] text-primary font-medium w-full pt-1">
                           <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                           {mealFoods.length} aliment{mealFoods.length === 1 ? "o" : "i"} prescritti
                         </CollapsibleTrigger>
@@ -1317,9 +1343,9 @@ const UserDietPage = () => {
                             <div key={item.id} className="rounded-lg bg-secondary/40 px-2.5 py-1.5">
                               <div className="flex items-center justify-between">
                                 <p className="text-[11px] font-medium text-foreground">{item.food_name}</p>
-                                <p className="text-[10px] text-muted-foreground">{item.calories} kcal</p>
+                                <p className="text-[11px] text-muted-foreground">{item.calories} kcal</p>
                               </div>
-                              <p className="text-[9px] text-muted-foreground">
+                              <p className="text-[11px] text-muted-foreground">
                                 {item.quantity}{item.unit} · P:{item.protein_g}g C:{item.carbs_g}g{item.sugars_g > 0 ? ` (Z:${item.sugars_g}g)` : ""} G:{item.fats_g}g
                                 {item.notes ? ` · ${item.notes}` : ""}
                               </p>
@@ -1352,7 +1378,7 @@ const UserDietPage = () => {
                         <p className="font-bold text-sm text-foreground">{tmpl.title}</p>
                         <div className="flex items-center gap-1.5">
                           {isActive && (
-                            <Badge className="bg-primary/15 text-primary border-primary/30 text-[9px]">Attivo</Badge>
+                            <Badge className="bg-primary/15 text-primary border-primary/30 text-[11px]">Attivo</Badge>
                           )}
                           <Badge variant="secondary" className="text-xs">
                             <Flame className="h-3 w-3 mr-0.5" /> {tmpl.kcal_day} kcal
@@ -1365,7 +1391,7 @@ const UserDietPage = () => {
                         <span className="text-rose-600 font-medium">G {tmpl.fats_g_day}g</span>
                       </div>
                       {tmpl.notes && (
-                        <p className="text-[10px] text-muted-foreground line-clamp-2">{tmpl.notes}</p>
+                        <p className="text-[11px] text-muted-foreground line-clamp-2">{tmpl.notes}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -1405,35 +1431,49 @@ const UserDietPage = () => {
                 <Card key={s.id} className={`border overflow-hidden ${isNew ? "border-primary/30 shadow-sm" : "border-border opacity-80"}`}>
                   <CardContent className="py-3 space-y-2.5">
                     <div className="flex items-start gap-2">
-                      <span className="text-lg mt-0.5">{isRecipe ? "👨‍🍳" : s.type === "food" ? "🍎" : "💬"}</span>
+                      <span className="text-lg mt-0.5">{isRecipe ? "" : s.type === "food" ? "" : ""}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="text-sm font-bold text-foreground truncate">{p?.title || p?.name || "Suggerimento"}</p>
-                          {isNew && <Badge className="bg-primary/15 text-primary border-primary/30 text-[9px] px-1.5">Nuovo</Badge>}
+                          {isNew && <Badge className="bg-primary/15 text-primary border-primary/30 text-[11px] px-1.5">Nuovo</Badge>}
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(s.created_at).toLocaleDateString("it-IT")}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(s.created_at).toLocaleDateString("it-IT")}</p>
                       </div>
                     </div>
                     {isRecipe && p?.kcal_total && (
-                      <div className="flex gap-3 text-[10px] text-muted-foreground">
+                      <div className="flex gap-3 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-0.5 font-medium"><Flame className="h-3 w-3 text-primary" /> {p.kcal_total} kcal</span>
                         {p.macros && (<><span>P: {p.macros.protein}g</span><span>C: {p.macros.carbs}g</span><span>G: {p.macros.fats}g</span></>)}
                       </div>
                     )}
                     {isRecipe && topIngredients && (
-                      <p className="text-[10px] text-muted-foreground">🧾 {topIngredients}{moreCount > 0 ? ` + altri ${moreCount}` : ""}</p>
+                      <p className="text-[11px] text-muted-foreground">{topIngredients}{moreCount > 0 ? ` + altri ${moreCount}` : ""}</p>
                     )}
                     {isRecipe && (
                       <div className="flex items-center gap-2 pt-1">
-                        <Button size="sm" variant="default" className="h-7 text-[11px] gap-1 flex-1" onClick={() => navigate("/meals")}>
+                        <Button size="sm" variant="default" className="h-7 text-[11px] gap-1 flex-1" onClick={() => navigate(p.meal_type ? `/meals?add=${p.meal_type}` : "/meals")}>
                           <Plus className="h-3 w-3" /> Aggiungi al pasto
                         </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 px-2.5"><BookOpen className="h-3 w-3" /> Apri</Button>
-                        <Button size="sm" variant="ghost" className="h-7 text-[11px] gap-1 px-2"><Bookmark className="h-3 w-3" /> Salva</Button>
+                        {p.generated_recipe_id && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-[11px] gap-1 px-2"
+                            onClick={() => toggleFavorite("generated_recipe", p.generated_recipe_id, p.meal_type ? [p.meal_type] : [], {
+                              name: p.title,
+                              kcal: p.kcal_total,
+                              protein: p.macros?.protein,
+                              carbs: p.macros?.carbs,
+                              fats: p.macros?.fats,
+                            })}
+                          >
+                            <Bookmark className="h-3 w-3" /> {isFavorite("generated_recipe", p.generated_recipe_id) ? "Salvata" : "Salva"}
+                          </Button>
+                        )}
                       </div>
                     )}
                     {isNew && (
-                      <button onClick={() => markSeen(s.id)} className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors pt-1">
+                      <button onClick={() => markSeen(s.id)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors pt-1">
                         <Eye className="h-3 w-3" /> Segna come letto
                       </button>
                     )}
@@ -1456,7 +1496,7 @@ const UserDietPage = () => {
                   Stai per attivare il piano <strong className="text-foreground">{confirmTemplate?.title}</strong>.
                 </span>
                 <span className="flex gap-3 text-xs">
-                  <span className="text-primary font-medium">🔥 {confirmTemplate?.kcal_day} kcal</span>
+                  <span className="text-primary font-medium">{confirmTemplate?.kcal_day} kcal</span>
                   <span className="font-medium" style={{ color: "hsl(217, 91%, 60%)" }}>P {confirmTemplate?.protein_g_day}g</span>
                   <span className="font-medium" style={{ color: "hsl(38, 92%, 50%)" }}>C {confirmTemplate?.carbs_g_day}g</span>
                   <span className="font-medium" style={{ color: "hsl(350, 89%, 60%)" }}>G {confirmTemplate?.fats_g_day}g</span>
@@ -1510,7 +1550,7 @@ function MacroBar({ label, current, target, pct, color }: { label: string; curre
   const remaining = target - current;
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-[10px] text-muted-foreground">
+      <div className="flex justify-between text-[11px] text-muted-foreground">
         <span className="font-medium">{label}</span>
         <span>{remaining >= 0 ? `${Math.round(remaining)}g` : `+${Math.round(Math.abs(remaining))}g`}</span>
       </div>
@@ -1525,7 +1565,7 @@ function DetailBox({ label, value, className }: { label: string; value: string |
   return (
     <div className="rounded-lg bg-secondary/60 p-2">
       <p className={`text-lg font-bold ${className}`}>{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
     </div>
   );
 }

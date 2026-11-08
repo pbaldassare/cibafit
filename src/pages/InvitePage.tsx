@@ -209,20 +209,28 @@ const InvitePage = () => {
     });
 
     if (linkErr) {
-      if (linkErr.code === "23505") {
-        await supabase
+      // Already linked in the past: reactivate the existing link
+      let linkFailed = linkErr.code !== "23505";
+      if (!linkFailed) {
+        const { data: reactivated, error: reactivateErr } = await supabase
           .from("client_links")
           .update({ status: "active", activated_at: new Date().toISOString() })
           .eq("professional_id", proProfile.professional_id)
-          .eq("client_user_id", user.id);
-      } else {
-        toast({ variant: "destructive", title: "Errore", description: linkErr.message });
+          .eq("client_user_id", user.id)
+          .select("id");
+        linkFailed = !!reactivateErr || !reactivated?.length;
+      }
+      if (linkFailed) {
+        console.error("client_links save failed:", linkErr);
+        toast({ variant: "destructive", title: "Collegamento non riuscito", description: "Non sei ancora collegato al nutrizionista. Controlla la connessione e riprova." });
         setCodeLoading(false);
         return;
       }
     }
 
-    await supabase.from("professional_invites").update({ status: "used" }).eq("id", proProfile.invite_id);
+    // The link is active at this point: a failure here must not tell the user it failed
+    const { error: inviteErr } = await supabase.rpc("redeem_invite", { code: proProfile.invite_code });
+    if (inviteErr) console.error("professional_invites update failed:", inviteErr);
 
     setLinked(true);
     setCodeStep("done");
@@ -281,7 +289,7 @@ const InvitePage = () => {
           {/* TAB: Direct code entry */}
           <TabsContent value="code" className="mt-4">
             {codeStep === "input" && (
-              <Card className="border-2 border-accent">
+              <Card className="border border-border">
                 <CardHeader className="items-center pb-2">
                   <Link2 className="h-10 w-10 text-primary mb-2" />
                   <CardTitle className="text-lg">Inserisci codice invito</CardTitle>
@@ -306,7 +314,7 @@ const InvitePage = () => {
             )}
 
             {codeStep === "confirm" && proProfile && (
-              <Card className="border-2 border-accent">
+              <Card className="border border-border">
                 <CardHeader className="items-center pb-2">
                   <ShieldCheck className="h-10 w-10 text-primary mb-2" />
                   <CardTitle className="text-lg">Conferma collegamento</CardTitle>
@@ -316,7 +324,7 @@ const InvitePage = () => {
                     <p className="text-sm font-medium text-foreground">{proProfile.full_name || "Professionista"}</p>
                     <p className="text-xs text-muted-foreground">{proProfile.email}</p>
                   </div>
-                  <div className="rounded-xl border border-accent/30 bg-accent/5 p-3">
+                  <div className="rounded-xl border border-border bg-accent/5 p-3">
                     <p className="text-sm text-foreground font-medium mb-1">Cosa condividerai:</p>
                     <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
                       <li>I tuoi pasti e il diario alimentare</li>
@@ -338,7 +346,7 @@ const InvitePage = () => {
             )}
 
             {codeStep === "done" && (
-              <Card className="border-2 border-accent">
+              <Card className="border border-border">
                 <CardHeader className="items-center pb-2">
                   <UserCheck className="h-10 w-10 text-primary mb-2" />
                   <CardTitle className="text-lg">Collegato!</CardTitle>
@@ -398,26 +406,26 @@ function ProfessionalCard({
             )}
             {pro.bio && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{pro.bio}</p>}
             <div className="flex gap-1 mt-1.5 flex-wrap">
-              {pro.works_online && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Online</Badge>}
-              {pro.works_in_person && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">In studio</Badge>}
+              {pro.works_online && <Badge variant="secondary" className="text-[11px] px-1.5 py-0">Online</Badge>}
+              {pro.works_in_person && <Badge variant="secondary" className="text-[11px] px-1.5 py-0">In studio</Badge>}
               {pro.experience_years && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0">{pro.experience_years} anni exp.</Badge>
+                <Badge variant="outline" className="text-[11px] px-1.5 py-0">{pro.experience_years} anni exp.</Badge>
               )}
             </div>
           </div>
           <div className="flex-shrink-0">
             {status === "approved" && (
-              <Badge className="bg-primary text-primary-foreground text-[10px]">
+              <Badge className="bg-primary text-primary-foreground text-[11px]">
                 <CheckCircle2 className="h-3 w-3 mr-1" /> Collegato
               </Badge>
             )}
             {status === "pending" && (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-[11px]">
                 <Clock className="h-3 w-3 mr-1" /> In attesa
               </Badge>
             )}
             {status === "rejected" && (
-              <Badge variant="destructive" className="text-[10px]">
+              <Badge variant="destructive" className="text-[11px]">
                 <XCircle className="h-3 w-3 mr-1" /> Rifiutata
               </Badge>
             )}

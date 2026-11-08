@@ -18,21 +18,21 @@ import {
 import ProRecipeEditor, { type RecipeData } from "@/components/ProRecipeEditor";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 type GoalType = "balanced" | "high_protein" | "low_carb" | "low_fat" | "deficit" | "surplus";
 
 const GOALS: { value: GoalType; label: string; emoji: string; description: string }[] = [
-  { value: "balanced", label: "Equilibrio", emoji: "⚖️", description: "Macro bilanciati rispetto al target" },
-  { value: "high_protein", label: "Proteine alte", emoji: "💪", description: "Massimizza proteine, carbo flessibili" },
-  { value: "low_carb", label: "Low carb", emoji: "🥬", description: "Riduce carboidrati, favorisce proteine e grassi" },
-  { value: "low_fat", label: "Low fat", emoji: "🫒", description: "Riduce grassi, favorisce carbo e proteine" },
-  { value: "deficit", label: "Deficit calorico", emoji: "📉", description: "Target kcal ridotto del 10%" },
-  { value: "surplus", label: "Massa", emoji: "📈", description: "Target kcal aumentato del 10% (surplus controllato)" },
+  { value: "balanced", label: "Equilibrio", emoji: "", description: "Macro bilanciati rispetto al target" },
+  { value: "high_protein", label: "Proteine alte", emoji: "", description: "Massimizza proteine, carbo flessibili" },
+  { value: "low_carb", label: "Low carb", emoji: "", description: "Riduce carboidrati, favorisce proteine e grassi" },
+  { value: "low_fat", label: "Low fat", emoji: "", description: "Riduce grassi, favorisce carbo e proteine" },
+  { value: "deficit", label: "Deficit calorico", emoji: "", description: "Target kcal ridotto del 10%" },
+  { value: "surplus", label: "Massa", emoji: "", description: "Target kcal aumentato del 10% (surplus controllato)" },
 ];
 
 const GOAL_BADGE_LABELS: Record<GoalType, string> = {
@@ -395,12 +395,13 @@ const ProClientPantryRecipesPage = () => {
     }).select().single();
 
     if (saveErr) {
-      toast({ variant: "destructive", title: "Errore", description: saveErr.message });
+      console.error("generated_recipes insert failed:", saveErr);
+      toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." });
       setSendingIdx(null);
       return;
     }
 
-    await supabase.from("pro_suggestions").insert({
+    const { error: suggestionErr } = await supabase.from("pro_suggestions").insert({
       professional_id: user.id,
       client_user_id: clientId,
       type: "recipe",
@@ -418,8 +419,16 @@ const ProClientPantryRecipesPage = () => {
       },
     });
 
+    if (suggestionErr) {
+      console.error("pro_suggestions insert failed:", suggestionErr);
+      await supabase.from("generated_recipes").delete().eq("id", saved.id);
+      toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." });
+      setSendingIdx(null);
+      return;
+    }
+
     setSendingIdx(null);
-    toast({ title: "Ricetta inviata al cliente! ✅" });
+    toast({ title: "Ricetta inviata al cliente!" });
   };
 
   // ===== AI RECIPE GENERATION =====
@@ -464,13 +473,20 @@ const ProClientPantryRecipesPage = () => {
       instructions: recipe.instructions, kcal_total: recipe.kcal_total,
       macros: { protein: recipe.protein_total, carbs: recipe.carbs_total, fats: recipe.fats_total } as any,
     }).select().single();
-    if (saveErr) { toast({ variant: "destructive", title: "Errore", description: saveErr.message }); setLoading(false); return; }
-    await supabase.from("pro_suggestions").insert({
+    if (saveErr) { console.error("generated_recipes insert failed:", saveErr); toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." }); setLoading(false); return; }
+    const { error: suggestionErr } = await supabase.from("pro_suggestions").insert({
       professional_id: user.id, client_user_id: clientId, type: "recipe",
       payload: { generated_recipe_id: saved.id, title: recipe.title, meal_type: mealType, kcal_total: recipe.kcal_total, macros: { protein: recipe.protein_total, carbs: recipe.carbs_total, fats: recipe.fats_total }, ingredients: recipe.ingredients, instructions: recipe.instructions } as any,
     });
+    if (suggestionErr) {
+      console.error("pro_suggestions insert failed:", suggestionErr);
+      await supabase.from("generated_recipes").delete().eq("id", saved.id);
+      toast({ variant: "destructive", title: "Ricetta non inviata", description: "Il cliente non l'ha ricevuta. Controlla la connessione e riprova." });
+      setLoading(false);
+      return;
+    }
     setLoading(false);
-    toast({ title: "Ricetta inviata al cliente! ✅" });
+    toast({ title: "Ricetta inviata al cliente!" });
     setAiRecipe(null); setShowManual(false);
   };
 
@@ -554,7 +570,7 @@ const ProClientPantryRecipesPage = () => {
 
         {/* Priority toggle */}
         <div className="flex items-center justify-between rounded-lg bg-secondary/50 p-3">
-          <span className="text-sm font-medium text-foreground">🔥 Priorità scadenze</span>
+          <span className="text-sm font-medium text-foreground">Priorità scadenze</span>
           <Switch checked={priorityExpiry} onCheckedChange={setPriorityExpiry} />
         </div>
 
@@ -584,7 +600,7 @@ const ProClientPantryRecipesPage = () => {
           </div>
         ) : (
           <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3">
-            <p className="text-xs text-destructive font-medium">⚠️ Nessun target impostato per questo pasto. Crea prima un piano nutrizionale.</p>
+            <p className="text-xs text-destructive font-medium">Nessun target impostato per questo pasto. Crea prima un piano nutrizionale.</p>
           </div>
         )}
 
@@ -595,8 +611,8 @@ const ProClientPantryRecipesPage = () => {
               Ingredienti ({selectedCount}/{filtered.length} selezionati)
             </h3>
             <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="text-[10px] h-6 px-2" onClick={selectAll}>Tutti</Button>
-              <Button size="sm" variant="ghost" className="text-[10px] h-6 px-2" onClick={deselectAll}>Nessuno</Button>
+              <Button size="sm" variant="ghost" className="text-[11px] h-6 px-2" onClick={selectAll}>Tutti</Button>
+              <Button size="sm" variant="ghost" className="text-[11px] h-6 px-2" onClick={deselectAll}>Nessuno</Button>
             </div>
           </div>
 
@@ -624,18 +640,18 @@ const ProClientPantryRecipesPage = () => {
                       {(() => {
                         const nut = getNutritionPer100g(item.product, templates);
                         return (
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             x{item.quantity} {item.unit || ""} · {item.storage_type}
                             {nut.source !== "none"
                               ? ` · ${nut.calories} kcal/100g`
-                              : " · ⚠️ no kcal"}
-                            {nut.source === "template" && " 📋"}
+                              : " · no kcal"}
+                            {nut.source === "template" && ""}
                           </p>
                         );
                       })()}
                     </div>
-                    {status === "expired" && <Badge variant="destructive" className="text-[8px] px-1 py-0">Scaduto</Badge>}
-                    {status === "expiring" && <Badge className="bg-amber-500/20 text-amber-700 border-0 text-[8px] px-1 py-0">In scadenza</Badge>}
+                    {status === "expired" && <Badge variant="destructive" className="text-[11px] px-1 py-0">Scaduto</Badge>}
+                    {status === "expiring" && <Badge className="bg-amber-500/20 text-amber-700 border-0 text-[11px] px-1 py-0">In scadenza</Badge>}
                   </label>
                 );
               })}
@@ -677,7 +693,7 @@ const ProClientPantryRecipesPage = () => {
         {/* AI generated recipe editor */}
         {aiRecipe && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">🤖 Ricetta generata con IA</h3>
+            <h3 className="text-sm font-semibold text-foreground">Ricetta generata con IA</h3>
             <ProRecipeEditor
               initialRecipe={aiRecipe}
               onSend={(r) => sendEditorRecipe(r, setAiSending)}
@@ -690,7 +706,7 @@ const ProClientPantryRecipesPage = () => {
         {/* Manual recipe editor */}
         {showManual && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">✏️ Ricetta personalizzata</h3>
+            <h3 className="text-sm font-semibold text-foreground">Ricetta personalizzata</h3>
             <ProRecipeEditor
               onSend={(r) => sendEditorRecipe(r, setManualSending)}
               sending={manualSending}
@@ -702,7 +718,7 @@ const ProClientPantryRecipesPage = () => {
         {recipes.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">🍽️ Ricette generate</h3>
+              <h3 className="text-sm font-semibold text-foreground">Ricette generate</h3>
               <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={generateRecipes}>
                 <RefreshCw className="h-3 w-3" /> Rigenera
               </Button>
@@ -718,7 +734,7 @@ const ProClientPantryRecipesPage = () => {
                 : mealTarget?.kcal_target ?? 0;
 
               return (
-                <Card key={idx} className="border-2 border-accent overflow-hidden">
+                <Card key={idx} className="border border-border overflow-hidden">
                   <CardHeader className="pb-2 pt-3 px-4">
                     <div className="flex items-center justify-between gap-2">
                       <CardTitle className="text-sm flex-1">{recipe.title}</CardTitle>
@@ -736,12 +752,12 @@ const ProClientPantryRecipesPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       {goalInfo && (
-                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 gap-0.5">
+                        <Badge variant="outline" className="text-[11px] px-1.5 py-0 gap-0.5">
                           {goalInfo.emoji} {GOAL_BADGE_LABELS[recipe.goal]}
                         </Badge>
                       )}
                       {recipe.partial_estimate && (
-                        <Badge variant="secondary" className="gap-1 text-[9px] px-1 py-0">
+                        <Badge variant="secondary" className="gap-1 text-[11px] px-1 py-0">
                           <AlertTriangle className="h-3 w-3" /> Stima parziale
                         </Badge>
                       )}
@@ -750,7 +766,7 @@ const ProClientPantryRecipesPage = () => {
                   <CardContent className="px-4 pb-4 space-y-3">
                     {/* Macro comparison */}
                     {mealTarget && (
-                      <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                      <div className="grid grid-cols-4 gap-1.5 text-center text-[11px]">
                         <div className="rounded-md bg-primary/10 p-1.5">
                           <p className="font-bold text-primary">{recipe.kcal_total}</p>
                           <p className="text-muted-foreground">/{effectiveKcal} kcal</p>

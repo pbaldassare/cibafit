@@ -12,7 +12,7 @@ interface MealReminderBannerProps {
 const MEAL_CONFIG: Record<string, { label: string; emoji: string; message: string; followUpMessage: string; enabledKey: string; timeKey: string }> = {
   colazione: {
     label: "Colazione",
-    emoji: "☀️",
+    emoji: "",
     message: "Hai già registrato la colazione?",
     followUpMessage: "Non hai ancora registrato la colazione",
     enabledKey: "colazione_enabled",
@@ -20,7 +20,7 @@ const MEAL_CONFIG: Record<string, { label: string; emoji: string; message: strin
   },
   pranzo: {
     label: "Pranzo",
-    emoji: "🍝",
+    emoji: "",
     message: "Ricordati di registrare il pranzo su CibaFit",
     followUpMessage: "Non hai ancora registrato il pranzo",
     enabledKey: "pranzo_enabled",
@@ -28,7 +28,7 @@ const MEAL_CONFIG: Record<string, { label: string; emoji: string; message: strin
   },
   cena: {
     label: "Cena",
-    emoji: "🌙",
+    emoji: "",
     message: "Vuoi registrare la cena?",
     followUpMessage: "Non hai ancora registrato la cena",
     enabledKey: "cena_enabled",
@@ -160,7 +160,7 @@ const MealReminderBanner = ({ className = "" }: MealReminderBannerProps) => {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-            {config.emoji} {message}
+            {message}
           </p>
           <div className="mt-1.5 flex flex-wrap gap-2">
             {isFollowUp && (
@@ -175,7 +175,7 @@ const MealReminderBanner = ({ className = "" }: MealReminderBannerProps) => {
               onClick={handleNavigate}
               className={`text-xs font-semibold ${isFollowUp ? "text-destructive" : "text-primary"} hover:underline`}
             >
-              {isFollowUp ? "➕ Aggiungi pasto" : `Registra ${config.label.toLowerCase()} →`}
+              {isFollowUp ? "Aggiungi pasto" : `Registra ${config.label.toLowerCase()} →`}
             </button>
           </div>
         </div>

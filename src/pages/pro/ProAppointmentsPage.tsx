@@ -214,7 +214,7 @@ const ProAppointmentsPage = () => {
         {/* Upcoming */}
         {upcoming.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-bold text-foreground">📅 Prossimi</h3>
+            <h3 className="text-sm font-bold text-foreground">Prossimi</h3>
             {upcoming.map((a) => (
               <AppointmentCard key={a.id} appointment={a} />
             ))}
@@ -246,7 +246,7 @@ function AppointmentCard({ appointment: a }: { appointment: Appointment }) {
       <CardContent className="py-3 space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-foreground">{a.title}</span>
-          <Badge className={`text-[10px] ${STATUS_COLORS[a.status] || ""}`}>{a.status}</Badge>
+          <Badge className={`text-[11px] ${STATUS_COLORS[a.status] || ""}`}>{a.status}</Badge>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">

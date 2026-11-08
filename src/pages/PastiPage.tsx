@@ -56,10 +56,10 @@ interface MealTarget {
 }
 
 const mealEmoji: Record<string, string> = {
-  colazione: "☀️",
-  pranzo: "🌤️",
-  cena: "🌙",
-  spuntino: "🍎",
+  colazione: "",
+  pranzo: "",
+  cena: "",
+  spuntino: "",
 };
 
 const mealOrder = ["colazione", "pranzo", "spuntino", "cena"];
@@ -104,7 +104,7 @@ const PastiPage = () => {
     if (target && newTotal > target && prevTotalRef.current <= target && prevTotalRef.current > 0) {
       toast({
         variant: "destructive",
-        title: "⚠️ Obiettivo calorico superato!",
+        title: "Obiettivo calorico superato!",
         description: `Hai raggiunto ${Math.round(newTotal)} kcal su ${target} kcal previste (+${Math.round(newTotal - target)} kcal).`,
       });
     }
@@ -137,6 +137,8 @@ const PastiPage = () => {
       .select("*, diet_plan_meal_targets(*)")
       .eq("client_user_id", user.id)
       .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -148,7 +150,12 @@ const PastiPage = () => {
   }, [user]);
 
   const handleDeleteItem = async (itemId: string) => {
-    await supabase.from("meal_items").delete().eq("id", itemId);
+    const { error } = await supabase.from("meal_items").delete().eq("id", itemId);
+    if (error) {
+      console.error("meal_items delete failed:", error);
+      toast({ variant: "destructive", title: "Alimento non eliminato", description: "L'alimento è ancora nel diario. Controlla la connessione e riprova." });
+      return;
+    }
     fetchMeals();
   };
 
@@ -186,7 +193,7 @@ const PastiPage = () => {
       if (error) throw error;
       // Auto-deduct from pantry
       await deductPantryFromMeal(user.id, [{ custom_name: snap.name, dish_name: snap.name, quantity: 1, unit: "porzione" }]);
-      toast({ title: `"${snap.name}" aggiunto! ✅` });
+      toast({ title: `"${snap.name}" aggiunto!` });
       fetchMeals();
     } catch (e: any) {
       toast({ variant: "destructive", title: "Errore", description: e.message });
@@ -239,34 +246,42 @@ const PastiPage = () => {
   // Handle adding a favorite meal combo to the diary
   const handleAddComboToDay = async (items: any[], mealType: string) => {
     if (!user) return;
-    const today = localDateString();
-    let { data: dayData } = await supabase
-      .from("meal_days").select("id").eq("user_id", user.id).eq("day_date", today).maybeSingle();
-    if (!dayData) {
-      const { data: nd, error: de } = await supabase
-        .from("meal_days").insert({ user_id: user.id, day_date: today }).select("id").single();
-      if (de) throw de;
-      dayData = nd;
-    }
-    let { data: mealData } = await supabase
-      .from("meals").select("id").eq("meal_day_id", dayData!.id).eq("meal_type", mealType).maybeSingle();
-    if (!mealData) {
-      const { data: nm, error: me } = await supabase
-        .from("meals").insert({ meal_day_id: dayData!.id, meal_type: mealType }).select("id").single();
-      if (me) throw me;
-      mealData = nm;
-    }
-    for (const item of items) {
-      await supabase.from("meal_items").insert({
-        meal_id: mealData!.id,
-        source_type: "custom",
-        custom_name: item.ingredient_name,
-        dish_name: item.ingredient_name,
-        calories: item.kcal || 0,
-        quantity: item.grams,
-        unit: "g",
-        macros: { protein: item.protein_g || 0, carbs: item.carbs_g || 0, fats: item.fats_g || 0 },
-      });
+    try {
+      const today = localDateString();
+      let { data: dayData } = await supabase
+        .from("meal_days").select("id").eq("user_id", user.id).eq("day_date", today).maybeSingle();
+      if (!dayData) {
+        const { data: nd, error: de } = await supabase
+          .from("meal_days").insert({ user_id: user.id, day_date: today }).select("id").single();
+        if (de) throw de;
+        dayData = nd;
+      }
+      let { data: mealData } = await supabase
+        .from("meals").select("id").eq("meal_day_id", dayData!.id).eq("meal_type", mealType).maybeSingle();
+      if (!mealData) {
+        const { data: nm, error: me } = await supabase
+          .from("meals").insert({ meal_day_id: dayData!.id, meal_type: mealType }).select("id").single();
+        if (me) throw me;
+        mealData = nm;
+      }
+      // A single insert: either the whole combo is added or none of it
+      const { error: itemsErr } = await supabase.from("meal_items").insert(
+        items.map((item) => ({
+          meal_id: mealData!.id,
+          source_type: "custom",
+          custom_name: item.ingredient_name,
+          dish_name: item.ingredient_name,
+          calories: item.kcal || 0,
+          quantity: item.grams,
+          unit: "g",
+          macros: { protein: item.protein_g || 0, carbs: item.carbs_g || 0, fats: item.fats_g || 0 },
+        }))
+      );
+      if (itemsErr) throw itemsErr;
+    } catch (e) {
+      console.error("Favorite combo not added:", e);
+      // FavoriteMealCombos shows this text in its error toast
+      throw new Error("Il pasto non è stato aggiunto al diario. Controlla la connessione e riprova.");
     }
     fetchMeals();
   };
@@ -301,7 +316,7 @@ const PastiPage = () => {
       const { error } = await supabase.from("favorite_meal_items" as any).insert(itemsToInsert as any);
       if (error) throw error;
 
-      toast({ title: "Pasto salvato nei preferiti! ❤️" });
+      toast({ title: "Pasto salvato nei preferiti!" });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Errore", description: e.message });
     } finally {
@@ -384,7 +399,7 @@ const PastiPage = () => {
         )}
 
         {targetKcal && meals.length > 0 && (
-          <div className={`rounded-xl border-2 ${totalKcal > targetKcal ? "border-destructive/30" : "border-accent"} bg-card p-4 space-y-2`}>
+          <div className={`rounded-xl border-2 ${totalKcal > targetKcal ? "border-destructive/30" : "border-border"} bg-card p-4 space-y-2`}>
             <div className="flex items-center gap-2">
               <Flame size={18} className={totalKcal > targetKcal ? "text-destructive" : "text-primary"} />
               <span className="text-sm font-semibold text-foreground">Bilancio calorie</span>
@@ -428,10 +443,10 @@ const PastiPage = () => {
               );
               const mt = mealTargets.find((t) => t.meal_type === meal.meal_type);
               return (
-                <div key={meal.id} className="rounded-xl border-2 border-accent bg-card p-4 space-y-2.5">
+                <div key={meal.id} className="rounded-xl border border-border bg-card p-4 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2 font-semibold text-card-foreground">
-                      <span>{mealEmoji[meal.meal_type] ?? "🍽️"}</span>
+                      <span>{mealEmoji[meal.meal_type] ?? ""}</span>
                       {meal.meal_type.charAt(0).toUpperCase() + meal.meal_type.slice(1)}
                     </span>
                     <span className="text-sm font-medium text-primary">
@@ -442,7 +457,7 @@ const PastiPage = () => {
                   {mt && (
                     <div className="space-y-1">
                       <Progress value={mt.kcal_target > 0 ? Math.min((mealKcal / mt.kcal_target) * 100, 100) : 0} className="h-1.5" />
-                      <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
                       <span>P: {Math.round(mealMacros.p)}/{mt.protein_g}g</span>
                         <span>C: {Math.round(mealMacros.c)}/{mt.carbs_g}g{(mt as any).sugars_g > 0 ? ` (Z:${(mt as any).sugars_g})` : ""}</span>
                         <span>G: {Math.round(mealMacros.f)}/{mt.fats_g}g</span>
@@ -471,7 +486,7 @@ const PastiPage = () => {
                             <p className="text-sm font-medium text-foreground truncate">
                               {item.dish_name || item.custom_name || "—"}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">
+                            <p className="text-[11px] text-muted-foreground">
                               {item.quantity ?? "—"}{item.unit ?? "g"} · {item.calories ?? 0} kcal
                             </p>
                           </button>
@@ -492,7 +507,7 @@ const PastiPage = () => {
                     if (mealFavs.length === 0) return null;
                     return (
                       <div className="pt-1">
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
                           <Heart className="h-3 w-3 text-destructive" /> Preferiti
                         </p>
                         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">

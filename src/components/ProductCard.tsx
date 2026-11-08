@@ -18,7 +18,7 @@ const getLabel = (score: number) => {
   return "Scarso";
 };
 
-const ProductCard = ({ name, brand, score, emoji = "🍫", onClick, isFavorite, onToggleFavorite }: ProductCardProps) => {
+const ProductCard = ({ name, brand, score, emoji = "", onClick, isFavorite, onToggleFavorite }: ProductCardProps) => {
   return (
     <button
       onClick={onClick}

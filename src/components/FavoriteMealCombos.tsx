@@ -122,7 +122,7 @@ const FavoriteMealCombos = ({ mealType, onAddToDay }: Props) => {
         if (error) throw error;
       }
 
-      toast({ title: "Pasto preferito salvato! ✅" });
+      toast({ title: "Pasto preferito salvato!" });
       setCreateOpen(false);
       setNewTitle("");
       setNewItems([]);
@@ -144,7 +144,7 @@ const FavoriteMealCombos = ({ mealType, onAddToDay }: Props) => {
     setAddingId(combo.id);
     try {
       await onAddToDay(combo.items, mealType);
-      toast({ title: `"${combo.title}" aggiunto! ✅` });
+      toast({ title: `"${combo.title}" aggiunto!` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Errore", description: e.message });
     } finally {
@@ -184,12 +184,12 @@ const FavoriteMealCombos = ({ mealType, onAddToDay }: Props) => {
                 </div>
                 <div className="space-y-0.5">
                   {combo.items.slice(0, 3).map((item) => (
-                    <p key={item.id} className="text-[10px] text-muted-foreground truncate">
+                    <p key={item.id} className="text-[11px] text-muted-foreground truncate">
                       {item.ingredient_name} · {item.grams}g
                     </p>
                   ))}
                   {combo.items.length > 3 && (
-                    <p className="text-[10px] text-muted-foreground">+{combo.items.length - 3} altri</p>
+                    <p className="text-[11px] text-muted-foreground">+{combo.items.length - 3} altri</p>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
@@ -198,7 +198,7 @@ const FavoriteMealCombos = ({ mealType, onAddToDay }: Props) => {
                     <button
                       onClick={() => handleAddToDay(combo)}
                       disabled={addingId === combo.id}
-                      className="text-[10px] font-semibold text-primary-foreground bg-primary rounded-lg px-2 py-1 hover:opacity-90 disabled:opacity-50"
+                      className="text-[11px] font-semibold text-primary-foreground bg-primary rounded-lg px-2 py-1 hover:opacity-90 disabled:opacity-50"
                     >
                       {addingId === combo.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Aggiungi"}
                     </button>

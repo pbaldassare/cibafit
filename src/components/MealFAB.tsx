@@ -8,7 +8,7 @@ interface Props {
 }
 
 const actions = [
-  { key: "search", label: "Cerca alimento", icon: Search, color: "bg-primary" },
+  { key: "search", label: "Cerca alimento", icon: Search, color: "btn-brand" },
   { key: "photo", label: "Scatta foto", icon: Camera, color: "bg-accent" },
   { key: "eat-out", label: "Mangio fuori", icon: Utensils, color: "bg-secondary-foreground" },
   { key: "favorites", label: "Pasti preferiti", icon: Heart, color: "bg-destructive" },
@@ -76,7 +76,7 @@ const MealFAB = ({ onSearchOpen, onQuickDayOpen }: Props) => {
           className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-xl transition-all duration-200 ${
             open
               ? "bg-muted rotate-45"
-              : "bg-primary"
+              : "btn-brand"
           }`}
         >
           {open ? (

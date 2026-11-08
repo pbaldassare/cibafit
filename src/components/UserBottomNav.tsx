@@ -74,13 +74,13 @@ const UserBottomNav = () => {
                   className={`transition-colors ${isActive ? "text-white" : "text-white/60"}`}
                 />
                 {showBadge && (
-                  <span className="absolute -top-1.5 -right-2 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-destructive px-0.5 text-[8px] font-bold text-destructive-foreground">
+                  <span className="absolute -top-1.5 -right-2 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-destructive px-0.5 text-[11px] font-bold text-destructive-foreground">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </div>
               <span
-                className={`text-[9px] transition-colors ${
+                className={`text-[11px] transition-colors ${
                   isActive ? "text-white font-semibold" : "text-white/60 font-medium"
                 }`}
               >

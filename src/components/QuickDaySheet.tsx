@@ -18,7 +18,7 @@ const DAY_TYPES = [
   {
     key: "leggero",
     label: "Giorno leggero",
-    emoji: "🥗",
+    emoji: "",
     icon: Leaf,
     description: "Pasti leggeri, meno calorie del solito",
     factor: 0.75,
@@ -27,7 +27,7 @@ const DAY_TYPES = [
   {
     key: "equilibrato",
     label: "Giorno equilibrato",
-    emoji: "⚖️",
+    emoji: "",
     icon: Zap,
     description: "Alimentazione nella norma",
     factor: 1.0,
@@ -36,7 +36,7 @@ const DAY_TYPES = [
   {
     key: "abbondante",
     label: "Giorno abbondante",
-    emoji: "🍕",
+    emoji: "",
     icon: Flame,
     description: "Pasti più ricchi del solito",
     factor: 1.3,
@@ -83,7 +83,7 @@ const QuickDaySheet = ({ open, onOpenChange, targetKcal, onComplete }: Props) =>
       if (error) throw new Error(error);
 
       toast({
-        title: offline ? "Salvato offline 📴" : "Giorno veloce registrato ✅",
+        title: offline ? "Salvato offline" : "Giorno veloce registrato",
         description: `${DAY_TYPES.find((d) => d.key === dayType)?.label} — ~${kcal} kcal stimati${offline ? " (verrà sincronizzato)" : ""}`,
       });
       onComplete();
@@ -120,7 +120,6 @@ const QuickDaySheet = ({ open, onOpenChange, targetKcal, onComplete }: Props) =>
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-card">
-                    <span className="text-2xl">{dt.emoji}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{dt.label}</p>

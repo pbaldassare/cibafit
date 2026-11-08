@@ -32,9 +32,9 @@ const DEFAULT_SETTINGS: ReminderSettings = {
 };
 
 const MEAL_LABELS: { mealKey: string; label: string; emoji: string; key: keyof ReminderSettings; timeKey: keyof ReminderSettings }[] = [
-  { mealKey: "colazione", label: "Colazione", emoji: "☀️", key: "colazione_enabled", timeKey: "colazione_time" },
-  { mealKey: "pranzo", label: "Pranzo", emoji: "🍝", key: "pranzo_enabled", timeKey: "pranzo_time" },
-  { mealKey: "cena", label: "Cena", emoji: "🌙", key: "cena_enabled", timeKey: "cena_time" },
+  { mealKey: "colazione", label: "Colazione", emoji: "", key: "colazione_enabled", timeKey: "colazione_time" },
+  { mealKey: "pranzo", label: "Pranzo", emoji: "", key: "pranzo_enabled", timeKey: "pranzo_time" },
+  { mealKey: "cena", label: "Cena", emoji: "", key: "cena_enabled", timeKey: "cena_time" },
 ];
 
 const MealRemindersPage = () => {
@@ -226,7 +226,6 @@ const MealRemindersPage = () => {
                     checked={settings[key] as boolean}
                     onCheckedChange={(v) => handleToggle(key, v)}
                   />
-                  <span className="text-lg">{emoji}</span>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-foreground">{label}</p>
                   </div>
@@ -248,11 +247,11 @@ const MealRemindersPage = () => {
           <div className="rounded-xl bg-muted/50 p-4 space-y-2">
             <p className="text-xs font-semibold text-foreground">Come funzionano i promemoria</p>
             <ul className="text-xs text-muted-foreground space-y-1">
-              <li>📱 <strong>In-app:</strong> Vedrai un banner nella home quando è ora di registrare un pasto</li>
+              <li><strong>In-app:</strong> Vedrai un banner nella home quando è ora di registrare un pasto</li>
               {pushSupported && (
-                <li>🔔 <strong>Push:</strong> Ricevi una notifica anche con l'app chiusa (se attivate)</li>
+                <li><strong>Push:</strong> Ricevi una notifica anche con l'app chiusa (se attivate)</li>
               )}
-              <li>🎯 Cliccando il promemoria vai direttamente alla registrazione del pasto</li>
+              <li>Cliccando il promemoria vai direttamente alla registrazione del pasto</li>
             </ul>
           </div>
         )}

@@ -189,7 +189,6 @@ html {
 
   .btn-brand {
     background: hsl(var(--citron));
-    box-shadow: var(--shadow-brand);
     color: hsl(var(--shell));
   }
   .btn-brand:active {

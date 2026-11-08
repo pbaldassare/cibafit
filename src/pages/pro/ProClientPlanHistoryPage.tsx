@@ -6,15 +6,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { activatePlanExclusive, PlanActivationError } from "@/lib/supabase-result";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, RotateCcw, GitCompareArrows, Check } from "lucide-react";
 
 const MEAL_LABELS: Record<string, string> = {
-  colazione: "☀️ Colazione",
-  pranzo: "🌤️ Pranzo",
-  cena: "🌙 Cena",
-  spuntino: "🍎 Spuntino",
+  colazione: "Colazione",
+  pranzo: "Pranzo",
+  cena: "Cena",
+  spuntino: "Spuntino",
 };
 
 interface PlanWithTargets {
@@ -86,38 +87,41 @@ const ProClientPlanHistoryPage = () => {
     if (!reactivateId || !clientId || !user) return;
     setReactivating(true);
     try {
-      // Deactivate all active plans
-      await supabase
-        .from("diet_plans")
-        .update({ is_active: false })
-        .eq("professional_id", user.id)
-        .eq("client_user_id", clientId)
-        .eq("is_active", true);
+      // Deactivates the current plan and activates the chosen one; restores the current one on failure
+      await activatePlanExclusive(supabase, "diet_plans", reactivateId, { professional_id: user.id, client_user_id: clientId });
 
-      // Reactivate chosen plan
-      const { error } = await supabase
-        .from("diet_plans")
-        .update({ is_active: true })
-        .eq("id", reactivateId);
-      if (error) throw error;
-
-      // Sync nutrition_targets from reactivated plan
+      // Sync nutrition_targets from reactivated plan. The plan is already active: a failure must not
+      // undo it. A professional cannot currently write a client's nutrition_targets (RLS).
       const plan = plans.find((p) => p.id === reactivateId);
+      let targetsSynced = true;
       if (plan) {
-        await supabase.from("nutrition_targets").upsert({
+        const { error: targetsErr } = await supabase.from("nutrition_targets").upsert({
           user_id: clientId,
           kcal_day: plan.kcal_day,
           protein_g: plan.protein_g_day,
           carbs_g: plan.carbs_g_day,
           fats_g: plan.fats_g_day,
         }, { onConflict: "user_id" });
+        if (targetsErr) {
+          console.error("nutrition_targets sync failed:", targetsErr);
+          targetsSynced = false;
+        }
       }
 
-      toast({ title: "Piano riattivato! ✅" });
+      toast(targetsSynced
+        ? { title: "Piano riattivato!" }
+        : { title: "Piano riattivato, ma obiettivi giornalieri no", description: "Il cliente vede il piano riattivato, ma nel diario potrebbe trovare gli obiettivi di prima." });
       setReactivateId(null);
       await load();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: err?.message });
+      console.error("Plan reactivation failed:", err);
+      toast({
+        variant: "destructive",
+        title: "Piano non riattivato",
+        description: err instanceof PlanActivationError && !err.previousRestored
+          ? "Il cliente potrebbe essere rimasto senza piano attivo. Riprova subito."
+          : "Il piano attivo del cliente non è cambiato. Controlla la connessione e riprova.",
+      });
     }
     setReactivating(false);
   };
@@ -160,7 +164,7 @@ const ProClientPlanHistoryPage = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-foreground">{plan.title}</p>
-                      {plan.is_active && <Badge variant="default" className="text-[10px]">Attivo</Badge>}
+                      {plan.is_active && <Badge variant="default" className="text-[11px]">Attivo</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {new Date(plan.created_at).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
@@ -172,19 +176,19 @@ const ProClientPlanHistoryPage = () => {
                 <div className="grid grid-cols-4 gap-2 text-center">
                   <div className="rounded-lg bg-primary/10 p-1.5">
                     <p className="text-sm font-bold text-primary">{plan.kcal_day}</p>
-                    <p className="text-[9px] text-muted-foreground">kcal</p>
+                    <p className="text-[11px] text-muted-foreground">kcal</p>
                   </div>
                   <div className="rounded-lg bg-blue-500/10 p-1.5">
                     <p className="text-sm font-bold text-blue-600">{plan.protein_g_day}g</p>
-                    <p className="text-[9px] text-muted-foreground">prot</p>
+                    <p className="text-[11px] text-muted-foreground">prot</p>
                   </div>
                   <div className="rounded-lg bg-amber-500/10 p-1.5">
                     <p className="text-sm font-bold text-amber-600">{plan.carbs_g_day}g</p>
-                    <p className="text-[9px] text-muted-foreground">carbo</p>
+                    <p className="text-[11px] text-muted-foreground">carbo</p>
                   </div>
                   <div className="rounded-lg bg-red-500/10 p-1.5">
                     <p className="text-sm font-bold text-red-600">{plan.fats_g_day}g</p>
-                    <p className="text-[9px] text-muted-foreground">grassi</p>
+                    <p className="text-[11px] text-muted-foreground">grassi</p>
                   </div>
                 </div>
 
@@ -246,12 +250,12 @@ const ProClientPlanHistoryPage = () => {
                 <div className="text-center p-2 rounded-lg bg-primary/5 border border-primary/20">
                   <p className="truncate">{comparePlans[0].title}</p>
                   <p className="text-muted-foreground font-normal">{new Date(comparePlans[0].created_at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}</p>
-                  {comparePlans[0].is_active && <Badge variant="default" className="text-[9px] mt-1">Attivo</Badge>}
+                  {comparePlans[0].is_active && <Badge variant="default" className="text-[11px] mt-1">Attivo</Badge>}
                 </div>
                 <div className="text-center p-2 rounded-lg bg-secondary border border-border">
                   <p className="truncate">{comparePlans[1].title}</p>
                   <p className="text-muted-foreground font-normal">{new Date(comparePlans[1].created_at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}</p>
-                  {comparePlans[1].is_active && <Badge variant="default" className="text-[9px] mt-1">Attivo</Badge>}
+                  {comparePlans[1].is_active && <Badge variant="default" className="text-[11px] mt-1">Attivo</Badge>}
                 </div>
               </div>
 
@@ -272,7 +276,7 @@ const ProClientPlanHistoryPage = () => {
                     <div className="text-center">
                       <span className="font-semibold">{v2}{key !== "kcal_day" && "g"}</span>
                       {diff !== 0 && (
-                        <span className={`ml-1 text-[10px] ${diff > 0 ? "text-green-600" : "text-destructive"}`}>
+                        <span className={`ml-1 text-[11px] ${diff > 0 ? "text-green-600" : "text-destructive"}`}>
                           ({diff > 0 ? "+" : ""}{diff})
                         </span>
                       )}
@@ -290,12 +294,12 @@ const ProClientPlanHistoryPage = () => {
                   return (
                     <div key={mealType} className="rounded-lg bg-secondary/50 p-2.5">
                       <p className="text-xs font-semibold mb-1">{MEAL_LABELS[mealType]}</p>
-                      <div className="grid grid-cols-3 gap-1 text-[10px]">
+                      <div className="grid grid-cols-3 gap-1 text-[11px]">
                         <span className="text-muted-foreground">Kcal</span>
                         <span className="text-center">{mt1?.kcal_target ?? "—"}</span>
                         <span className="text-center">{mt2?.kcal_target ?? "—"}</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-1 text-[10px]">
+                      <div className="grid grid-cols-3 gap-1 text-[11px]">
                         <span className="text-muted-foreground">P / C / G</span>
                         <span className="text-center">{mt1 ? `${mt1.protein_g}/${mt1.carbs_g}/${mt1.fats_g}` : "—"}</span>
                         <span className="text-center">{mt2 ? `${mt2.protein_g}/${mt2.carbs_g}/${mt2.fats_g}` : "—"}</span>

@@ -175,7 +175,7 @@ const IngredientAutocomplete = ({
       </div>
 
       {open && results.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-accent bg-popover shadow-lg">
+        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-lg">
           {results.map((r) => (
             <button
               key={`${r.source}-${r.id}`}
@@ -185,16 +185,16 @@ const IngredientAutocomplete = ({
             >
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-popover-foreground truncate">{r.name}</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground">
                   {r.defaultPortionLabel !== "100 g" ? `${r.defaultPortionLabel} (${r.defaultPortionG}g)` : r.category || ""}
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <span className="text-[10px] text-muted-foreground block">
+                <span className="text-[11px] text-muted-foreground block">
                   {Math.round(r.kcal * r.defaultPortionG / 100)} kcal
                 </span>
                 {r.defaultPortionLabel !== "100 g" && (
-                  <span className="text-[9px] text-muted-foreground/60 block">
+                  <span className="text-[11px] text-muted-foreground/60 block">
                     /{r.defaultPortionLabel}
                   </span>
                 )}
@@ -205,7 +205,7 @@ const IngredientAutocomplete = ({
       )}
 
       {open && loading && results.length === 0 && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-accent bg-popover p-3 text-center text-xs text-muted-foreground shadow-lg">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover p-3 text-center text-xs text-muted-foreground shadow-lg">
           Ricerca…
         </div>
       )}

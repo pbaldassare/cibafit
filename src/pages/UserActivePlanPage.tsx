@@ -21,10 +21,10 @@ import { Loader2, Plus, ArrowRight, RefreshCw, ChevronDown, ChevronUp, UtensilsC
 import { toast } from "sonner";
 
 const MEAL_LABELS: Record<string, { emoji: string; label: string }> = {
-  colazione: { emoji: "☀️", label: "Colazione" },
-  pranzo: { emoji: "🌤️", label: "Pranzo" },
-  spuntino: { emoji: "🍎", label: "Spuntino" },
-  cena: { emoji: "🌙", label: "Cena" },
+  colazione: { emoji: "", label: "Colazione" },
+  pranzo: { emoji: "", label: "Pranzo" },
+  spuntino: { emoji: "", label: "Spuntino" },
+  cena: { emoji: "", label: "Cena" },
 };
 const MEAL_ORDER = ["colazione", "pranzo", "spuntino", "cena"];
 
@@ -103,6 +103,7 @@ const UserActivePlanPage = () => {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [mealTargets, setMealTargets] = useState<MealTarget[]>([]);
   const [todayMeals, setTodayMeals] = useState<TodayMeal[]>([]);
@@ -122,14 +123,22 @@ const UserActivePlanPage = () => {
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
+    setLoadFailed(false);
 
-    const { data: plans } = await supabase
+    const { data: plans, error: plansError } = await supabase
       .from("diet_plans")
       .select("*, diet_plan_meal_targets(*)")
       .eq("client_user_id", user.id)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(1);
+
+    if (plansError) {
+      console.error("Active plan load failed:", plansError);
+      setLoadFailed(true);
+      setLoading(false);
+      return;
+    }
 
     let activePlan: any = null;
     if (plans && plans.length > 0) {
@@ -299,7 +308,7 @@ const UserActivePlanPage = () => {
       });
       if (itemErr) throw itemErr;
 
-      toast.success(`"${title}" registrato! ✅`);
+      toast.success(`"${title}" registrato!`);
       loadData(); // refresh progress
     } catch (e: any) {
       toast.error("Errore nella registrazione: " + e.message);
@@ -324,7 +333,7 @@ const UserActivePlanPage = () => {
       if (data?.error) throw new Error(data.error);
       if (data?.recipe) {
         setAiRecipes((prev) => ({ ...prev, [mealType]: data.recipe }));
-        toast.success("Ricetta generata! 🍽️");
+        toast.success("Ricetta generata!");
       }
     } catch (e: any) {
       toast.error(e.message || "Errore nella generazione");
@@ -361,7 +370,7 @@ const UserActivePlanPage = () => {
     if (error) {
       toast.error("Errore nel salvataggio");
     } else {
-      toast.success("Giornata salvata! ✅");
+      toast.success("Giornata salvata!");
     }
     setSaving(false);
   };
@@ -377,6 +386,18 @@ const UserActivePlanPage = () => {
     );
   }
 
+  if (loadFailed) {
+    return (
+      <div>
+        <MobileHeader title="Il mio piano" />
+        <main className="px-4 py-10 text-center space-y-4">
+          <p className="text-muted-foreground">Non riusciamo a caricare il piano. Riprova.</p>
+          <Button onClick={() => loadData()}>Riprova</Button>
+        </main>
+      </div>
+    );
+  }
+
   if (!plan) {
     return (
       <div>
@@ -387,7 +408,7 @@ const UserActivePlanPage = () => {
             Scegli un piano <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
           <Button variant="outline" onClick={() => navigate("/weekly-plan")}>
-            📅 Piano settimanale
+            Piano settimanale
           </Button>
         </main>
       </div>
@@ -411,21 +432,21 @@ const UserActivePlanPage = () => {
               <div>
                 <h2 className="font-semibold text-base text-foreground leading-tight">{plan.title}</h2>
                 {plan.notes && (
-                  <p className="text-xs text-muted-foreground mt-1">📝 {plan.notes}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{plan.notes}</p>
                 )}
               </div>
-              <Badge className="bg-success/15 text-success border-0 text-[10px] font-semibold shrink-0">
+              <Badge className="bg-success/15 text-success border-0 text-[11px] font-semibold shrink-0">
                 Attivo
               </Badge>
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className="font-bold text-foreground">🔥 {plan.kcal_day} kcal</span>
+              <span className="font-bold text-foreground">{plan.kcal_day} kcal</span>
               <span className="text-muted-foreground">P {plan.protein_g_day}g</span>
               <span className="text-muted-foreground">C {plan.carbs_g_day}g</span>
               <span className="text-muted-foreground">G {plan.fats_g_day}g</span>
             </div>
             <Button size="sm" variant="ghost" className="gap-1 text-xs mt-1" onClick={() => navigate("/weekly-plan")}>
-              📅 Vedi piano settimanale
+              Vedi piano settimanale
             </Button>
           </CardContent>
         </Card>
@@ -438,7 +459,7 @@ const UserActivePlanPage = () => {
           <Alert className="border-destructive/50 bg-destructive/10">
             <AlertTriangle className="h-4 w-4 text-destructive" />
             <AlertDescription className="text-sm font-medium text-destructive">
-              ⚠️ Hai superato il tuo obiettivo di <strong>{Math.round(todayTotals.kcal - plan.kcal_day)} kcal</strong>! 
+              Hai superato il tuo obiettivo di <strong>{Math.round(todayTotals.kcal - plan.kcal_day)} kcal</strong>! 
               ({Math.round(todayTotals.kcal)} / {plan.kcal_day} kcal)
             </AlertDescription>
           </Alert>
@@ -464,7 +485,7 @@ const UserActivePlanPage = () => {
 
         {/* Per-meal breakdown */}
         {sortedTargets.map((target) => {
-          const ml = MEAL_LABELS[target.meal_type] || { emoji: "🍽️", label: target.meal_type };
+          const ml = MEAL_LABELS[target.meal_type] || { emoji: "", label: target.meal_type };
           const logged = todayMeals.find((m) => m.meal_type === target.meal_type);
           const mealKcal = logged?.kcal ?? 0;
           const mealPct = target.kcal_target > 0 ? Math.min(100, Math.round((mealKcal / target.kcal_target) * 100)) : 0;
@@ -498,7 +519,6 @@ const UserActivePlanPage = () => {
               <CardContent className="p-4 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{ml.emoji}</span>
                     <span className="font-semibold text-sm text-foreground">{ml.label}</span>
                   </div>
                   <span className="text-xs font-bold tabular-nums text-muted-foreground">
@@ -515,11 +535,11 @@ const UserActivePlanPage = () => {
                     <span>G {Math.round(target.fats_g)}g</span>
                   </div>
                   {hasLogged ? (
-                    <Badge variant="outline" className="text-[10px] border-success/30 text-success">
+                    <Badge variant="outline" className="text-[11px] border-success/30 text-success">
                       {mealPct}% completato
                     </Badge>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground/60 italic">Da registrare</span>
+                    <span className="text-[11px] text-muted-foreground/60 italic">Da registrare</span>
                   )}
                 </div>
 
@@ -536,7 +556,7 @@ const UserActivePlanPage = () => {
                 {/* Recipe alternatives */}
                 {/* Message when meal target reached */}
                 {hasLogged && remainingKcal === 0 && (
-                  <p className="text-[10px] text-success italic text-center">✅ Obiettivo pasto raggiunto</p>
+                  <p className="text-[11px] text-success italic text-center">Obiettivo pasto raggiunto</p>
                 )}
 
                 {mealRecipes.length > 0 && (
@@ -593,7 +613,7 @@ const UserActivePlanPage = () => {
                 {/* AI generated recipe */}
                 {aiRecipes[target.meal_type] && (
                   <div className="pt-1">
-                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                    <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
                       <Sparkles className="h-3 w-3 text-primary" /> Ricetta AI su misura
                     </p>
                     <MealRecipeCard
@@ -675,11 +695,10 @@ const UserActivePlanPage = () => {
                         setMealsLogged((prev) => ({ ...prev, [key]: !!checked }))
                       }
                     />
-                    <span className="text-lg">{ml.emoji}</span>
                     <span className="text-sm font-medium text-foreground flex-1">{ml.label}</span>
                     {mealsLogged[key] && (
-                      <span className="text-[10px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
-                        ✓ Fatto
+                      <span className="text-[11px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">
+                        Fatto
                       </span>
                     )}
                   </label>

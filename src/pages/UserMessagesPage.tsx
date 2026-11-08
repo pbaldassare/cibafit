@@ -160,7 +160,7 @@ const UserMessagesPage = () => {
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                <p className="text-[10px] text-muted-foreground mt-1 text-right">
+                <p className="text-[11px] text-muted-foreground mt-1 text-right">
                   {new Date(msg.created_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>

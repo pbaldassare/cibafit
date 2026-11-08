@@ -176,7 +176,7 @@ const CompareProductsPage = () => {
     // Log usage
     await logUsage(data.id);
     
-    toast({ title: "Prodotto salvato ✓" });
+    toast({ title: "Prodotto salvato" });
   };
 
   const handleToggleFavorite = async (idx: number) => {
@@ -248,7 +248,7 @@ const CompareProductsPage = () => {
                   >
                     ×
                   </button>
-                  <Badge className="absolute bottom-1 left-1 text-[9px] bg-black/60 text-white border-0">
+                  <Badge className="absolute bottom-1 left-1 text-[11px] bg-black/60 text-white border-0">
                     #{i + 1}
                   </Badge>
                 </div>
@@ -259,7 +259,7 @@ const CompareProductsPage = () => {
                   className="aspect-square rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                 >
                   <Plus className="h-6 w-6" />
-                  <span className="text-[10px] font-medium">Aggiungi</span>
+                  <span className="text-[11px] font-medium">Aggiungi</span>
                 </button>
               )}
             </div>
@@ -307,17 +307,17 @@ const CompareProductsPage = () => {
                 </div>
                 {bestProtein && (
                   <p className="text-xs text-foreground">
-                    💪 <span className="font-medium">Più proteico:</span> {bestProtein}
+                    <span className="font-medium">Più proteico:</span> {bestProtein}
                   </p>
                 )}
                 {leastCalories && (
                   <p className="text-xs text-foreground">
-                    🔥 <span className="font-medium">Meno calorico:</span> {leastCalories}
+                    <span className="font-medium">Meno calorico:</span> {leastCalories}
                   </p>
                 )}
                 {leastFats && (
                   <p className="text-xs text-foreground">
-                    💧 <span className="font-medium">Meno grassi:</span> {leastFats}
+                    <span className="font-medium">Meno grassi:</span> {leastFats}
                   </p>
                 )}
               </div>
@@ -347,10 +347,10 @@ const CompareProductsPage = () => {
                         <h3 className="text-sm font-bold text-foreground truncate">{p.name}</h3>
                         {p.brand && <p className="text-xs text-muted-foreground">{p.brand}</p>}
                         <div className="flex gap-1 mt-1 flex-wrap">
-                          {isBestProtein && <Badge className="text-[8px] px-1.5 py-0 bg-emerald-100 text-emerald-700 border-0">💪 Più proteico</Badge>}
-                          {isLeastCal && <Badge className="text-[8px] px-1.5 py-0 bg-blue-100 text-blue-700 border-0">🔥 Meno calorico</Badge>}
-                          {isLeastFat && <Badge className="text-[8px] px-1.5 py-0 bg-violet-100 text-violet-700 border-0">💧 Meno grassi</Badge>}
-                          {p.saved && <Badge variant="outline" className="text-[8px] px-1.5 py-0 border-emerald-400 text-emerald-600">✓ Salvato</Badge>}
+                          {isBestProtein && <Badge className="text-[11px] px-1.5 py-0 bg-emerald-100 text-emerald-700 border-0">Più proteico</Badge>}
+                          {isLeastCal && <Badge className="text-[11px] px-1.5 py-0 bg-blue-100 text-blue-700 border-0">Meno calorico</Badge>}
+                          {isLeastFat && <Badge className="text-[11px] px-1.5 py-0 bg-violet-100 text-violet-700 border-0">Meno grassi</Badge>}
+                          {p.saved && <Badge variant="outline" className="text-[11px] px-1.5 py-0 border-emerald-400 text-emerald-600">Salvato</Badge>}
                         </div>
                       </div>
                     </div>
@@ -360,27 +360,27 @@ const CompareProductsPage = () => {
                       <div className="rounded-lg bg-secondary/50 p-2 text-center">
                         <Flame className="h-3 w-3 mx-auto text-orange-500 mb-0.5" />
                         <p className="text-xs font-bold text-foreground">{p.calories_100g ?? "—"}</p>
-                        <p className="text-[9px] text-muted-foreground">kcal</p>
+                        <p className="text-[11px] text-muted-foreground">kcal</p>
                       </div>
                       <div className="rounded-lg bg-secondary/50 p-2 text-center">
                         <Beef className="h-3 w-3 mx-auto text-red-500 mb-0.5" />
                         <p className="text-xs font-bold text-foreground">{p.protein_100g ?? "—"}</p>
-                        <p className="text-[9px] text-muted-foreground">proteine</p>
+                        <p className="text-[11px] text-muted-foreground">proteine</p>
                       </div>
                       <div className="rounded-lg bg-secondary/50 p-2 text-center">
                         <Wheat className="h-3 w-3 mx-auto text-amber-500 mb-0.5" />
                         <p className="text-xs font-bold text-foreground">{p.carbs_100g ?? "—"}</p>
-                        <p className="text-[9px] text-muted-foreground">carb</p>
+                        <p className="text-[11px] text-muted-foreground">carb</p>
                       </div>
                       <div className="rounded-lg bg-secondary/50 p-2 text-center">
                         <Candy className="h-3 w-3 mx-auto text-pink-500 mb-0.5" />
                         <p className="text-xs font-bold text-foreground">{p.sugars_100g ?? "—"}</p>
-                        <p className="text-[9px] text-muted-foreground">zuccheri</p>
+                        <p className="text-[11px] text-muted-foreground">zuccheri</p>
                       </div>
                       <div className="rounded-lg bg-secondary/50 p-2 text-center">
                         <Droplets className="h-3 w-3 mx-auto text-blue-500 mb-0.5" />
                         <p className="text-xs font-bold text-foreground">{p.fats_100g ?? "—"}</p>
-                        <p className="text-[9px] text-muted-foreground">grassi</p>
+                        <p className="text-[11px] text-muted-foreground">grassi</p>
                       </div>
                     </div>
 
