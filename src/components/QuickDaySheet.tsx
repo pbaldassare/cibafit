@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +64,7 @@ const QuickDaySheet = ({ open, onOpenChange, targetKcal, onComplete }: Props) =>
     const fats = Math.round((kcal * MACRO_RATIOS.fats) / 9); // 9 kcal/g
 
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
 
       const { offline, error } = await safeSupabaseOp({
         table: "quick_day_logs",

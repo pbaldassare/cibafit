@@ -125,7 +125,7 @@ const JoinReferralPage = () => {
                 </div>
 
                 <p className="text-sm text-muted-foreground text-center">
-                  Lo sconto verrà applicato automaticamente quando attiverai il tuo abbonamento
+                  Registrati con questo invito per collegarti al tuo nutrizionista.
                 </p>
 
                 <div className="flex flex-col gap-2 pt-2">

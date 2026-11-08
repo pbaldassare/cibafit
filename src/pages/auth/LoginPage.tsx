@@ -1,3 +1,4 @@
+import { safeNextPath } from "@/lib/safe-next";
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,8 +28,10 @@ const LoginPage = () => {
     );
   }
 
-  if (session && role) return <Navigate to={getRoleHomePath(role)} replace />;
-  if (session && !role) return <Navigate to="/" replace />;
+  const nextPath = safeNextPath(new URLSearchParams(window.location.search).get("next"));
+
+  if (session && role) return <Navigate to={nextPath ?? getRoleHomePath(role)} replace />;
+  if (session && !role) return <Navigate to={nextPath ?? "/"} replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +145,7 @@ const LoginPage = () => {
             <p className="text-sm text-muted-foreground">
               Non hai un account?{" "}
               <Link
-                to="/auth/signup"
+                to={nextPath ? `/auth/signup?next=${encodeURIComponent(nextPath)}` : "/auth/signup"}
                 className="font-semibold text-primary hover:underline inline-flex items-center gap-0.5"
               >
                 Registrati <ArrowRight className="h-3.5 w-3.5" />

@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useRef, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -240,7 +241,7 @@ const MealPhotoPage = () => {
       }
 
       // 4. Also save to existing meal_items system for backward compatibility
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       let { data: dayRow } = await supabase
         .from("meal_days")
         .select("id")

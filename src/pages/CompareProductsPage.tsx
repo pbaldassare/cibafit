@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProductFavorites } from "@/hooks/useProductFavorites";
 import MobileHeader from "@/components/MobileHeader";
@@ -74,13 +74,13 @@ const CompareProductsPage = () => {
         const token = session?.session?.access_token;
         if (!token) throw new Error("Non autenticato");
 
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const res = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/cibafit-analyze-food-photos`,
+          `${SUPABASE_URL}/functions/v1/cibafit-analyze-food-photos`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
+              apikey: SUPABASE_PUBLISHABLE_KEY,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -381,7 +382,7 @@ const SuggestMealPage = () => {
     setMealPickerOpen(false);
     setCooking(key);
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
 
       let { data: dayData } = await supabase.from("meal_days").select("id").eq("user_id", user.id).eq("day_date", today).maybeSingle();
       if (!dayData) {

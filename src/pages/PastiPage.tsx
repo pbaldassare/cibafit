@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -87,7 +88,7 @@ const PastiPage = () => {
   const prevTotalRef = { current: 0 };
   const fetchMeals = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     const { data } = await supabase
       .from("meal_days")
       .select("id, day_date, meals(id, meal_type, meal_items(id, custom_name, dish_name, photo_url, calories, quantity, unit, macros))")
@@ -154,7 +155,7 @@ const PastiPage = () => {
   const handleQuickAddFavorite = async (fav: any, mealType: string) => {
     if (!user) return;
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       let { data: dayData } = await supabase
         .from("meal_days").select("id").eq("user_id", user.id).eq("day_date", today).maybeSingle();
       if (!dayData) {
@@ -238,7 +239,7 @@ const PastiPage = () => {
   // Handle adding a favorite meal combo to the diary
   const handleAddComboToDay = async (items: any[], mealType: string) => {
     if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     let { data: dayData } = await supabase
       .from("meal_days").select("id").eq("user_id", user.id).eq("day_date", today).maybeSingle();
     if (!dayData) {

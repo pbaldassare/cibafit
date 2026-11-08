@@ -1,3 +1,4 @@
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -23,7 +24,7 @@ interface Plan {
   trial_days: number;
 }
 
-const SubscriptionPage = () => {
+const SubscriptionCheckout = () => {
   const { user } = useAuth();
   const { role } = useRole();
   const navigate = useNavigate();
@@ -267,5 +268,22 @@ const SubscriptionPage = () => {
     </div>
   );
 };
+
+const SubscriptionPage = () =>
+  PAYMENTS_ENABLED ? (
+    <SubscriptionCheckout />
+  ) : (
+    <div>
+      <MobileHeader title="Abbonamento" />
+      <main className="px-4 py-5">
+        <section className="rounded-lg bg-card p-4 shadow-card">
+          <h1 className="text-lg font-semibold text-foreground">Tutte le funzioni sono incluse</h1>
+          <p className="mt-1 max-w-[65ch] text-sm leading-relaxed text-muted-foreground">
+            In questa fase CibaFit non prevede pagamenti: piano, progressi e misure sono già disponibili.
+          </p>
+        </section>
+      </main>
+    </div>
+  );
 
 export default SubscriptionPage;

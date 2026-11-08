@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, Plus, Upload, Copy, FileText, Pencil } from "lucide-react";
@@ -116,11 +116,13 @@ const ProTemplatesPage = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessione scaduta: accedi di nuovo.");
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cibafit-extract-diet-template`,
+        `${SUPABASE_URL}/functions/v1/cibafit-extract-diet-template`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+          headers: { Authorization: `Bearer ${session.access_token}`, apikey: SUPABASE_PUBLISHABLE_KEY },
           body: formData,
         }
       );

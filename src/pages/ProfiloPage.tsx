@@ -73,6 +73,7 @@ const ProfiloPage = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   
 
   // Settings form
@@ -232,10 +233,14 @@ const ProfiloPage = () => {
   const handleDeleteAccount = async () => {
     if (!user) return;
     setDeleting(true);
-    await supabase.from("support_requests" as any).insert({ user_id: user.id, type: "delete_account", message: "Richiesta eliminazione account dall'utente." });
+    const { data, error } = await supabase.functions.invoke("cibafit-delete-user", { body: {} });
     setDeleting(false);
+    if (error || data?.error) {
+      toast({ variant: "destructive", title: "Account non eliminato", description: data?.error ?? "Riprova tra qualche istante." });
+      return;
+    }
     setDeleteOpen(false);
-    toast({ title: "Richiesta inviata", description: "Il tuo account verrà disattivato. Verrai disconnesso." });
+    toast({ title: "Account eliminato", description: "I tuoi dati CibaFit sono stati cancellati." });
     setTimeout(() => signOut(), 1500);
   };
 
@@ -588,6 +593,7 @@ const ProfiloPage = () => {
           <ChevronRight size={16} className="text-muted-foreground" />
         </button>
 
+        {role !== "admin" && (
         <button
           onClick={() => setDeleteOpen(true)}
           className="flex w-full items-center justify-center gap-2 rounded-[18px] border border-destructive/20 py-3.5 text-sm font-medium text-destructive/70 transition-colors active:bg-destructive/5"
@@ -595,6 +601,7 @@ const ProfiloPage = () => {
           <Trash2 size={16} />
           Elimina account
         </button>
+        )}
 
         {/* Logout */}
         <button
@@ -778,18 +785,33 @@ const ProfiloPage = () => {
       </Dialog>
 
       {/* ═══ Delete Account Dialog ═══ */}
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <Dialog open={deleteOpen} onOpenChange={(open) => { setDeleteOpen(open); if (!open) setDeleteConfirm(""); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Elimina account</DialogTitle>
+            <DialogTitle>Eliminare l'account?</DialogTitle>
             <DialogDescription>
-              Sei sicuro? Questa azione è irreversibile. Il tuo account verrà segnalato per l'eliminazione.
+              Cancelliamo subito e per sempre pasti, misure, messaggi, foto e scheda salute. Non si può annullare.
+              {role === "professional" && " I piani che hai già preparato restano ai tuoi clienti."}
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="delete-confirm">Scrivi ELIMINA per confermare</Label>
+            <Input
+              id="delete-confirm"
+              autoComplete="off"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+            />
+          </div>
           <DialogFooter className="flex gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setDeleteOpen(false)} className="flex-1">Annulla</Button>
-            <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting} className="flex-1">
-              {deleting ? "Eliminazione..." : "Elimina"}
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleting || deleteConfirm.trim().toUpperCase() !== "ELIMINA"}
+              className="flex-1"
+            >
+              {deleting ? "Eliminazione..." : "Elimina account"}
             </Button>
           </DialogFooter>
         </DialogContent>

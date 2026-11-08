@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -228,7 +229,7 @@ const UserDietPage = () => {
       loadCoaches();
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     const { data: dayData } = await supabase
       .from("meal_days")
       .select("id, meals(id, meal_type, meal_items(calories, macros))")

@@ -1,3 +1,4 @@
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,7 +92,7 @@ export const useSubscription = (planType?: "user_plus") => {
     fetch();
   }, [user, planType]);
 
-  const isActive = subscription?.status === "trial" || subscription?.status === "active";
+  const isActive = !PAYMENTS_ENABLED || subscription?.status === "trial" || subscription?.status === "active";
   const isTrial = subscription?.status === "trial";
   const isExpired = subscription?.status === "expired" || subscription?.status === "cancelled";
   const isFreeOverride = subscription?.is_free_override === true;

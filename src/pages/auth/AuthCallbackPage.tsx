@@ -1,3 +1,4 @@
+import { safeNextPath } from "@/lib/safe-next";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { EmailOtpType } from "@supabase/supabase-js";
@@ -51,7 +52,9 @@ const AuthCallbackPage = () => {
         }
 
         // Check if there's a ?next= param (e.g. /reset-password)
-        const nextPath = url.searchParams.get("next");
+        const rawNext = url.searchParams.get("next");
+        // /reset-password resta consentito; gli altri percorsi devono essere interni.
+        const nextPath = safeNextPath(rawNext);
 
         if (session) {
           navigate(nextPath || "/", { replace: true });

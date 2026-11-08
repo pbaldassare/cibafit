@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,7 +69,7 @@ const UserMeasurementsPage = () => {
 
   // Form state
   const [form, setForm] = useState({
-    measured_at: new Date().toISOString().slice(0, 10),
+    measured_at: localDateString(),
     weight_kg: "",
     waist_cm: "",
     hips_cm: "",
@@ -136,7 +137,7 @@ const UserMeasurementsPage = () => {
     } else {
       toast({ title: "Misurazione salvata ✅" });
       setShowForm(false);
-      setForm({ measured_at: new Date().toISOString().slice(0, 10), weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "" });
+      setForm({ measured_at: localDateString(), weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "" });
       loadData();
     }
   };

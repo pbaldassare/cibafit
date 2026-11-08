@@ -58,6 +58,7 @@ const InvitePage = () => {
       supabase
         .from("professional_profiles")
         .select("user_id, display_name, specialization, city, bio, photo_url, experience_years, works_online, works_in_person")
+        .eq("is_visible", true)
         .order("display_name"),
       supabase
         .from("professional_link_requests")

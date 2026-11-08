@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleGuard from "./components/RoleGuard";
@@ -21,7 +21,6 @@ import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
 
 // User pages
 import Index from "./pages/Index";
-import ExpiryPage from "./pages/ExpiryPage";
 import ScanPage from "./pages/ScanPage";
 import UserProductsPage from "./pages/UserProductsPage";
 import UserPantryPage from "./pages/UserPantryPage";
@@ -35,20 +34,16 @@ import ProClientClinicalPage from "./pages/pro/ProClientClinicalPage";
 import SuggestMealPage from "./pages/SuggestMealPage";
 import PublicRecipesPage from "./pages/PublicRecipesPage";
 import RecipeDetailPage from "./pages/RecipeDetailPage";
-import RemindersPage from "./pages/RemindersPage";
 
 // Admin pages
 import AdminPage from "./pages/admin/AdminPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminProductReviewPage from "./pages/admin/AdminProductReviewPage";
 import AdminSupportPage from "./pages/admin/AdminSupportPage";
 // AdminCouponsPage merged into AdminPaymentsPage
 import AdminStatsPage from "./pages/admin/AdminStatsPage";
-import AdminSubscriptionsPage from "./pages/admin/AdminSubscriptionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
 import AdminProductsDbPage from "./pages/admin/AdminProductsDbPage";
-import AdminApiPage from "./pages/admin/AdminApiPage";
 
 
 
@@ -61,7 +56,6 @@ import ProClientMonitorPage from "./pages/pro/ProClientMonitorPage";
 import ProClientSuggestPage from "./pages/pro/ProClientSuggestPage";
 import ProClientPantryPage from "./pages/pro/ProClientPantryPage";
 import ProClientPantryRecipesPage from "./pages/pro/ProClientPantryRecipesPage";
-import ProReportsPage from "./pages/pro/ProReportsPage";
 import ProNotesPage from "./pages/pro/ProNotesPage";
 import ProClientPlanHistoryPage from "./pages/pro/ProClientPlanHistoryPage";
 import ProTemplatesPage from "./pages/pro/ProTemplatesPage";
@@ -129,7 +123,6 @@ const App = () => (
               {/* ═══ USER APP (UserLayout) ═══ */}
               <Route element={<RG roles={["user", "admin"]}><UserLayout /></RG>}>
                 <Route path="/" element={<Index />} />
-                <Route path="/expiry" element={<ExpiryPage />} />
                 <Route path="/scan" element={<ScanPage />} />
                 <Route path="/products" element={<UserProductsPage />} />
                 <Route path="/pantry" element={<UserPantryPage />} />
@@ -143,7 +136,6 @@ const App = () => (
                 <Route path="/clinical" element={<UserClinicalPage />} />
                 <Route path="/suggest-meal" element={<SuggestMealPage />} />
                 <Route path="/my-recipes" element={<UserPantryRecipesPage />} />
-                <Route path="/reminders" element={<RemindersPage />} />
                 <Route path="/meal-reminders" element={<MealRemindersPage />} />
                 <Route path="/invite" element={<InvitePage />} />
                 <Route path="/recipes" element={<PublicRecipesPage />} />
@@ -170,10 +162,10 @@ const App = () => (
                 <Route path="/pro/client/:clientId/suggest" element={<RG roles={["professional", "admin"]}><ProClientSuggestPage /></RG>} />
                 <Route path="/pro/client/:clientId/pantry" element={<RG roles={["professional", "admin"]}><ProClientPantryPage /></RG>} />
                 <Route path="/pro/client/:clientId/pantry-recipes" element={<RG roles={["professional", "admin"]}><ProClientPantryRecipesPage /></RG>} />
-                <Route path="/pro/reports" element={<RG roles={["professional", "admin"]}><ProReportsPage /></RG>} />
                 <Route path="/pro/notes" element={<RG roles={["professional", "admin"]}><ProNotesPage /></RG>} />
                 <Route path="/pro/templates" element={<RG roles={["professional", "admin"]}><ProTemplatesPage /></RG>} />
                 <Route path="/pro/template/:templateId" element={<RG roles={["professional", "admin"]}><ProTemplateEditorPage /></RG>} />
+                <Route path="/pro/reports" element={<Navigate to="/pro/weekly-report" replace />} />
                 <Route path="/pro/weekly-report" element={<RG roles={["professional", "admin"]}><ProWeeklyReportPage /></RG>} />
                 <Route path="/pro/client/:clientId/messages" element={<RG roles={["professional", "admin"]}><ProClientMessagesPage /></RG>} />
                 <Route path="/pro/client/:clientId/plan-pdf" element={<RG roles={["professional", "admin"]}><ProClientPlanPdfPage /></RG>} />
@@ -188,14 +180,11 @@ const App = () => (
               <Route path="/admin" element={<RG roles={["admin"]}><AdminPwaGuard><AdminPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/users" element={<RG roles={["admin"]}><AdminPwaGuard><AdminUsersPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/stats" element={<RG roles={["admin"]}><AdminPwaGuard><AdminStatsPage /></AdminPwaGuard></RG>} />
-              <Route path="/admin/settings" element={<RG roles={["admin"]}><AdminPwaGuard><AdminSettingsPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/product-review" element={<RG roles={["admin"]}><AdminPwaGuard><AdminProductReviewPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/support" element={<RG roles={["admin"]}><AdminPwaGuard><AdminSupportPage /></AdminPwaGuard></RG>} />
               {/* /admin/coupons removed — merged into /admin/payments */}
-              <Route path="/admin/subscriptions" element={<RG roles={["admin"]}><AdminPwaGuard><AdminSubscriptionsPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/payments" element={<RG roles={["admin"]}><AdminPwaGuard><AdminPaymentsPage /></AdminPwaGuard></RG>} />
               <Route path="/admin/products-db" element={<RG roles={["admin"]}><AdminPwaGuard><AdminProductsDbPage /></AdminPwaGuard></RG>} />
-              <Route path="/admin/api" element={<RG roles={["admin"]}><AdminPwaGuard><AdminApiPage /></AdminPwaGuard></RG>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

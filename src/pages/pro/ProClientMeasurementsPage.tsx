@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -63,7 +64,7 @@ const ProClientMeasurementsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    measured_at: new Date().toISOString().slice(0, 10),
+    measured_at: localDateString(),
     weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "",
   });
 
@@ -153,7 +154,7 @@ const ProClientMeasurementsPage = () => {
     } else {
       toast({ title: "Misurazione salvata ✅" });
       setShowForm(false);
-      setForm({ measured_at: new Date().toISOString().slice(0, 10), weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "" });
+      setForm({ measured_at: localDateString(), weight_kg: "", waist_cm: "", hips_cm: "", chest_cm: "", arm_cm: "", thigh_cm: "", body_fat_pct: "", notes: "" });
       loadData();
     }
   };

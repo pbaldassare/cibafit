@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,7 +87,7 @@ export function useMealReminders() {
     let timers: ReturnType<typeof setTimeout>[] = [];
 
     const checkMealLoggedFactory = (mealType: string) => async (): Promise<boolean> => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       const { data: mealDay } = await supabase
         .from("meal_days")
         .select("id, meals(meal_type)")
@@ -116,7 +117,7 @@ export function useMealReminders() {
       ];
 
       // Check which meals already logged today
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       const { data: mealDay } = await supabase
         .from("meal_days")
         .select("id, meals(meal_type)")

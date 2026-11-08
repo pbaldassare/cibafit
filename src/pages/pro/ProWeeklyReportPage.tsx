@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -50,8 +51,8 @@ const ProWeeklyReportPage = () => {
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     return {
-      start: monday.toISOString().slice(0, 10),
-      end: sunday.toISOString().slice(0, 10),
+      start: localDateString(monday),
+      end: localDateString(sunday),
       label: `${monday.toLocaleDateString("it-IT", { day: "numeric", month: "short" })} – ${sunday.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`,
     };
   };
@@ -109,7 +110,7 @@ const ProWeeklyReportPage = () => {
 
       // 5. Build reports per client
       // Calculate how many days are in the week (up to today if current week)
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       const weekEnd = week.end > today ? today : week.end;
       const startDate = new Date(week.start + "T00:00:00");
       const endDate = new Date(weekEnd + "T00:00:00");

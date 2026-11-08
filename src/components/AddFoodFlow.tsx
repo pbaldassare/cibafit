@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -306,7 +307,7 @@ const AddFoodFlow = ({
     if (!user || !(selectedMealType || preselectedMealType)) return;
     setSaving(true);
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       let { data: dayData } = await supabase
         .from("meal_days").select("id")
         .eq("user_id", user.id).eq("day_date", today).maybeSingle();
@@ -1033,7 +1034,7 @@ const AddFoodFlow = ({
         }
 
       } else if (context === "meal") {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = localDateString();
         let mealId = contextId;
 
         if (!mealId) {

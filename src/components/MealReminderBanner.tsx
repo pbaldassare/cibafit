@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +65,7 @@ function isDismissedToday(mealType: string): boolean {
     const stored = localStorage.getItem(DISMISSED_KEY);
     if (!stored) return false;
     const data = JSON.parse(stored);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     return data[mealType] === today;
   } catch {
     return false;
@@ -75,7 +76,7 @@ function dismissMeal(mealType: string) {
   try {
     const stored = localStorage.getItem(DISMISSED_KEY);
     const data = stored ? JSON.parse(stored) : {};
-    data[mealType] = new Date().toISOString().slice(0, 10);
+    data[mealType] = localDateString();
     localStorage.setItem(DISMISSED_KEY, JSON.stringify(data));
   } catch {}
 }
@@ -110,7 +111,7 @@ const MealReminderBanner = ({ className = "" }: MealReminderBannerProps) => {
       }
 
       // Check if meal already logged today
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
       const { data: mealDay } = await supabase
         .from("meal_days")
         .select("id, meals(id, meal_type)")
@@ -143,7 +144,7 @@ const MealReminderBanner = ({ className = "" }: MealReminderBannerProps) => {
   };
 
   const handlePhoto = () => {
-    navigate(`/meal-photo?meal=${activeMeal}`);
+    navigate("/meals/photo");
   };
 
   if (!activeMeal || dismissed || alreadyLogged) return null;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { Loader2 } from "lucide-react";
@@ -7,6 +7,7 @@ import OnboardingWalkthrough, { shouldShowOnboarding } from "@/components/Onboar
 
 const ProtectedRoute = () => {
   const { session, loading } = useAuth();
+  const location = useLocation();
   const { role, isLoading: roleLoading } = useRole();
   const [showOnboarding, setShowOnboarding] = useState(() => shouldShowOnboarding());
 
@@ -19,7 +20,9 @@ const ProtectedRoute = () => {
   }
 
   if (!session) {
-    return <Navigate to="/auth/login" replace />;
+    const destination = location.pathname + location.search;
+    const login = destination === "/" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(destination)}`;
+    return <Navigate to={login} replace />;
   }
 
   if (showOnboarding) {

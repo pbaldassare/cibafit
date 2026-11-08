@@ -705,7 +705,7 @@ export type Database = {
           is_active: boolean
           kcal_day: number
           notes: string | null
-          professional_id: string
+          professional_id: string | null
           protein_g_day: number
           saturated_fats_g_day: number | null
           start_date: string
@@ -724,7 +724,7 @@ export type Database = {
           is_active?: boolean
           kcal_day: number
           notes?: string | null
-          professional_id: string
+          professional_id?: string | null
           protein_g_day: number
           saturated_fats_g_day?: number | null
           start_date?: string
@@ -743,7 +743,7 @@ export type Database = {
           is_active?: boolean
           kcal_day?: number
           notes?: string | null
-          professional_id?: string
+          professional_id?: string | null
           protein_g_day?: number
           saturated_fats_g_day?: number | null
           start_date?: string
@@ -976,7 +976,7 @@ export type Database = {
           kcal_total: number | null
           macros: Json | null
           meal_type: string | null
-          professional_id: string
+          professional_id: string | null
           title: string
         }
         Insert: {
@@ -988,7 +988,7 @@ export type Database = {
           kcal_total?: number | null
           macros?: Json | null
           meal_type?: string | null
-          professional_id: string
+          professional_id?: string | null
           title: string
         }
         Update: {
@@ -1000,7 +1000,7 @@ export type Database = {
           kcal_total?: number | null
           macros?: Json | null
           meal_type?: string | null
-          professional_id?: string
+          professional_id?: string | null
           title?: string
         }
         Relationships: []
@@ -1798,42 +1798,42 @@ export type Database = {
       }
       nutritionist_commissions: {
         Row: {
-          client_user_id: string
+          client_user_id: string | null
           commission_amount: number
           commission_percent: number
           coupon_id: string | null
           created_at: string
           final_paid_amount: number
           id: string
-          nutritionist_user_id: string
+          nutritionist_user_id: string | null
           original_amount: number
           paid_at: string | null
           payment_id: string | null
           status: string
         }
         Insert: {
-          client_user_id: string
+          client_user_id?: string | null
           commission_amount: number
           commission_percent: number
           coupon_id?: string | null
           created_at?: string
           final_paid_amount: number
           id?: string
-          nutritionist_user_id: string
+          nutritionist_user_id?: string | null
           original_amount: number
           paid_at?: string | null
           payment_id?: string | null
           status?: string
         }
         Update: {
-          client_user_id?: string
+          client_user_id?: string | null
           commission_amount?: number
           commission_percent?: number
           coupon_id?: string | null
           created_at?: string
           final_paid_amount?: number
           id?: string
-          nutritionist_user_id?: string
+          nutritionist_user_id?: string | null
           original_amount?: number
           paid_at?: string | null
           payment_id?: string | null
@@ -1841,10 +1841,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "nutritionist_commissions_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "nutritionist_commissions_coupon_id_fkey"
             columns: ["coupon_id"]
             isOneToOne: false
             referencedRelation: "nutritionist_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nutritionist_commissions_nutritionist_user_id_fkey"
+            columns: ["nutritionist_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1896,7 +1910,15 @@ export type Database = {
           valid_from?: string | null
           valid_until?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "nutritionist_coupons_nutritionist_user_id_fkey"
+            columns: ["nutritionist_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pro_meal_text_suggestions: {
         Row: {
@@ -2170,7 +2192,15 @@ export type Database = {
           note?: string
           professional_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professional_notes_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professional_profiles: {
         Row: {
@@ -2726,10 +2756,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "user_nutritionist_links_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_nutritionist_links_coupon_id_fkey"
             columns: ["coupon_id"]
             isOneToOne: false
             referencedRelation: "nutritionist_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_nutritionist_links_nutritionist_user_id_fkey"
+            columns: ["nutritionist_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2805,6 +2849,13 @@ export type Database = {
     }
     Functions: {
       current_user_is_admin: { Args: never; Returns: boolean }
+      delete_account_data: {
+        Args: { target: string }
+        Returns: {
+          bucket_id: string
+          name: string
+        }[]
+      }
       ensure_profile: { Args: never; Returns: undefined }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_active_client_link: {

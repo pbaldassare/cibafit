@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -141,7 +142,7 @@ const UserActivePlanPage = () => {
     }
 
     // Today's logged meals
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     const { data: dayData } = await supabase
       .from("meal_days")
       .select("id, meals(id, meal_type, meal_items(calories, macros))")
@@ -236,7 +237,7 @@ const UserActivePlanPage = () => {
   const handleRegisterRecipe = async (ingredients: any[], title: string, mealType: string) => {
     if (!user) return;
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
 
       // Get or create meal_day
       let { data: dayData } = await supabase
@@ -334,7 +335,7 @@ const UserActivePlanPage = () => {
   const handleSaveDay = async () => {
     if (!user || !plan) return;
     setSaving(true);
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = localDateString();
 
     const row = {
       user_id: user.id,

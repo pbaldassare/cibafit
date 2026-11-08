@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -389,7 +390,7 @@ const UserPantryRecipesPage = () => {
   // ===== ADD TO MEAL =====
   const addToMeal = async (recipe: GeneratedRecipe) => {
     if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
 
     // Upsert meal_day
     let { data: dayData } = await supabase

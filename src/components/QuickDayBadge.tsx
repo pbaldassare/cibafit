@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +16,7 @@ const QuickDayBadge = () => {
 
   useEffect(() => {
     if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     supabase
       .from("quick_day_logs" as any)
       .select("*")

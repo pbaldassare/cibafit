@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const { email, password, full_name, role } = await req.json();
     if (!email || !password) throw new Error("email and password required");
 
-    const validRoles = ["user", "restaurant_owner", "admin", "professional", "supplier"];
+    const validRoles = ["user", "professional", "admin"];
     const userRole = validRoles.includes(role) ? role : "user";
 
     // Create auth user with email confirmed
@@ -42,18 +42,24 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: full_name || "", email },
+      // La chiave cibafit evita che il trigger di Cibarius crei un profilo anche lì.
+      user_metadata: { full_name: full_name || "", email, cibafit: { role: userRole, full_name: full_name || "" } },
     });
     if (createError) throw createError;
 
-    // Update role if not default
-    if (userRole !== "user" && newUser.user) {
-      await adminClient.from("profiles").update({ role: userRole }).eq("id", newUser.user.id);
-    }
+    if (newUser.user) {
+      const { error: profileError } = await adminClient
+        .from("profiles")
+        .upsert({ id: newUser.user.id, email, full_name: full_name || "", role: userRole });
+      if (profileError) throw profileError;
 
-    // Update full_name if provided
-    if (full_name && newUser.user) {
-      await adminClient.from("profiles").update({ full_name }).eq("id", newUser.user.id);
+      if (userRole === "professional") {
+        const slug = `${(full_name || "nutrizionista").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "nutrizionista"}-${newUser.user.id.slice(0, 6)}`;
+        const { error: proError } = await adminClient
+          .from("professional_profiles")
+          .insert({ user_id: newUser.user.id, display_name: full_name || "", specialization: "", public_slug: slug });
+        if (proError) throw proError;
+      }
     }
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user?.id }), {

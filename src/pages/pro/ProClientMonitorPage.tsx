@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -30,7 +31,7 @@ const ProClientMonitorPage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [clientName, setClientName] = useState("");
-  const [dayDate, setDayDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dayDate, setDayDate] = useState(() => localDateString());
   const [plan, setPlan] = useState<any>(null);
   const [mealTargets, setMealTargets] = useState<MealTarget[]>([]);
   const [meals, setMeals] = useState<any[]>([]);
@@ -81,7 +82,7 @@ const ProClientMonitorPage = () => {
   const shiftDay = (d: number) => {
     const dt = new Date(dayDate);
     dt.setDate(dt.getDate() + d);
-    setDayDate(dt.toISOString().slice(0, 10));
+    setDayDate(localDateString(dt));
   };
 
   if (loading) {

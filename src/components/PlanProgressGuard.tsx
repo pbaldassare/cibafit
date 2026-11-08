@@ -19,10 +19,10 @@ const PlanProgressGuard = ({ children }: { children: React.ReactNode }) => {
     let cancelled = false;
     (async () => {
       const { data } = await supabase
-        .from("user_nutritionist_links")
+        .from("client_links")
         .select("id")
         .eq("client_user_id", user.id)
-        .eq("is_active", true)
+        .eq("status", "active")
         .limit(1)
         .maybeSingle();
       if (!cancelled) setHasNutritionist(!!data);

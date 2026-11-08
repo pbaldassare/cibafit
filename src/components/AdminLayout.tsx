@@ -16,10 +16,7 @@ const sidebarItems = [
   { to: "/admin/support", icon: MessageSquareWarning, label: "Segnalazioni" },
   { to: "/admin/payments", icon: CreditCard, label: "Pagamenti & Coupon" },
   { to: "/admin/products-db", icon: Database, label: "Database Prodotti" },
-  { to: "/admin/api", icon: Key, label: "API CibaFit" },
   { to: "/admin/stats", icon: TrendingUp, label: "Statistiche" },
-  { to: "/admin/settings", icon: Settings, label: "Impostazioni" },
-  { to: "/admin/seed", icon: Sprout, label: "Dati Demo" },
 ];
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -78,7 +75,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             <ChevronLeft size={22} strokeWidth={2} />
           </button>
           <BrandLogo className="text-xl text-white" />
-          <span className="text-xs font-medium text-white/60 uppercase tracking-wider ml-auto">Admin</span>
+          <button onClick={handleLogout} aria-label="Esci" className="ml-auto p-1 text-white/90 transition-opacity active:opacity-70">
+            <LogOut size={20} />
+          </button>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>

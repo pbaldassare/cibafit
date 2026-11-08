@@ -1,3 +1,4 @@
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useEffect, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,7 @@ const ProPage = () => {
     const load = async () => {
       const [linksRes, notesRes] = await Promise.all([
         supabase.from("client_links").select("id", { count: "exact" }).eq("professional_id", user.id).eq("status", "active"),
-        supabase.from("professional_notes").select("*").eq("professional_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("professional_notes").select("*, profiles!professional_notes_client_user_id_fkey(full_name, email)").eq("professional_id", user.id).order("created_at", { ascending: false }).limit(5),
       ]);
       setClientCount(linksRes.count ?? 0);
       setRecentNotes(notesRes.data ?? []);
@@ -31,7 +32,7 @@ const ProPage = () => {
   if (loading) {
     return (
       <div>
-        <MobileHeader title="Dashboard Pro" />
+        <MobileHeader title="Dashboard" />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -41,7 +42,7 @@ const ProPage = () => {
 
   return (
     <div data-tour="pro-greeting">
-      <MobileHeader title="Dashboard Pro" />
+      <MobileHeader title="Dashboard" />
       <main className="px-4 py-5 space-y-4">
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
@@ -72,9 +73,11 @@ const ProPage = () => {
            <Button variant="outline" className="gap-2" onClick={() => navigate("/pro/appointments")}>
               <CalendarDays className="h-4 w-4" /> Appuntamenti
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => navigate("/pro/coupon")}>
+            {PAYMENTS_ENABLED && (
+              <Button variant="outline" className="gap-2" onClick={() => navigate("/pro/coupon")}>
               <Ticket className="h-4 w-4" /> Guadagni Coupon
             </Button>
+            )}
         </div>
 
         {/* Recent notes */}

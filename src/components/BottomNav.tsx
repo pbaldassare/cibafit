@@ -23,7 +23,7 @@ const tabsByRole: Record<string, TabItem[]> = {
   professional: [
     { to: "/pro", icon: LayoutDashboard, label: "Dashboard", tourId: "pro-nav-dashboard" },
     { to: "/pro/clients", icon: Users, label: "Clienti", tourId: "pro-nav-clients" },
-    { to: "/pro/reports", icon: FileText, label: "Report", tourId: "pro-nav-reports" },
+    { to: "/pro/weekly-report", icon: FileText, label: "Report", tourId: "pro-nav-reports" },
     { to: "/pro/notes", icon: MessageSquare, label: "Note", tourId: "pro-nav-notes" },
     { to: "/pro/profile", icon: User, label: "Profilo", tourId: "pro-nav-profile" },
   ],
@@ -39,7 +39,9 @@ const BottomNav = () => {
   const location = useLocation();
   const { role } = useRole();
 
-  const tabs = tabsByRole[role ?? "user"] ?? tabsByRole.user;
+  // Un admin dentro l'area nutrizionista deve vedere la navigazione di quell'area.
+  const area = location.pathname.startsWith("/pro") ? "professional" : role ?? "user";
+  const tabs = tabsByRole[area] ?? tabsByRole.user;
 
   return (
     <nav

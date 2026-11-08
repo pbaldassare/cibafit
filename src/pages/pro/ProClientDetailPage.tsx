@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MobileHeader from "@/components/MobileHeader";
@@ -26,7 +27,7 @@ const ProClientDetailPage = () => {
 
   const [clientProfile, setClientProfile] = useState<any>(null);
   const [targets, setTargets] = useState<any>(null);
-  const [dayDate, setDayDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dayDate, setDayDate] = useState(() => localDateString());
   const [meals, setMeals] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [newNote, setNewNote] = useState("");
@@ -83,7 +84,7 @@ const ProClientDetailPage = () => {
   const shiftDay = (delta: number) => {
     const d = new Date(dayDate);
     d.setDate(d.getDate() + delta);
-    setDayDate(d.toISOString().slice(0, 10));
+    setDayDate(localDateString(d));
   };
 
   const totalKcal = meals.reduce((sum, m) => sum + (m.meal_items ?? []).reduce((s: number, i: any) => s + (i.calories ?? 0), 0), 0);

@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -92,7 +93,7 @@ const Index = () => {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
 
     const [dayRes, ownTargetRes, planRes, linkRes, messagesRes] = await Promise.all([
       supabase

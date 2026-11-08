@@ -1,3 +1,4 @@
+import { localDateString } from "@/lib/date";
 import { useState, useEffect, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,7 @@ const AddMealSheet = ({ open, onOpenChange, onSaved }: AddMealSheetProps) => {
     setSaving(true);
 
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateString();
 
       // 1. Get or create meal_day
       let { data: mealDay } = await supabase

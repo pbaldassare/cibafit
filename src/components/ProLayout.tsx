@@ -16,6 +16,7 @@ import AppTourPrompt from "./AppTourPrompt";
 import BottomNav from "./BottomNav";
 import BrandLogo from "./BrandLogo";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS: { to: string; icon: LucideIcon; label: string; end?: boolean; tourId?: string }[] = [
@@ -23,9 +24,9 @@ const NAV_ITEMS: { to: string; icon: LucideIcon; label: string; end?: boolean; t
   { to: "/pro/clients", icon: Users, label: "Clienti", tourId: "pro-nav-clients" },
   { to: "/pro/templates", icon: BookmarkCheck, label: "Modelli di piano" },
   { to: "/pro/appointments", icon: CalendarDays, label: "Appuntamenti" },
-  { to: "/pro/reports", icon: BarChart3, label: "Report", tourId: "pro-nav-reports" },
+  { to: "/pro/weekly-report", icon: BarChart3, label: "Report", tourId: "pro-nav-reports" },
   { to: "/pro/notes", icon: MessageSquare, label: "Note", tourId: "pro-nav-notes" },
-  { to: "/pro/coupon", icon: Ticket, label: "Coupon" },
+  ...(PAYMENTS_ENABLED ? [{ to: "/pro/coupon", icon: Ticket, label: "Coupon" }] : []),
   { to: "/pro/profile", icon: User, label: "Profilo", tourId: "pro-nav-profile" },
 ];
 

@@ -1,3 +1,4 @@
+import { safeNextPath } from "@/lib/safe-next";
 import { useState, useEffect } from "react";
 import { Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,7 +70,9 @@ const SignupPage = () => {
     );
   }
 
-  if (session) return <Navigate to="/" replace />;
+  const nextPath = safeNextPath(new URLSearchParams(window.location.search).get("next"));
+
+  if (session) return <Navigate to={nextPath ?? "/"} replace />;
 
   const totalSteps = accountType === "user" ? 2 : 3;
 
@@ -119,7 +122,7 @@ const SignupPage = () => {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`,
         // I dati CibaFit stanno sotto "cibafit": il trigger di Cibarius legge solo i campi di primo livello,
         // cosi' non crea profili in public (Cibarius).
         data: { full_name: metadata.full_name, email: metadata.email, cibafit: metadata },
@@ -148,10 +151,10 @@ const SignupPage = () => {
     }
 
     toast({
-      title: "Registrazione completata! 🎉",
+      title: "Registrazione completata",
       description: "Benvenuto in CibaFit! Puoi iniziare subito ad usare l'app.",
     });
-    navigate("/", { replace: true });
+    navigate(nextPath ?? "/", { replace: true });
   };
 
   return (
@@ -350,7 +353,7 @@ const SignupPage = () => {
 
             <p className="mt-4 text-center text-sm text-muted-foreground">
               Hai già un account?{" "}
-              <Link to="/auth/login" className="font-medium text-primary hover:underline">
+              <Link to={nextPath ? `/auth/login?next=${encodeURIComponent(nextPath)}` : "/auth/login"} className="font-medium text-primary hover:underline">
                 Accedi
               </Link>
             </p>
