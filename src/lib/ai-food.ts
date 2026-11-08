@@ -96,7 +96,7 @@ export async function analyzeFoodPhotos(
   images: ImageFile[],
   context: string
 ): Promise<AIFoodResult | null> {
-  const { data, error } = await supabase.functions.invoke("analyze-food-photos", {
+  const { data, error } = await supabase.functions.invoke("cibafit-analyze-food-photos", {
     body: {
       images: images.map((img) => ({ base64: img.base64, mime_type: img.mime_type })),
       context,

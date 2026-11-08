@@ -76,7 +76,7 @@ const CompareProductsPage = () => {
 
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const res = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/analyze-food-photos`,
+          `https://${projectId}.supabase.co/functions/v1/cibafit-analyze-food-photos`,
           {
             method: "POST",
             headers: {

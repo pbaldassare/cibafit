@@ -1,73 +1,32 @@
-# Welcome to your Lovable project
+# CibaFit
 
-## Project info
+App React + Vite derivata da Cibarius. Condivide il progetto Supabase `dqhzopbjhxyhgcpedskl`
+con Cibarius **in produzione**, ma usa solo lo schema `cibafit`.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Regole per non rompere Cibarius
 
-## How can I edit this code?
+- Lo schema `public` e le funzioni senza prefisso appartengono a Cibarius: non si toccano da qui.
+- **Non eseguire `supabase db push`**: le vecchie migrazioni in `supabase/migrations` puntano a `public`.
+  Le modifiche a CibaFit si applicano una per una e solo su `cibafit`.
+- Le Edge Functions hanno il prefisso `cibafit-`. Deploy solo per nome:
+  `supabase functions deploy cibafit-<nome> --project-ref dqhzopbjhxyhgcpedskl --use-api`.
+- `auth.users` e i bucket Storage sono condivisi con Cibarius.
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Avvio locale
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Variabili: vedi `.env.example`. Per le mappe serve `VITE_GOOGLE_MAPS_KEY`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Il database richiede che `cibafit` sia tra gli "Exposed schemas" (Supabase > Data API).
 
-**Use GitHub Codespaces**
+## Funzioni non deployate di proposito
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `cibafit-create-checkout-session`, `cibafit-stripe-webhook`, `cibafit-process-coupon-payment`:
+  usano le chiavi Stripe live di Cibarius, serve una configurazione separata.
+- `cibafit-delete-user`, `cibafit-create-user`: agiscono sull'account condiviso con Cibarius.
+- `cibafit-send-email`, `cibafit-send-expiry-alerts`, `cibafit-auth-email-hook`: email ancora a nome Cibarius.
+- `cibafit-seed-template-recipes`, `cibafit-seed-off-products`, `cibafit-extract-product`.

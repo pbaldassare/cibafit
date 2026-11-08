@@ -103,7 +103,7 @@ const RestaurantInvoicesPage = () => {
         body.mime_type = "application/pdf";
       }
 
-      const { data: response, error } = await supabase.functions.invoke("extract-invoice", { body });
+      const { data: response, error } = await supabase.functions.invoke("cibafit-extract-invoice", { body });
 
       if (error) throw error;
       if (response?.error) throw new Error(response.error);

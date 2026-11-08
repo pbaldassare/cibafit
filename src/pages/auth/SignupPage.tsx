@@ -133,7 +133,9 @@ const SignupPage = () => {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: metadata,
+        // I dati CibaFit stanno sotto "cibafit": il trigger di Cibarius legge solo i campi di primo livello,
+        // cosi' non crea ristoranti o profili professionali in public.
+        data: { full_name: metadata.full_name, email: metadata.email, cibafit: metadata },
       },
     });
 

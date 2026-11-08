@@ -337,7 +337,7 @@ const AntiWastePage = () => {
     setAiLoading(true);
     setAiError(null);
     try {
-      const { data: result, error: fnErr } = await supabase.functions.invoke("suggest-meal");
+      const { data: result, error: fnErr } = await supabase.functions.invoke("cibafit-suggest-meal");
       if (fnErr) throw fnErr;
       if (result?.error) throw new Error(result.error);
       const mapped: SuggestedRecipe[] = (result.suggestions || []).map((s: any) => ({

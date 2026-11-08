@@ -27,7 +27,7 @@ const PublicHaccpLabelPage = () => {
     if (!token) return;
     (async () => {
       try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-haccp-label?token=${encodeURIComponent(token)}`);
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/cibafit-get-haccp-label?token=${encodeURIComponent(token)}`);
         const json = await res.json();
         if (!res.ok) { setError(json.error || "Errore"); }
         else { setData(json); }

@@ -159,7 +159,7 @@ const RestaurantAddFlow = ({ open, onOpenChange, restaurantId, onComplete }: Pro
     if (photos.length === 0) return;
     setAnalyzing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("analyze-restaurant-photos", {
+      const { data, error } = await supabase.functions.invoke("cibafit-analyze-restaurant-photos", {
         body: { images: photos.map((p) => ({ base64: p.base64, mime_type: p.mime_type })) },
       });
       if (error) throw error;

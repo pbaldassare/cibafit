@@ -190,7 +190,7 @@ async function searchLocal(query: string, requireNutrition = false): Promise<Foo
 // ─── Edge function: OFF only ─────────────────────────
 async function searchEdgeOFF(query: string): Promise<FoodSearchResult[]> {
   try {
-    const { data, error } = await supabase.functions.invoke("search-food", {
+    const { data, error } = await supabase.functions.invoke("cibafit-search-food", {
       body: { query, sources: ["off"] },
     });
     if (error || !data?.results) return [];
@@ -203,7 +203,7 @@ async function searchEdgeOFF(query: string): Promise<FoodSearchResult[]> {
 // ─── Edge function: USDA only ────────────────────────
 async function searchEdgeUSDA(query: string): Promise<FoodSearchResult[]> {
   try {
-    const { data, error } = await supabase.functions.invoke("search-food", {
+    const { data, error } = await supabase.functions.invoke("cibafit-search-food", {
       body: { query, sources: ["usda"] },
     });
     if (error || !data?.results) return [];

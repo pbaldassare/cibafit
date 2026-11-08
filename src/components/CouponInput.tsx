@@ -33,7 +33,7 @@ const CouponInput = ({ onCouponApplied }: CouponInputProps) => {
       (async () => {
         setLoading(true);
         try {
-          const { data, error } = await supabase.functions.invoke("validate-coupon", {
+          const { data, error } = await supabase.functions.invoke("cibafit-validate-coupon", {
             body: { coupon_code: saved },
           });
           if (!error && data?.valid) {
@@ -50,7 +50,7 @@ const CouponInput = ({ onCouponApplied }: CouponInputProps) => {
     if (!code.trim()) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("validate-coupon", {
+      const { data, error } = await supabase.functions.invoke("cibafit-validate-coupon", {
         body: { coupon_code: code.trim() },
       });
       if (error) throw error;

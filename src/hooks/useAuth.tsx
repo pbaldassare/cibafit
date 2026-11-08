@@ -22,6 +22,21 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ensuredUserId, setEnsuredUserId] = useState<string | null>(null);
+  const userId = session?.user?.id ?? null;
+
+  // auth.users e' condiviso con Cibarius: il profilo CibaFit va creato al primo accesso.
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    supabase.rpc("ensure_profile").then(({ error }) => {
+      if (error) console.error("ensure_profile failed", error);
+      if (!cancelled) setEnsuredUserId(userId);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     // Set up listener BEFORE getSession (best practice)
@@ -47,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading: loading || (!!userId && ensuredUserId !== userId), signOut }}>
       {children}
     </AuthContext.Provider>
   );

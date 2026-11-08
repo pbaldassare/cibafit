@@ -628,7 +628,7 @@ const AddFoodFlow = ({
       setReceiptLoading(true);
       setStep("receipt");
       try {
-        const { data: fnData, error: fnError } = await supabase.functions.invoke("parse-receipt-qr", {
+        const { data: fnData, error: fnError } = await supabase.functions.invoke("cibafit-parse-receipt-qr", {
           body: { qr_content: code },
         });
         if (fnError) throw fnError;
@@ -733,7 +733,7 @@ const AddFoodFlow = ({
     setReceiptLoading(true);
     setStep("receipt");
     try {
-      const { data: fnData, error: fnError } = await supabase.functions.invoke("parse-receipt-qr", {
+      const { data: fnData, error: fnError } = await supabase.functions.invoke("cibafit-parse-receipt-qr", {
         body: { receipt_image: { base64, mime_type: file.type } },
       });
       if (fnError) throw fnError;
@@ -852,7 +852,7 @@ const AddFoodFlow = ({
       const mimeType = file.type || "image/jpeg";
 
       try {
-        const { data, error } = await supabase.functions.invoke("extract-expiry", {
+        const { data, error } = await supabase.functions.invoke("cibafit-extract-expiry", {
           body: { image_base64: base64, mime_type: mimeType },
         });
         if (error) throw error;
@@ -1835,7 +1835,7 @@ const AddFoodFlow = ({
                     setReceiptLoading(true);
                     setStep("receipt");
                     try {
-                      const { data: fnData, error: fnError } = await supabase.functions.invoke("parse-receipt-qr", {
+                      const { data: fnData, error: fnError } = await supabase.functions.invoke("cibafit-parse-receipt-qr", {
                         body: { qr_content: code },
                       });
                       if (fnError) throw fnError;

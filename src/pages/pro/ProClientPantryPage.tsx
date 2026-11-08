@@ -255,7 +255,7 @@ const ProClientPantryPage = () => {
   const generateAiRecipe = async () => {
     if (!user || !clientId || !mealTarget) return;
     setAiGenerating(true); setAiRecipe(null);
-    const { data, error } = await supabase.functions.invoke("generate-meal-recipe", {
+    const { data, error } = await supabase.functions.invoke("cibafit-generate-meal-recipe", {
       body: { meal_type: mealType, kcal_target: mealTarget.kcal_target, protein_g: mealTarget.protein_g, carbs_g: mealTarget.carbs_g, fats_g: mealTarget.fats_g, diet_category: "mediterranea" },
     });
     setAiGenerating(false);

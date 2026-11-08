@@ -89,7 +89,7 @@ const MealPhotoPage = () => {
       for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
       const base64 = btoa(binary);
 
-      const { data, error } = await supabase.functions.invoke("analyze-meal-photo", {
+      const { data, error } = await supabase.functions.invoke("cibafit-analyze-meal-photo", {
         body: {
           image_base64: base64,
           mime_type: imageFile.type || "image/jpeg",

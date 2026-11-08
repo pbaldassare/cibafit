@@ -1,61 +1,61 @@
 project_id = "dqhzopbjhxyhgcpedskl"
 
-[functions.extract-expiry]
+[functions.cibafit-extract-expiry]
 verify_jwt = false
 
-[functions.delete-user]
+[functions.cibafit-delete-user]
 verify_jwt = false
 
-[functions.create-user]
+[functions.cibafit-create-user]
 verify_jwt = false
 
-[functions.analyze-food-photos]
+[functions.cibafit-analyze-food-photos]
 verify_jwt = false
 
-[functions.search-food]
+[functions.cibafit-search-food]
 verify_jwt = false
 
-[functions.extract-diet-template]
+[functions.cibafit-extract-diet-template]
 verify_jwt = false
 
-[functions.analyze-meal-photo]
+[functions.cibafit-analyze-meal-photo]
 verify_jwt = false
 
-[functions.analyze-restaurant-photos]
+[functions.cibafit-analyze-restaurant-photos]
 verify_jwt = false
 
-[functions.parse-receipt-qr]
+[functions.cibafit-parse-receipt-qr]
 verify_jwt = false
 
-[functions.generate-meal-recipe]
+[functions.cibafit-generate-meal-recipe]
 verify_jwt = false
 
-[functions.validate-coupon]
+[functions.cibafit-validate-coupon]
 verify_jwt = false
 
-[functions.process-coupon-payment]
+[functions.cibafit-process-coupon-payment]
 verify_jwt = false
 
-[functions.suggest-meal]
+[functions.cibafit-suggest-meal]
 verify_jwt = false
 
-[functions.send-email]
+[functions.cibafit-send-email]
 verify_jwt = false
 
-[functions.send-expiry-alerts]
+[functions.cibafit-send-expiry-alerts]
 verify_jwt = false
 
-[functions.create-checkout-session]
+[functions.cibafit-create-checkout-session]
 verify_jwt = false
 
-[functions.stripe-webhook]
+[functions.cibafit-stripe-webhook]
 verify_jwt = false
 
-[functions.auth-email-hook]
+[functions.cibafit-auth-email-hook]
 verify_jwt = false
 
-[functions.seed-off-products]
+[functions.cibafit-seed-off-products]
 verify_jwt = false
 
-[functions.get-haccp-label]
+[functions.cibafit-get-haccp-label]
 verify_jwt = false

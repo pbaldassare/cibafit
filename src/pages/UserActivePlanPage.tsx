@@ -308,7 +308,7 @@ const UserActivePlanPage = () => {
   const handleGenerateAiRecipe = async (mealType: string, remainingKcal: number, target: MealTarget) => {
     setAiLoading((prev) => ({ ...prev, [mealType]: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("generate-meal-recipe", {
+      const { data, error } = await supabase.functions.invoke("cibafit-generate-meal-recipe", {
         body: {
           meal_type: mealType,
           kcal_target: Math.round(remainingKcal),

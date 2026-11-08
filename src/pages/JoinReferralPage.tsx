@@ -54,7 +54,7 @@ const JoinReferralPage = () => {
 
     const validate = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("validate-coupon", {
+        const { data, error } = await supabase.functions.invoke("cibafit-validate-coupon", {
           body: { coupon_code: code.toUpperCase().trim() },
         });
 

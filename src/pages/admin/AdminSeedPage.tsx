@@ -409,7 +409,7 @@ const AdminSeedPage = () => {
     setLogs([]);
     log("🌍 Avvio importazione prodotti italiani da OpenFoodFacts...");
     try {
-      const { data, error } = await supabase.functions.invoke("seed-off-products", {
+      const { data, error } = await supabase.functions.invoke("cibafit-seed-off-products", {
         body: { max_pages: 50 },
       });
       if (error) {

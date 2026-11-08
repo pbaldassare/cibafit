@@ -67,7 +67,7 @@ const SubscriptionPage = () => {
     if (!user) return;
     setProcessing(plan.id);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+      const { data, error } = await supabase.functions.invoke("cibafit-create-checkout-session", {
         body: {
           plan_id: plan.id,
           coupon_code: couponCode || undefined,

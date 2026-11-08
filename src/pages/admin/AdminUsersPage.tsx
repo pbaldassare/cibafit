@@ -90,7 +90,7 @@ const AdminUsersPage = () => {
 
   const handleDelete = async (userId: string) => {
     setDeleting(userId);
-    const { data, error } = await supabase.functions.invoke("delete-user", {
+    const { data, error } = await supabase.functions.invoke("cibafit-delete-user", {
       body: { user_id: userId },
     });
     setDeleting(null);
@@ -115,7 +115,7 @@ const AdminUsersPage = () => {
       return;
     }
     setCreating(true);
-    const { data, error } = await supabase.functions.invoke("create-user", {
+    const { data, error } = await supabase.functions.invoke("cibafit-create-user", {
       body: { email: newEmail, password: newPassword, full_name: newName, role: newRole },
     });
     setCreating(false);

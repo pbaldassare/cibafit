@@ -428,7 +428,7 @@ const ProClientPantryRecipesPage = () => {
     setAiGenerating(true);
     setAiRecipe(null);
 
-    const { data, error } = await supabase.functions.invoke("generate-meal-recipe", {
+    const { data, error } = await supabase.functions.invoke("cibafit-generate-meal-recipe", {
       body: {
         meal_type: mealType,
         kcal_target: mealTarget.kcal_target,

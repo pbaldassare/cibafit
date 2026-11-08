@@ -117,7 +117,7 @@ const ProTemplatesPage = () => {
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-diet-template`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cibafit-extract-diet-template`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
